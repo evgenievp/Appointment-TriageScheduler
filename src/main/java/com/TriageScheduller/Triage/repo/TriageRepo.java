@@ -1,4 +1,8 @@
 package com.TriageScheduller.Triage.repo;
 
-public interface TriageRepo {
+import com.TriageScheduller.Triage.models.TriageResults;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TriageRepo extends JpaRepository<TriageResults, Long> {
+
 }

@@ -4,10 +4,10 @@ import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AppointementsService {
+public class AppointmentsService {
     private final AppointmentsRepo repo;
 
-    public AppointementsService(AppointmentsRepo repo) {
+    public AppointmentsService(AppointmentsRepo repo) {
         this.repo = repo;
     }
 

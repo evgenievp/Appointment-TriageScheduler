@@ -1,4 +1,8 @@
 package com.TriageScheduller.Triage.repo;
 
-public interface AppointmentsRepo {
+import com.TriageScheduller.Triage.models.Appointment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AppointmentsRepo extends JpaRepository<Appointment, Long> {
+
 }
