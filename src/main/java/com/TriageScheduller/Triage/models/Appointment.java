@@ -11,11 +11,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Appointment {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(targetEntity = User.class)
-    @JoinColumn(name = "patient_id")
+    @OneToOne
+    @JoinColumn(name = "slot_id", unique = true, nullable = false)
     private Slot slot;
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private User patient;
     private AppointmentStatus status;
 
 

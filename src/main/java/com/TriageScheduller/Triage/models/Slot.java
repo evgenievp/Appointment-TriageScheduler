@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Slot {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,13 +34,12 @@ public class Slot {
     private LocalDateTime endsAt;
     @Enumerated(EnumType.STRING)
     private Status status = Status.FREE;
-    @Version
-    private Long version;
+    private final int slotTime = 30;
 
     public Slot(Doctor doctor, LocalDateTime startsAt) {
         this.doctor = doctor;
         this.startsAt = startsAt;
-        this.endsAt = startsAt.plusMinutes(30);
+        this.endsAt = startsAt.plusMinutes(slotTime);
     }
 
 }

@@ -26,7 +26,7 @@ public class SlotsController {
         this.doctorService = doctorService;
     }
 
-    @GetMapping("/fee")
+    @GetMapping("/free")
     public List<SlotDto> findFreeSlots(
             @RequestParam Long doctorId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,

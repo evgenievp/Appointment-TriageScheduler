@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-// No request mapping or added Rest endpoints. We have to negotiate first about them.
 @Service
 public class SlotsService {
     private final SlotsRepo repo;
