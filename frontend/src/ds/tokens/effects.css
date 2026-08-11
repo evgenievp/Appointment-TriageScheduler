@@ -1,0 +1,20 @@
+:root{
+/* Depth comes from background contrast — the ONLY shadow in the system belongs to glass panels. */
+--shadow-none:none;
+--shadow-glass:0 8px 32px rgba(23,23,56,0.12);
+
+/* Selective glassmorphism */
+--glass-header-bg:rgba(255,255,255,0.94); /* @kind color */
+--glass-header-blur:blur(6px); /* @kind other */
+--glass-panel-bg:rgba(255,255,255,0.40); /* @kind color */
+--glass-panel-border:1px solid rgba(255,255,255,0.2); /* @kind other */
+--glass-panel-blur:blur(6px); /* @kind other */
+--glass-dark-bg:rgba(6,6,32,0.93); /* @kind color */
+--glass-dark-blur:blur(6px); /* @kind other */
+
+--focus-ring:0 0 0 3px rgba(65,207,253,0.45); /* @kind shadow */
+--ease:cubic-bezier(0.2,0,0,1); /* @kind other */
+--dur-fast:120ms; /* @kind other */
+--dur:180ms; /* @kind other */
+--dur-slow:260ms; /* @kind other */
+}

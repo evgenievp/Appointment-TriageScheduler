@@ -1,0 +1,7 @@
+:root{
+--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;
+/* component rhythm */
+--btn-padding:11px 24px;--btn-padding-sm:7px 16px;--btn-padding-lg:15px 32px;
+--card-padding:24px;--card-padding-sm:16px;--field-padding:11px 14px;
+--section-padding-y:80px;--gutter:24px;--container-max:1200px;
+}

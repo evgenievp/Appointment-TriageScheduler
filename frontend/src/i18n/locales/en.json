@@ -1,0 +1,164 @@
+{
+  "common": {
+    "clinicName": "Sirma Clinic",
+    "documentTitle": "Sirma Clinic — book an appointment"
+  },
+  "lang": {
+    "switchTo": "БГ",
+    "switchToTitle": "Превключи на български"
+  },
+  "nav": {
+    "booking": "Book a visit",
+    "appointments": "My appointments",
+    "staff": "Staff",
+    "login": "Log in",
+    "book": "Book a visit"
+  },
+  "home": {
+    "hero": {
+      "title": "Care without the wait",
+      "lead": "Answer a few questions about your symptoms, see which clinician at {{clinic}} is free this week, and book in under two minutes.",
+      "book": "Book a visit",
+      "register": "Create an account",
+      "phone": "Or call <mono>{{phone}}</mono> and we will book you in."
+    },
+    "glass": {
+      "title": "Next available times",
+      "asOf": "As of <mono>{{time}}</mono> today"
+    },
+    "doctors": {
+      "title": "Choose your clinician",
+      "count": "<mono>{{count}}</mono> free this week.",
+      "seeAll": "See all clinicians",
+      "filterAll": "All",
+      "seeSlots": "See available times"
+    },
+    "how": {
+      "title": "How it works",
+      "steps": [
+        {
+          "step": "01",
+          "title": "You answer the questions",
+          "text": "A few questions about your symptoms and pain. It takes under a minute."
+        },
+        {
+          "step": "02",
+          "title": "You see who is free",
+          "text": "We show the clinicians with open times this week."
+        },
+        {
+          "step": "03",
+          "title": "You book the time",
+          "text": "The time is yours the moment you confirm — no phone call, no queue."
+        }
+      ]
+    },
+    "upcoming": {
+      "title": "Your next visit",
+      "seeAll": "All appointments",
+      "confirmed": "Confirmed",
+      "reschedule": "Reschedule",
+      "cancel": "Cancel",
+      "safety": "If you have severe chest pain or trouble breathing right now, call <mono>{{phone}}</mono> instead of booking a visit."
+    },
+    "demo": {
+      "time": "08:12",
+      "doctors": [
+        {
+          "id": "1",
+          "icon": "heart-pulse",
+          "name": "Dr Ana Ferrer",
+          "specialty": "Cardiology",
+          "description": "Rhythm disorders, hypertension, prevention",
+          "next": "today 14:30"
+        },
+        {
+          "id": "2",
+          "icon": "stethoscope",
+          "name": "Dr Martin Lund",
+          "specialty": "General medicine",
+          "description": "Acute complaints, referrals, sick notes",
+          "next": "today 15:45"
+        },
+        {
+          "id": "3",
+          "icon": "activity",
+          "name": "Dr Irina Koleva",
+          "specialty": "Orthopaedics",
+          "description": "Joints, spine, sports injuries",
+          "next": "tomorrow 09:15"
+        },
+        {
+          "id": "4",
+          "icon": "brain",
+          "name": "Dr Emil Stoev",
+          "specialty": "Neurology",
+          "description": "Headaches, dizziness, neuropathies",
+          "next": "tomorrow 11:00"
+        },
+        {
+          "id": "5",
+          "icon": "person-standing",
+          "name": "Dr Sonya Raycheva",
+          "specialty": "Paediatrics",
+          "description": "Children aged 0 to 18, vaccinations",
+          "next": "Thu 10:20"
+        },
+        {
+          "id": "6",
+          "icon": "sun",
+          "name": "Dr Nikola Grozdev",
+          "specialty": "Dermatology",
+          "description": "Rashes, moles, allergic reactions",
+          "next": "Fri 16:40"
+        }
+      ],
+      "nextFree": [
+        "14:30 · Dr Ferrer, Cardiology",
+        "15:45 · Dr Lund, General medicine",
+        "18:00 · Dr Koleva, Orthopaedics"
+      ],
+      "appointment": {
+        "date": "12 AUG",
+        "time": "14:30",
+        "doctor": "Dr Ana Ferrer",
+        "specialty": "Cardiology",
+        "room": "room 4"
+      }
+    }
+  },
+  "footer": {
+    "emergency": "Emergencies",
+    "reception": "Reception"
+  },
+  "pages": {
+    "login": {
+      "title": "Log in",
+      "text": "This will hold the email and password form; on success we keep the token and the role (PATIENT / STAFF) and redirect to the matching home screen."
+    },
+    "register": {
+      "title": "Create an account",
+      "text": "This is where a patient signs up on their own — name, email, phone and password — so they can book without calling reception."
+    },
+    "doctors": {
+      "title": "Clinicians",
+      "text": "This will list the clinic's doctors with a specialty filter; a doctor's card opens their weekly calendar of free slots."
+    },
+    "doctorCalendar": {
+      "title": "Doctor's calendar",
+      "text": "This will be the weekly slot grid for doctor <mono>{{id}}</mono> — days as columns, hours as rows, free slots clickable and leading into triage."
+    },
+    "myAppointments": {
+      "title": "My appointments",
+      "text": "This is where a patient sees their upcoming and past visits and can reschedule or cancel a booked time."
+    },
+    "staffDashboard": {
+      "title": "Staff dashboard",
+      "text": "This will hold the day schedule per doctor and hour, plus the priority queue for the day — urgent cases on top with their triage score."
+    },
+    "staffNewBooking": {
+      "title": "New booking by phone",
+      "text": "This is where staff book on the clinic's behalf while the patient is on the phone — find or create the patient, pick a slot, and fill in the triage for them."
+    }
+  }
+}

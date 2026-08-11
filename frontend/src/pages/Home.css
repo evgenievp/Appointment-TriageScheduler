@@ -1,0 +1,32 @@
+/* Само гридовете на началната страница. Всичко останало идва от дизайн
+   системата (src/ds) или от инлайн стиловете на нейните компоненти. */
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: var(--space-12);
+  align-items: center;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.home-docs,
+.home-how {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+/* CSS променливи не работят в media query условия — точката на пречупване
+   остава литерал. */
+@media (max-width: 900px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .home-docs,
+  .home-how {
+    grid-template-columns: 1fr;
+  }
+}
