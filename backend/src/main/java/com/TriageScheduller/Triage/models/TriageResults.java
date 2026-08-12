@@ -2,13 +2,9 @@ package com.TriageScheduller.Triage.models;
 
 import com.TriageScheduller.Triage.utils.Priority;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 public class TriageResults {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +17,26 @@ public class TriageResults {
     private int score;
     @Enumerated(EnumType.STRING)
     private Priority priority;
+
+    public TriageResults(Long id,
+                         Appointment appointment,
+                         String answers,
+                         int score,
+                         Priority priority) {
+        this.id = id;
+        this.appointment = appointment;
+        this.answers = answers;
+        this.score = score;
+        this.priority = priority;
+    }
+
+    public TriageResults() {}
+
+    public TriageResults(String answers, int score, Priority priority) {
+        this.answers = answers;
+        this.score = score;
+        this.priority = priority;
+    }
 
     public Long getId() {
         return id;

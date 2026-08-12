@@ -2,8 +2,7 @@ package com.TriageScheduller.Triage.models;
 
 import com.TriageScheduller.Triage.utils.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 
 import java.time.LocalDateTime;
 
@@ -15,8 +14,6 @@ import java.time.LocalDateTime;
         )
 )
 
-@AllArgsConstructor
-@NoArgsConstructor
 public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,11 +28,21 @@ public class Slot {
     @Enumerated(EnumType.STRING)
     private Status status = Status.FREE;
     private final int slotTime = 30;
+    private Long patientId;
 
     public Slot(Doctor doctor, LocalDateTime startsAt) {
         this.doctor = doctor;
         this.startsAt = startsAt;
         this.endsAt = startsAt.plusMinutes(slotTime);
+    }
+
+    public Slot(Long id, Doctor doctor, LocalDateTime startsAt, LocalDateTime endsAt, Status status, Long patientId) {
+        this.id = id;
+        this.doctor = doctor;
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+        this.status = status;
+        this.patientId = patientId;
     }
 
     public Long getId() {
@@ -80,5 +87,13 @@ public class Slot {
 
     public int getSlotTime() {
         return slotTime;
+    }
+
+    public Long getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(Long patientId) {
+        this.patientId = patientId;
     }
 }

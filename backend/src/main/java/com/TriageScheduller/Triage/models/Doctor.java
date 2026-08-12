@@ -5,13 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +25,13 @@ public class Doctor {
     public Doctor(String name, String speciality) {
         this.name = name;
         this.speciality = speciality;
+    }
+
+    public Doctor(Long id, String name, String speciality, Role role) {
+        this.id = id;
+        this.name = name;
+        this.speciality = speciality;
+        this.role = role;
     }
 
     public Long getId() {
