@@ -52,7 +52,6 @@ public class SlotsService {
                 .collect(Collectors.toSet());
 
 
-        List<SlotDto> dtos = new ArrayList<>();
         LocalDate currentDate = startDate;
         List<SlotDto> generatedSlots = new ArrayList<>();
 
@@ -63,7 +62,7 @@ public class SlotsService {
                 continue;
             }
 
-            if (!isWorkingDay(currentDate, doctor)) {
+            if (!isWorkingDay(currentDate)) {
                 currentDate = currentDate.plusDays(1);
                 continue;
             }
@@ -115,12 +114,14 @@ public class SlotsService {
         this.restEnd = restEnd;
     }
 
-    private boolean isRestTime(LocalDateTime current, LocalTime restStart, LocalTime restEnd) {
+    private boolean isRestTime(LocalDateTime current,
+                               LocalTime restStart,
+                               LocalTime restEnd) {
         LocalTime time = current.toLocalTime();
         return !time.isBefore(restStart) && time.isBefore(restEnd);
     }
 
-    private boolean isWorkingDay(LocalDate date, Doctor doctor) {
+    private boolean isWorkingDay(LocalDate date) {
         DayOfWeek day = date.getDayOfWeek();
         return day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY;
     }
@@ -131,7 +132,7 @@ public class SlotsService {
     }
 
 
-    private void validateSlotIsWorkingDay(Slot slot, User patient) {
+    private void validateSlotIsWorkingDay(Slot slot) {
         boolean isException = exceptionDayRepo.existsByDoctorIdAndDate(slot.getDoctor().getId(),
                 slot.getStartsAt().toLocalDate());
         if (isException) {
@@ -148,8 +149,8 @@ public class SlotsService {
     public Appointment bookSlot(Long slotId, User patient) {
         Slot slot = validateAndGetSlot(slotId);
         checkIfSlotIsFree(slot);
+        validateSlotIsWorkingDay(slot);
         reserveSlot(slot, patient);
-        validateSlotIsWorkingDay(slot, patient);
         return createAppointment(slot, patient);
     }
 
