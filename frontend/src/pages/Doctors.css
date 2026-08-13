@@ -1,0 +1,12 @@
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+/* CSS променливи не работят в media query условия — точката остава литерал. */
+@media (max-width: 900px) {
+  .doctors-grid {
+    grid-template-columns: 1fr;
+  }
+}

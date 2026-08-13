@@ -1,16 +1,90 @@
-# React + Vite
+# Frontend — Appointment & Triage Scheduler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Пациентската част на системата за записване на часове: избор на лекар, седмичен
+календар със свободни слотове и запазване на час. Общият преглед на проекта е в
+[README.md](../README.md) в корена, планът — в [PLAN_1.md](../PLAN_1.md).
 
-Currently, two official plugins are available:
+React 19 + Vite · React Router · TanStack Query · i18next (български и английски)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Стартиране
 
-## React Compiler
+Нужен е Node 20 или по-нов.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Отваря се на <http://localhost:5173>. По подразбиране приложението работи срещу
+**mock-ове (MSW)**, а не срещу истинския бекенд — не е нужно да пускаш нищо друго.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Команда | Какво прави |
+|---|---|
+| `npm run dev` | Dev сървър с HMR |
+| `npm run build` | Продукционен билд в `dist/` |
+| `npm run preview` | Преглед на готовия билд |
+| `npm run lint` | ESLint |
+
+## Срещу mock-ове или срещу бекенда
+
+Превключването е един флаг. Създай `frontend/.env`:
+
+```
+VITE_USE_MOCKS=false
+```
+
+Тогава заявките отиват към истинския сървър. За да работи:
+
+1. Бекендът трябва да върви на порт **8081** (виж
+   [../backend/README_BACKEND.md](../backend/README_BACKEND.md)).
+2. Нищо друго не се пипа — Vite препраща `/api` към 8081 от сървър към сървър,
+   така че CORS не влиза в играта.
+
+Mock-овете следват DTO-тата от кода на бекенда и живеят в `src/mocks/`. Полезно е
+да се знае, че `?lng=en` в URL-а сменя езика — удобно за споделяне на линк.
+
+**Какво още липсва от страна на бекенда** (mock-овете го покриват, истинският
+сървър — не):
+
+- `GET /api/doctors` не съществува; има само `/api/doctors/me`.
+- Конфликтът при записване се връща като `500` вместо договорения `409` с
+  `{ "code": "SLOT_TAKEN" }`.
+- `GET /api/slots/*` гърми с 500 — `Slot` няма конструктор без аргументи.
+
+## Структура
+
+```
+src/
+├── pages/         по един файл на маршрут
+├── components/
+│   └── ds/        React портове на Sirma Design System
+├── ds/            CSS на дизайн системата + нашите токени (app.css)
+├── api/           HTTP слой към бекенда
+├── mocks/         MSW
+├── i18n/          конфигурация + преводи (bg.json, en.json)
+└── lib/           дати и дребни помощници
+```
+
+Маршрути: `/`, `/login`, `/register`, `/doctors`, `/doctors/:id/calendar`,
+`/me/appointments`, `/staff`, `/staff/new`.
+
+## Две правила, които са важни
+
+**Никакви голи стойности в стиловете.** Цветове, размери, отстъпи и радиуси идват
+от CSS променливи. Липсва ли токен — добавя се в `src/ds/app.css`, не се пише
+число на място.
+
+**Никакъв текст в JSX.** Всичко минава през `t('ключ')`, а текстовете са в
+`src/i18n/locales/`. Двата езика се държат в синхрон — ключ, добавен в единия, се
+добавя и в другия.
+
+Подробностите — кои компоненти са пренесени от дизайн системата, как се пренася
+следващ и какво още предстои — са в [CLAUDE.md](CLAUDE.md).
+
+## Състояние
+
+Готово: скелето, дизайн системата, двата езика, MSW, списъкът с лекари, седмичният
+календар със запазване на час и обработка на конфликт (409).
+
+Предстои: триаж въпросник, „Моите часове“, табло за персонала, вход и защита на
+маршрутите.

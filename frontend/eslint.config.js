@@ -5,7 +5,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // mockServiceWorker.js е генериран от MSW — не се редактира и не се линтва.
+  globalIgnores(['dist', 'public/mockServiceWorker.js']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

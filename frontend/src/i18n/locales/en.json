@@ -1,7 +1,42 @@
 {
   "common": {
     "clinicName": "Sirma Clinic",
-    "documentTitle": "Sirma Clinic — book an appointment"
+    "documentTitle": "Sirma Clinic — book an appointment",
+    "loading": "Loading",
+    "retry": "Try again"
+  },
+  "doctors": {
+    "title": "Choose your clinician",
+    "lead": "Pick a clinician to see their available times.",
+    "filterAll": "All",
+    "emptyTitle": "No clinicians",
+    "emptyText": "No clinician currently has a public schedule.",
+    "errorTitle": "We could not load the clinicians",
+    "errorText": "Check your connection and try again."
+  },
+  "calendar": {
+    "backToDoctors": "All clinicians",
+    "week": "{{from}} – {{to}}",
+    "prevWeek": "Previous",
+    "nextWeek": "Next",
+    "today": "This week",
+    "legendFree": "free",
+    "legendTaken": "taken",
+    "legendSelected": "selected",
+    "selected": "You picked <mono>{{time}}</mono>",
+    "pickPrompt": "Pick a free time from the grid.",
+    "book": "Book this time",
+    "booking": "Booking…",
+    "emptyTitle": "No free times this week",
+    "emptyText": "Try next week or pick another clinician.",
+    "errorTitle": "We could not load the times",
+    "errorText": "The server did not respond. Try again in a moment.",
+    "bookedTitle": "Your time is booked",
+    "bookedMessage": "See you at {{time}}.",
+    "takenTitle": "That time was just taken",
+    "takenMessage": "Someone booked it while you were choosing. Pick another.",
+    "failedTitle": "Booking failed",
+    "failedMessage": "Try again in a moment."
   },
   "lang": {
     "switchTo": "БГ",
@@ -12,7 +47,8 @@
     "appointments": "My appointments",
     "staff": "Staff",
     "login": "Log in",
-    "book": "Book a visit"
+    "book": "Book a visit",
+    "menu": "Menu"
   },
   "home": {
     "hero": {
@@ -139,14 +175,6 @@
     "register": {
       "title": "Create an account",
       "text": "This is where a patient signs up on their own — name, email, phone and password — so they can book without calling reception."
-    },
-    "doctors": {
-      "title": "Clinicians",
-      "text": "This will list the clinic's doctors with a specialty filter; a doctor's card opens their weekly calendar of free slots."
-    },
-    "doctorCalendar": {
-      "title": "Doctor's calendar",
-      "text": "This will be the weekly slot grid for doctor <mono>{{id}}</mono> — days as columns, hours as rows, free slots clickable and leading into triage."
     },
     "myAppointments": {
       "title": "My appointments",
