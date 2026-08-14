@@ -6,8 +6,10 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -21,6 +23,18 @@ public class SlotsController {
     public SlotsController(SlotsService slotsService, DoctorsService doctorsService) {
         this.slotsService = slotsService;
         this.doctorsService = doctorsService;
+    }
+
+    @PostMapping("/setRestStart")
+    public ResponseEntity setRestStart(LocalTime restStart) {
+        this.slotsService.setRestStart(restStart);
+        return ResponseEntity.ok(201);
+    }
+
+    @PostMapping("/setRestEnd")
+    public ResponseEntity setRestEnd(LocalTime restEnd) {
+        this.slotsService.setRestEnd(restEnd);
+        return ResponseEntity.ok(201);
     }
 
     @GetMapping("/free")
