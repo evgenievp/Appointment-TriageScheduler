@@ -7,21 +7,32 @@ import jakarta.persistence.*;
 @Entity
 @Table(name="users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role = Role.PATIENT;
+
     private String name;
     private String phone;
 
-    public User(Long id,
+    protected User() {
+    }
+
+    public User(
                 String email,
                 String password,
                 String name,
                 String phone) {
-        this.id = id;
         this.email = email;
         this.password = password;
         this.name = name;
