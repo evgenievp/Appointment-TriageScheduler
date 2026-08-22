@@ -24,8 +24,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включване на CORS
-                .csrf(csrf -> csrf.disable());
-                // our security options shall be added here.
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+        );
         return http.build();
     }
 
