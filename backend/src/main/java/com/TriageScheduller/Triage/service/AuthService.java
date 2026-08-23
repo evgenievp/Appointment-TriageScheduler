@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.LoginRequest;
+import com.TriageScheduller.Triage.dto.LoginResponse;
 import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.User;
@@ -13,10 +14,12 @@ public class AuthService {
 
     private final PatientsRepo patientsRepo;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(PatientsRepo patientsRepo, PasswordEncoder passwordEncoder) {
+    public AuthService(PatientsRepo patientsRepo, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.patientsRepo = patientsRepo;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public UserDto register(RegisterRequest request){
@@ -44,7 +47,7 @@ public class AuthService {
         );
     }
 
-    public LoginRequest login (LoginRequest request){
+    public LoginResponse login (LoginRequest request){
 
         User user = patientsRepo.findByEmail(request.email())
                 .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
@@ -53,8 +56,9 @@ public class AuthService {
             throw new IllegalStateException("Invalid email or password");
         }
 
+        String token = jwtService.generateToken(user);
 
-
+        return new LoginResponse(token);
     }
 
 }
