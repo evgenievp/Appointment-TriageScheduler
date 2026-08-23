@@ -1,5 +1,7 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.UpdatePatientRequest;
+import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.PatientsService;
 import org.springframework.http.ResponseEntity;
@@ -17,23 +19,39 @@ public class PatientsController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentPatient(Authentication authentication) {
+    public ResponseEntity<UserDto> getCurrentPatient(Authentication authentication) {
         String email = authentication.getName();
         User patient = patientsService.findByEmail(email);
-        return ResponseEntity.ok(patient);
+
+        UserDto dto = new UserDto(
+                patient.getId(),
+                patient.getName(),
+                patient.getPhone(),
+                patient.getEmail()
+        );
+
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/me")
-    public ResponseEntity<User> updatePatient(
+    public ResponseEntity<UserDto> updatePatient(
             Authentication authentication,
-            @RequestBody User updatedPatient) {
+            @RequestBody UpdatePatientRequest request) {
 
         String email = authentication.getName();
         User patient = patientsService.findByEmail(email);
+        patient.setName(request.name());
+        patient.setPhone(request.phone());
 
-        patient.setName(updatedPatient.getName());
-        patient.setPhone(updatedPatient.getPhone());
+        User savedPatient = patientsService.save(patient);
 
-        return ResponseEntity.ok(patientsService.save(patient));
+        UserDto dto = new UserDto(
+                savedPatient.getId(),
+                savedPatient.getName(),
+                savedPatient.getPhone(),
+                savedPatient.getEmail()
+        );
+
+        return ResponseEntity.ok(dto);
     }
 }
