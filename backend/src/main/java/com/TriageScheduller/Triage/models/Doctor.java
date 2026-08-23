@@ -1,10 +1,7 @@
 package com.TriageScheduller.Triage.models;
 
 import com.TriageScheduller.Triage.utils.Role;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 
 @Entity
@@ -15,6 +12,13 @@ public class Doctor {
     private String name;
     private String speciality;
     private Role role = Role.DOCTOR;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
+    protected Doctor() {
+    }
 
     public Doctor(Long id, String speciality, String name) {
         this.id = id;
