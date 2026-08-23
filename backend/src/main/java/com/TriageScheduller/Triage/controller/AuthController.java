@@ -1,6 +1,8 @@
 package com.TriageScheduller.Triage.controller;
 
 
+import com.TriageScheduller.Triage.dto.LoginRequest;
+import com.TriageScheduller.Triage.dto.LoginResponse;
 import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.service.AuthService;
@@ -23,5 +25,12 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @RequestBody LoginRequest request) {
+
+        return ResponseEntity.ok(authService.login(request));
     }
 }
