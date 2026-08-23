@@ -41,7 +41,16 @@ server.port= избран порт
  
 
 **Пример за `from`/`to`:** `2026-08-12T00:00:00`
-
+**Примерен слот: 
+```
+{
+   "doctor": "Doctor",
+   "startsAt": "2026-08-24T08:30:00",
+   "endsAt": "2026-08-24T17:30:00",
+   "status": "FREE/BOOKED/BLOCKED",
+   "patientId": 13  
+}
+```
 ---
 
 ### 4.4. Лекари и почивни дни (`/api/doctors`)
@@ -60,7 +69,14 @@ server.port= избран порт
   "reason": "VACATION"
 }
 ```
-
+**Пример за добавяне на лекар: **
+```
+{
+   "name": "Д-р Атанас Иванов",
+   "speciality": "ревматолог",
+   "role": "DOCTOR"
+}
+```
 ---
 
 ### 4.5. Резервации (`/api/appointments`)
@@ -71,6 +87,18 @@ server.port= избран порт
 | GET | `/api/appointments/me` | Връща всички резервации на логнатия пациент |
 | DELETE | `/api/appointments/{id}` | Отказва резервация |
 
+
+---
+**Пример за добяване на резервации:**
+докторът, слотът и пациентът трябва да се вземат от базата данни
+```
+{
+   "doctor": "Doctor", 
+   "slot": "slot",
+   "patient": "patient",
+   "status"; "FREE/BOOKED/BLOCKED" (these are status possibilities)
+}
+```
 ---
 
 ### 4.5. Триаж (`/api/triage`)
