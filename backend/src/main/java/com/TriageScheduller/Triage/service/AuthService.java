@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.LoginRequest;
 import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.User;
@@ -41,6 +42,19 @@ public class AuthService {
                 savedUser.getPhone(),
                 savedUser.getEmail()
         );
+    }
+
+    public LoginRequest login (LoginRequest request){
+
+        User user = patientsRepo.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new IllegalStateException("Invalid email or password");
+        }
+
+
+
     }
 
 }
