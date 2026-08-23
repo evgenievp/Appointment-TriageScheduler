@@ -4,8 +4,11 @@ import com.TriageScheduller.Triage.dto.LoginRequest;
 import com.TriageScheduller.Triage.dto.LoginResponse;
 import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.UserDto;
+import com.TriageScheduller.Triage.exception.ConflictException;
+import com.TriageScheduller.Triage.exception.UnauthorizedException;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
+import com.TriageScheduller.Triage.utils.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +27,8 @@ public class AuthService {
 
     public UserDto register(RegisterRequest request){
 
-        if(patientsRepo.existsByEmail(request.email())){
-            throw  new IllegalStateException("Email already Registered!");
+        if (patientsRepo.existsByEmail(request.email())) {
+            throw new ConflictException("Email already registered!");
         }
 
         String hashedPassword = passwordEncoder.encode(request.password());
@@ -36,6 +39,8 @@ public class AuthService {
                 request.name(),
                 request.phone()
         );
+
+        user.setRole(Role.PATIENT);
 
         User savedUser = patientsRepo.save(user);
 
@@ -50,10 +55,10 @@ public class AuthService {
     public LoginResponse login (LoginRequest request){
 
         User user = patientsRepo.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalStateException("Invalid email or password"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new IllegalStateException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         String token = jwtService.generateToken(user);
