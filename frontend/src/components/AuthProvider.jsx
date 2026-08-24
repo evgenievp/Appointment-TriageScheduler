@@ -7,8 +7,8 @@ export default function AuthProvider({ children }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState(readUser);
 
-  const signIn = useCallback((token) => {
-    saveToken(token);
+  const signIn = useCallback((token, remember = true) => {
+    saveToken(token, remember);
     setUser(readUser());
   }, []);
 
