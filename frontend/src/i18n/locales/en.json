@@ -5,6 +5,44 @@
     "loading": "Loading",
     "retry": "Try again"
   },
+  "auth": {
+    "errors": {
+      "required": "This field is required",
+      "emailInvalid": "Check the email address",
+      "passwordShort": "The password must be at least 8 characters",
+      "phoneInvalid": "Check the phone number"
+    },
+    "showPassword": "Show the password",
+    "hidePassword": "Hide the password",
+    "register": {
+      "title": "Create an account",
+      "lead": "We create an account so you can book visits and see them in one place. It takes under two minutes.",
+      "name": "Full name",
+      "namePlaceholder": "First Last",
+      "email": "Email",
+      "emailPlaceholder": "name@example.bg",
+      "phone": "Mobile phone",
+      "phonePlaceholder": "+359 88 123 4567",
+      "phoneHint": "We send confirmations and reminders to this number.",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "terms": "I accept the terms of use",
+      "termsDescription": "Includes the rules for cancelling up to 12 hours before the visit.",
+      "gdpr": "I agree my health data may be processed for the purpose of the visit",
+      "gdprDescription": "Only the clinician and the clinic team have access.",
+      "consentsRequired": "Both consents are required.",
+      "submit": "Create account",
+      "submitting": "Creating the account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Log in",
+      "successTitle": "Your account is ready",
+      "successMessage": "You are signed in.",
+      "emailTakenTitle": "That email is already registered",
+      "emailTakenMessage": "Log in to your account or use another address.",
+      "failedTitle": "Registration failed",
+      "failedMessage": "Try again in a moment."
+    }
+  },
   "doctors": {
     "title": "Choose your clinician",
     "lead": "Pick a clinician to see their available times.",
