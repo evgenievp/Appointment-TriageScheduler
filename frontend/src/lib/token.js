@@ -1,7 +1,8 @@
 const STORAGE_KEY = 'auth_token';
 
-// The token lives in localStorage so a refresh does not sign the patient out.
-// Accepted trade-off for this project: it is readable by any script on the page.
+// The token goes to localStorage when the patient asks to be remembered and to
+// sessionStorage otherwise, so a clinic computer forgets them when the tab closes.
+// Accepted trade-off either way: both are readable by any script on the page.
 
 export function decodeToken(token) {
   try {
@@ -19,12 +20,19 @@ const isExpired = (token) => {
 
 // An expired token counts as no token, so the UI never pretends to be signed in.
 export function readToken() {
-  const token = localStorage.getItem(STORAGE_KEY);
+  const token = sessionStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(STORAGE_KEY);
   return token && !isExpired(token) ? token : null;
 }
 
-export const saveToken = (token) => localStorage.setItem(STORAGE_KEY, token);
-export const clearToken = () => localStorage.removeItem(STORAGE_KEY);
+export function saveToken(token, remember = true) {
+  clearToken();
+  (remember ? localStorage : sessionStorage).setItem(STORAGE_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(STORAGE_KEY);
+}
 
 export function readUser() {
   const token = readToken();
