@@ -15,7 +15,6 @@ import {
 import { getCalendarSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { bookSlot } from '../api/appointments';
-import { SLOT_TAKEN } from '../api/client';
 import { useToast } from '../lib/toastContext';
 import {
   addDays,
@@ -75,8 +74,8 @@ export default function DoctorCalendar() {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
     },
     onError: (error) => {
-      // Сърцето на заданието: някой е взел часа между зареждането и клика.
-      if (error.code === SLOT_TAKEN) {
+      // Someone took the slot between loading the grid and the click.
+      if (error.status === 409) {
         showToast({
           tone: 'danger',
           title: t('calendar.takenTitle'),
