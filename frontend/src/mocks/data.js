@@ -76,6 +76,14 @@ export const users = [
     phone: '+359 88 123 4567',
     role: 'PATIENT',
   },
+  {
+    id: 2,
+    email: 'staff@example.bg',
+    password: 'sirma2026',
+    name: 'Регистратура',
+    phone: '+359 2 900 0000',
+    role: 'STAFF',
+  },
 ];
 
 const base64url = (value) =>
