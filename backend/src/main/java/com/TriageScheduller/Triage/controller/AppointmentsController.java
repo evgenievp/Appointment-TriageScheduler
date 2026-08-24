@@ -5,6 +5,7 @@ import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

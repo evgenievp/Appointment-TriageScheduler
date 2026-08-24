@@ -220,4 +220,69 @@ public class SlotsService {
                 patientId
         );
     }
+
+    public List<SlotDto> previewSlots(Doctor doctor,
+                                      LocalDate startDate,
+                                      LocalDate endDate,
+                                      LocalTime workStart,
+                                      LocalTime workEnd) {
+        Set<LocalDate> exceptionDays = exceptionDayRepo.findByDoctorIdAndDateBetween(
+                        doctor.getId(),
+                        startDate,
+                        endDate)
+                .stream()
+                .map(ExceptionDay::getDate)
+                .collect(Collectors.toSet());
+
+        List<SlotDto> previewSlots = new ArrayList<>();
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)) {
+            if (isExceptionDay(currentDate, exceptionDays)) {
+                currentDate = currentDate.plusDays(1);
+                continue;
+            }
+
+            if (!isWorkingDay(currentDate)) {
+                currentDate = currentDate.plusDays(1);
+                continue;
+            }
+
+            List<SlotDto> daySlots = previewSlotsForDay(doctor, currentDate, workStart, workEnd);
+            previewSlots.addAll(daySlots);
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return previewSlots;
+    }
+
+    private List<SlotDto> previewSlotsForDay(Doctor doctor,
+                                             LocalDate date,
+                                             LocalTime workStart,
+                                             LocalTime workEnd) {
+        List<SlotDto> daySlots = new ArrayList<>();
+        LocalDateTime current = LocalDateTime.of(date, workStart);
+        LocalDateTime endOfWorkDay = LocalDateTime.of(date, workEnd);
+
+        while (current.isBefore(endOfWorkDay)) {
+            LocalDateTime slotEnd = current.plusMinutes(30);
+
+            if (isRestTime(current,
+                    this.restStart,
+                    this.restEnd)) {
+                current = slotEnd;
+                continue;
+            }
+
+            if (slotEnd.isAfter(endOfWorkDay)) {
+                break;
+            }
+            Slot virtualSlot = new Slot(doctor,
+                    current);
+            daySlots.add(toDto(virtualSlot));
+            current = slotEnd;
+        }
+
+        return daySlots;
+    }
 }

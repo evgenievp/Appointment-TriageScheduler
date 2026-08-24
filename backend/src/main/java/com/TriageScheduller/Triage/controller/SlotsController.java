@@ -62,7 +62,6 @@ public class SlotsController {
     public List<SlotDto> generateSlots(@RequestBody GenerateSlotsRequest request) {
         Doctor doctor = doctorsService.findById(request.doctorId());
 
-
         return slotsService.generateSlots(
                 doctor,
                 request.startDate(),
@@ -71,4 +70,16 @@ public class SlotsController {
                 request.workEnd()
         );
     }
+
+    @GetMapping("/preview")
+    public List<SlotDto> previewSlots(@RequestBody GenerateSlotsRequest request) {
+
+        Doctor doctor = doctorsService.findById(request.doctorId());
+        return slotsService.previewSlots(doctor,
+                request.startDate(),
+                request.endDate(),
+                request.workStart(),
+                request.workEnd());
+    }
+
 }
