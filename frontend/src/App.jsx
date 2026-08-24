@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import AuthProvider from './components/AuthProvider';
+import RequireAuth from './components/RequireAuth';
 import ToastProvider from './components/ToastProvider';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -20,9 +21,30 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/doctors/:id/calendar" element={<DoctorCalendar />} />
-          <Route path="/me/appointments" element={<MyAppointments />} />
-          <Route path="/staff" element={<StaffDashboard />} />
-          <Route path="/staff/new" element={<StaffNewBooking />} />
+          <Route
+            path="/me/appointments"
+            element={
+              <RequireAuth>
+                <MyAppointments />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/staff"
+            element={
+              <RequireAuth role="STAFF">
+                <StaffDashboard />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/staff/new"
+            element={
+              <RequireAuth role="STAFF">
+                <StaffNewBooking />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </ToastProvider>
     </AuthProvider>
