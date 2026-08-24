@@ -24,17 +24,21 @@ public class DoctorsController {
 
     @GetMapping("/me")
     public ResponseEntity<Doctor> getCurrentDoctor(Authentication authentication) {
-        Long doctorId = Long.parseLong(authentication.getName());
-        Doctor doctor = doctorsService.findById(doctorId);
+        String email = authentication.getName();
+        Doctor doctor = doctorsService.findByEmail(email);
         return ResponseEntity.ok(doctor);
     }
 
     @GetMapping("/me/exceptions")
-    public ResponseEntity<List<ExceptionDayDto>> getMyExceptions(Authentication authentication) {
+    public ResponseEntity<List<ExceptionDayDto>> getMyExceptions(
+            Authentication authentication) {
+
         String email = authentication.getName();
-        Long doctorId = Long.parseLong(authentication.getName());
-        Doctor doctor = doctorsService.findById(doctorId);
-        return ResponseEntity.ok(exceptionDayService.getExceptionDays(doctor.getId()));
+        Doctor doctor = doctorsService.findByEmail(email);
+
+        return ResponseEntity.ok(
+                exceptionDayService.getExceptionDays(doctor.getId())
+        );
     }
 
     @PostMapping("/me/exceptions")
@@ -43,10 +47,12 @@ public class DoctorsController {
             @RequestBody ExceptionDayDto dto) {
 
         String email = authentication.getName();
-        Long doctorId = Long.parseLong(authentication.getName());
-        Doctor doctor = doctorsService.findById(doctorId);
 
-        ExceptionDayDto saved = exceptionDayService.addExceptionDay(doctor.getId(), dto);
+        Doctor doctor = doctorsService.findByEmail(email);
+
+        ExceptionDayDto saved =
+                exceptionDayService.addExceptionDay(doctor.getId(), dto);
+
         return ResponseEntity.status(201).body(saved);
     }
 
