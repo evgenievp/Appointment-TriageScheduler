@@ -40,6 +40,10 @@
   --slot-cell-height: 33px; /* клетка в седмичния SlotGrid */
   --slot-day-header-height: 48px; /* заглавието на ден в SlotGrid */
   --slot-col-min: 78px; /* под тази ширина колоната става нечетима */
+  --control-size: 20px; /* кутийката на checkbox/radio */
+  --control-icon-size: 12px; /* отметката вътре в нея */
+  --icon-btn-size: 40px;
+  --icon-btn-size-sm: 28px; /* напр. окото в полето за парола */
   --surface-on-dark-tile: rgba(255, 255, 255, 0.12);
 
   /* --- Типографика, която системата не покрива ------------------------ */
@@ -142,6 +146,14 @@
   .sirma-glass-header__panel {
     display: flex;
   }
+}
+
+/* Checkbox-ът крие истинския `input`, затова фокусът от клавиатурата не се вижда
+   никъде. Дизайнът не го покрива, но системата има токен за фокус пръстен и без
+   него компонентът е недостъпен с Tab. */
+.sirma-checkbox:focus-within .sirma-checkbox__box {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
 }
 
 /* Седмичният грид. Колоните имат минимална ширина и при тесен екран цялата
