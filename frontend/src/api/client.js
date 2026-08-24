@@ -4,6 +4,8 @@
 // talks to its own origin and CORS never comes into play. `VITE_API_URL` points
 // it elsewhere without touching the code.
 
+import { readToken } from '../lib/token';
+
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 // The backend returns plain text for errors, so callers branch on `status`.
@@ -19,8 +21,16 @@ export class ApiError extends Error {
 }
 
 export async function request(path, options = {}) {
+  // Read on every call rather than at import time: the token changes when the
+  // patient signs in or out, and localStorage is the single source of truth.
+  const token = readToken();
+
   const response = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
     ...options,
   });
 
