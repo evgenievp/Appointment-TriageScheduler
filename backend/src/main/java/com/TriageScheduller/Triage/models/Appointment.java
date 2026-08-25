@@ -14,6 +14,7 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
