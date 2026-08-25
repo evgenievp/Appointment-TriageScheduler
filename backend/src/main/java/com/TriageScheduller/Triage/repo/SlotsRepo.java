@@ -35,4 +35,10 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
     List<Slot> findByDoctorIdAndStartsAtBetween(Long doctorId,
                                                 LocalDateTime from,
                                                 LocalDateTime to);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Slot s SET s.status = 'BOOKED', s.patientId = :patientId " +
+            "WHERE s.id = :slotId AND s.status = 'FREE'")
+    int bookSlot(@Param("slotId") Long slotId, @Param("patientId") Long patientId);
+
 }
