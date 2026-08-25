@@ -15,10 +15,14 @@ import java.util.List;
 public class AppointmentsService {
     private final AppointmentsRepo appointmentsRepo;
     private final SlotsRepo slotsRepo;
+    private final SlotsService slotsService;
 
-    public AppointmentsService(AppointmentsRepo appointmentsRepo, SlotsRepo slotsRepo) {
+    public AppointmentsService(AppointmentsRepo appointmentsRepo,
+                               SlotsRepo slotsRepo,
+                               SlotsService slotsService) {
         this.appointmentsRepo = appointmentsRepo;
         this.slotsRepo = slotsRepo;
+        this.slotsService = slotsService;
     }
 
     public Appointment createAppointment(Long slotId, User patient, Doctor doctor) {
@@ -44,6 +48,7 @@ public class AppointmentsService {
     }
 
     public void delete(Long id) {
+        slotsService.freeSlot(id);
         appointmentsRepo.deleteById(id);
     }
 }
