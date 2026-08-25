@@ -1,10 +1,14 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DoctorsService {
@@ -29,4 +33,18 @@ public class DoctorsService {
         return repo.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
+
+    public List<DoctorDto> getRandomDoctors() {
+        List<DoctorDto> dtos = new ArrayList<>();
+        for (var doc : repo.findRandomDoctors()) {
+            dtos.add(toDto(doc));
+        }
+        return dtos;
+    }
+
+    private DoctorDto toDto(Doctor doc) {
+        return new DoctorDto(doc.getId(), doc.getName(), doc.getSpeciality());
+    }
+
+
 }
