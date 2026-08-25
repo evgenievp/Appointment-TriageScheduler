@@ -65,6 +65,50 @@ export const slots = doctors.flatMap((doctor) =>
 
 export const appointments = [];
 
+// AppointmentDto as the backend returns it, plus three fields it does not send
+// yet: `id` (documented in README_BACKEND.md but missing from the record) and
+// the two names. Without those the doctor and staff lists can only show ids.
+export function toAppointmentDto(appointment) {
+  return {
+    id: appointment.id,
+    slotId: appointment.slotId,
+    patientId: appointment.patientId,
+    patientName: users.find((u) => u.id === appointment.patientId)?.name ?? null,
+    doctorId: appointment.doctorId,
+    doctorName: doctors.find((d) => d.id === appointment.doctorId)?.name ?? null,
+    appointmentTime: appointment.appointmentTime,
+    status: appointment.status,
+    notes: appointment.notes ?? null,
+  };
+}
+
+let nextAppointmentId = 1;
+export const nextId = () => nextAppointmentId++;
+
+// Booked visits spread over two patients and three doctors, so the three lists
+// actually differ: the patient sees their own, the doctor sees their column,
+// the staff sees everything.
+[
+  { patientId: 1, doctorId: 1 },
+  { patientId: 1, doctorId: 2 },
+  { patientId: 4, doctorId: 1 },
+  { patientId: 4, doctorId: 3 },
+].forEach(({ patientId, doctorId }) => {
+  const slot = slots.find((s) => s.doctorId === doctorId && s.status === 'FREE');
+  if (!slot) return;
+  slot.status = 'BOOKED';
+  slot.patientId = patientId;
+  appointments.push({
+    id: nextId(),
+    slotId: slot.id,
+    patientId,
+    doctorId,
+    appointmentTime: slot.startTime,
+    status: 'CONFIRMED',
+    notes: null,
+  });
+});
+
 // Потребители за mock-натата автентикация. Паролите стоят в чист вид нарочно —
 // това е mock, не се доближава до нищо истинско.
 export const users = [
@@ -83,6 +127,25 @@ export const users = [
     name: 'Регистратура',
     phone: '+359 2 900 0000',
     role: 'STAFF',
+  },
+  // The backend cannot create a doctor account — registration always makes a
+  // PATIENT — so the doctor view is only testable against the mocks.
+  {
+    id: 3,
+    email: 'doctor@example.bg',
+    password: 'sirma2026',
+    name: 'Д-р Иванов',
+    phone: '+359 2 900 0001',
+    role: 'DOCTOR',
+    doctorId: 1,
+  },
+  {
+    id: 4,
+    email: 'ivan@example.bg',
+    password: 'sirma2026',
+    name: 'Иван Петров',
+    phone: '+359 88 555 1234',
+    role: 'PATIENT',
   },
 ];
 
