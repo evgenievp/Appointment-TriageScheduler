@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
@@ -9,6 +10,7 @@ import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,12 +45,28 @@ public class AppointmentsService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
     }
 
-    public List<Appointment> findByPatientId(Long patientId) {
-        return appointmentsRepo.findByPatientId(patientId);
+    public List<AppointmentDto> findByPatientId(Long patientId) {
+        List<AppointmentDto> dtos = new ArrayList<>();
+
+        for (var appo : this.appointmentsRepo.findByPatientId(patientId)) {
+            dtos.add(toDto(appo));
+        }
+        return dtos;
     }
 
     public void delete(Long id) {
         slotsService.freeSlot(id);
         appointmentsRepo.deleteById(id);
+    }
+
+    public AppointmentDto toDto(Appointment appointment) {
+        return new AppointmentDto(
+                appointment.getSlot().getId(),
+                appointment.getPatient().getId(),
+                appointment.getDoctor().getId(),
+                appointment.getSlot().getStartsAt(),
+                appointment.getStatus(),
+                null
+        );
     }
 }
