@@ -5,6 +5,8 @@ import {
   appointments,
   users,
   fakeToken,
+  nextId,
+  toAppointmentDto,
   toLocalDateTime,
 } from './data';
 
@@ -136,31 +138,66 @@ export const handlers = [
     }
 
     slot.status = 'BOOKED';
-    slot.patientId = 1;
+    slot.patientId = user.id;
 
     const appointment = {
+      id: nextId(),
       slotId: slot.id,
-      patientId: 1,
+      patientId: user.id,
       doctorId: slot.doctorId,
       appointmentTime: slot.startTime,
-      status: 'BOOKED',
+      status: 'CONFIRMED',
       notes: null,
     };
     appointments.push(appointment);
 
-    return HttpResponse.json(appointment, { status: 201 });
+    return HttpResponse.json(toAppointmentDto(appointment), { status: 201 });
   }),
 
   ...handle('get', '/api/appointments/me', async ({ request }) => {
-    if (!userFromRequest(request)) return unauthorized();
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
     await delay(LATENCY);
-    return HttpResponse.json(appointments);
+    return HttpResponse.json(
+      appointments.filter((a) => a.patientId === user.id).map(toAppointmentDto),
+    );
+  }),
+
+  // Neither of the next two exists on the backend. `findByDoctorId` is already
+  // in the repository, so the doctor one is a controller method away; the staff
+  // one is findAll() with a date filter.
+  ...handle('get', '/api/appointments/doctor/me', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    return HttpResponse.json(
+      appointments.filter((a) => a.doctorId === user.doctorId).map(toAppointmentDto),
+    );
+  }),
+
+  ...handle('get', '/api/staff/appointments', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const date = new URL(request.url).searchParams.get('date');
+    const onDate = date
+      ? appointments.filter((a) => a.appointmentTime.startsWith(date))
+      : appointments;
+
+    return HttpResponse.json(
+      [...onDate]
+        .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
+        .map(toAppointmentDto),
+    );
   }),
 
   ...handle('delete', '/api/appointments/:id', async ({ request, params }) => {
     if (!userFromRequest(request)) return unauthorized();
     await delay(LATENCY);
-    const index = appointments.findIndex((a) => a.slotId === Number(params.id));
+    const index = appointments.findIndex((a) => a.id === Number(params.id));
     if (index === -1) return new HttpResponse(null, { status: 404 });
 
     const slot = slots.find((s) => s.id === appointments[index].slotId);

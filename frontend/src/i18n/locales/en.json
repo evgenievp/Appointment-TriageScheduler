@@ -67,6 +67,16 @@
       "failedMessage": "Try again in a moment."
     }
   },
+  "appointments": {
+    "status": {
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled",
+      "DONE": "Done"
+    },
+    "patientFallback": "Patient #{{id}}",
+    "errorTitle": "We could not load the appointments",
+    "errorText": "The server did not respond. Try again in a moment."
+  },
   "doctors": {
     "title": "Choose your clinician",
     "lead": "Pick a clinician to see their available times.",

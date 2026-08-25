@@ -7,5 +7,12 @@ export const bookSlot = (slotId) =>
 
 export const getMyAppointments = () => request('/appointments/me');
 
+// Neither of these exists on the backend yet; the repository already has
+// findByDoctorId, so both are a controller method away. Mocked for now.
+export const getDoctorAppointments = () => request('/appointments/doctor/me');
+
+export const getStaffAppointments = (date) =>
+  request(`/staff/appointments?date=${date}`);
+
 export const cancelAppointment = (id) =>
   request(`/appointments/${id}`, { method: 'DELETE' });
