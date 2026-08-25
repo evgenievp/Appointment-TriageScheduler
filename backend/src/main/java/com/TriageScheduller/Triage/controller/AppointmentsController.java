@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.AppointmentsService;
@@ -29,19 +30,19 @@ public class AppointmentsController {
     }
 
     @PostMapping("/book/{slotId}")
-    public ResponseEntity<Appointment> bookAppointment(
+    public ResponseEntity<AppointmentDto> bookAppointment(
             Authentication authentication,
             @PathVariable Long slotId) {
 
         String email = authentication.getName();
         User patient = patientsService.findByEmail(email);
 
-        Appointment appointment = slotsService.bookSlot(slotId, patient);
+        AppointmentDto appointment = slotsService.bookSlot(slotId, patient);
         return ResponseEntity.status(201).body(appointment);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<Appointment>> getMyAppointments(Authentication authentication) {
+    public ResponseEntity<List<AppointmentDto>> getMyAppointments(Authentication authentication) {
         String email = authentication.getName();
         User patient = patientsService.findByEmail(email);
 
