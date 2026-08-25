@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.service.DoctorsService;
@@ -22,6 +23,12 @@ public class DoctorsController {
         this.doctorsService = doctorsService;
         this.exceptionDayService = exceptionDayService;
     }
+
+    @GetMapping("")
+    public ResponseEntity<List<DoctorDto>> getRandomDoctors() {
+        return ResponseEntity.status(200).body(this.doctorsService.getRandomDoctors());
+    }
+
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('DOCTOR')")
