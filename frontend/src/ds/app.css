@@ -40,6 +40,7 @@
   --slot-cell-height: 33px; /* клетка в седмичния SlotGrid */
   --slot-day-header-height: 48px; /* заглавието на ден в SlotGrid */
   --slot-col-min: 78px; /* под тази ширина колоната става нечетима */
+  --slots-preview-height: 320px; /* прегледът по дни скролва след тази височина */
   --control-size: 20px; /* кутийката на checkbox/radio */
   --control-icon-size: 12px; /* отметката вътре в нея */
   --icon-btn-size: 40px;

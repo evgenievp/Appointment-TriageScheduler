@@ -12,6 +12,9 @@ export function toLocalDateTime(date) {
   );
 }
 
+/** Дата → "2026-08-13", форматът на `<input type="date">` и на `LocalDate`. */
+export const toDateInput = (date) => toLocalDateTime(date).slice(0, 10);
+
 /** "2026-08-13T09:00:00" → Date. `new Date(...)` се справя, но явно е по-ясно. */
 export function fromLocalDateTime(value) {
   const [date, time] = value.split('T');

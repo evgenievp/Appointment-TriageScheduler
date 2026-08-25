@@ -6,6 +6,7 @@ import {
   users,
   fakeToken,
   nextId,
+  nextSlotId,
   toAppointmentDto,
   toLocalDateTime,
 } from './data';
@@ -59,6 +60,48 @@ function querySlots(request, onlyFree) {
   );
 }
 
+// Огледало на `SlotsService.previewSlots`: слотове по 30 минути, събота и неделя
+// се пропускат, 12:00–13:00 също (обедната почивка е поле на самия service —
+// обща за всички лекари и нередактируема отвън, затова е константа и тук).
+const SLOT_MINUTES = 30;
+const REST_START = '12:00';
+const REST_END = '13:00';
+
+const minutesOf = (time) => {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+};
+
+function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd }) {
+  const planned = [];
+  const day = new Date(`${startDate}T00:00:00`);
+  const last = new Date(`${endDate}T00:00:00`);
+  const from = minutesOf(workStart);
+  const to = minutesOf(workEnd);
+
+  while (day <= last) {
+    if (day.getDay() !== 0 && day.getDay() !== 6) {
+      for (let m = from; m + SLOT_MINUTES <= to; m += SLOT_MINUTES) {
+        const start = new Date(day);
+        start.setHours(0, m, 0, 0);
+        const time = toLocalDateTime(start).slice(11, 16);
+        if (time >= REST_START && time < REST_END) continue;
+
+        planned.push({
+          id: null,
+          startTime: toLocalDateTime(start),
+          endTime: toLocalDateTime(new Date(start.getTime() + SLOT_MINUTES * 60_000)),
+          status: 'FREE',
+          doctorId,
+          patientId: null,
+        });
+      }
+    }
+    day.setDate(day.getDate() + 1);
+  }
+  return planned;
+}
+
 export const handlers = [
   // --- Автентикация ---------------------------------------------------
   // Грешките тук са обикновен текст, а не JSON — точно както ги връща
@@ -108,6 +151,45 @@ export const handlers = [
   ...handle('get', '/api/doctors', async () => {
     await delay(LATENCY);
     return HttpResponse.json(doctors);
+  }),
+
+  ...handle('get', '/api/doctors/me', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    return HttpResponse.json(doctors.find((d) => d.id === user.doctorId));
+  }),
+
+  // Бекендът пази тези два зад `anyRequest().authenticated()` и взима doctorId от
+  // тялото — тоест всеки пациент може да генерира часове на чужд лекар. Тук е
+  // мокнато договореното: само DOCTOR, и то за себе си.
+  ...handle('post', '/api/slots/preview', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    return HttpResponse.json(plannedSlots(await request.json()));
+  }),
+
+  ...handle('post', '/api/slots/generate', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    // existsByDoctorAndStartsAt: съществуващият час не се пипа и не се връща.
+    const created = plannedSlots(await request.json())
+      .filter(
+        (planned) =>
+          !slots.some(
+            (s) => s.doctorId === planned.doctorId && s.startTime === planned.startTime,
+          ),
+      )
+      .map((planned) => ({ ...planned, id: nextSlotId() }));
+
+    slots.push(...created);
+    return HttpResponse.json(created);
   }),
 
   ...handle('get', '/api/slots/free', async ({ request }) => {
