@@ -27,14 +27,20 @@ public class Slot {
     private LocalDateTime endsAt;
     @Enumerated(EnumType.STRING)
     private Status status = Status.FREE;
-    private final int slotTime = 30;
+    private final static int slotTime = 30;
     private Long patientId;
+    @Version
+    private Long version;
+
+    public Slot() {}
+
 
     public Slot(Doctor doctor, LocalDateTime startsAt) {
         this.doctor = doctor;
         this.startsAt = startsAt;
         this.endsAt = startsAt.plusMinutes(slotTime);
     }
+
 
     public Slot(Long id, Doctor doctor, LocalDateTime startsAt, LocalDateTime endsAt, Status status, Long patientId) {
         this.id = id;
