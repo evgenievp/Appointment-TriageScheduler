@@ -2,19 +2,27 @@ package com.TriageScheduller.Triage.models;
 
 import com.TriageScheduller.Triage.utils.Priority;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 
 @Entity
 public class TriageResults {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @OneToOne
     @JoinColumn(name = "appointment_id", unique = true, nullable = false)
     private Appointment appointment;
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String answers;
+
     private int score;
+
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
