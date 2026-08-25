@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.exception.ConflictException;
 import com.TriageScheduller.Triage.models.*;
@@ -147,12 +148,14 @@ public class SlotsService {
     }
 
     @Transactional
-    public Appointment bookSlot(Long slotId, User patient) {
+    public AppointmentDto bookSlot(Long slotId, User patient) {
         Slot slot = validateAndGetSlot(slotId);
         checkIfSlotIsFree(slot);
         validateSlotIsWorkingDay(slot);
         reserveSlot(slot, patient);
-        return createAppointment(slot, patient);
+        Appointment appointment = createAppointment(slot, patient);
+        AppointmentDto dto = toDto(appointment);
+        return dto;
     }
 
     private Appointment createAppointment(Slot slot, User patient){
@@ -284,4 +287,18 @@ public class SlotsService {
 
         return daySlots;
     }
+
+
+    public AppointmentDto toDto(Appointment appointment) {
+        return new AppointmentDto(
+                appointment.getSlot().getId(),
+                appointment.getPatient().getId(),
+                appointment.getDoctor().getId(),
+                appointment.getSlot().getStartsAt(),
+                appointment.getStatus(),
+                null
+        );
+    }
+
+
 }
