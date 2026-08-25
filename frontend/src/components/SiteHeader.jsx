@@ -22,6 +22,15 @@ export default function SiteHeader({ active }) {
     },
     // Hidden rather than shown and rejected: a patient clicking it would only
     // get bounced back.
+    ...(user?.role === 'DOCTOR'
+      ? [
+          {
+            label: t('nav.schedule'),
+            active: active === 'doctor',
+            onClick: () => navigate('/doctor/appointments'),
+          },
+        ]
+      : []),
     ...(user?.role === 'STAFF'
       ? [
           {
