@@ -10,8 +10,10 @@ import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.TriageRepo;
+import org.springframework.transaction.annotation.Isolation;
 import com.TriageScheduller.Triage.utils.Priority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 
@@ -34,6 +36,7 @@ public class TriageService {
     }
 
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TriageResponseDto submitTriage(Long appointmentId,
                                           TriageRequestDto request,
                                           String userEmail) {

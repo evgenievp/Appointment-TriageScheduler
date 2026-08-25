@@ -9,12 +9,12 @@ public record TriageRequestDto(
 
         @Min(1)
         @Max(10)
-        int painLevel,
+        Integer painLevel,
 
         @NotNull
         PainDuration painDuration,
 
-        boolean highTemperature,
+        Boolean highTemperature,
 
-        boolean swelling
+        Boolean swelling
 ) {}

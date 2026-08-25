@@ -36,7 +36,6 @@ public class TriageResultsController {
 
         TriageResponseDto result =
                 triageService.submitTriage(appointmentId, request, email);
-
         return ResponseEntity.status(201).body(result);
     }
 
