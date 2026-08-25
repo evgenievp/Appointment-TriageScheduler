@@ -9,20 +9,12 @@ export default function SiteHeader({ active }) {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
 
+  const isDoctor = user?.role === 'DOCTOR';
+
+  // A doctor has no patient record, so the booking links would only lead to an
+  // empty page. They get their own set instead.
   const links = [
-    {
-      label: t('nav.booking'),
-      active: active === 'booking',
-      onClick: () => navigate('/doctors'),
-    },
-    {
-      label: t('nav.appointments'),
-      active: active === 'appointments',
-      onClick: () => navigate('/me/appointments'),
-    },
-    // Hidden rather than shown and rejected: a patient clicking it would only
-    // get bounced back.
-    ...(user?.role === 'DOCTOR'
+    ...(isDoctor
       ? [
           {
             label: t('nav.schedule'),
@@ -30,7 +22,18 @@ export default function SiteHeader({ active }) {
             onClick: () => navigate('/doctor/appointments'),
           },
         ]
-      : []),
+      : [
+          {
+            label: t('nav.booking'),
+            active: active === 'booking',
+            onClick: () => navigate('/doctors'),
+          },
+          {
+            label: t('nav.appointments'),
+            active: active === 'appointments',
+            onClick: () => navigate('/me/appointments'),
+          },
+        ]),
     ...(user?.role === 'STAFF'
       ? [
           {
@@ -77,11 +80,11 @@ export default function SiteHeader({ active }) {
       right={
         <>
           {smallActions}
-          {bookButton(false)}
+          {!isDoctor && bookButton(false)}
         </>
       }
       rightCompact={smallActions}
-      rightOnDark={bookButton(true)}
+      rightOnDark={isDoctor ? null : bookButton(true)}
     />
   );
 }
