@@ -20,6 +20,14 @@ export class ApiError extends Error {
   }
 }
 
+// A 401 outside the auth endpoints means the token died on the server — expired,
+// or signed with a secret the server no longer uses. Someone has to end the
+// session; `SessionWatcher` registers here so this file stays free of React.
+let onUnauthorized = null;
+export const setUnauthorizedHandler = (handler) => {
+  onUnauthorized = handler;
+};
+
 export async function request(path, options = {}) {
   // Read on every call rather than at import time: the token changes when the
   // patient signs in or out, and localStorage is the single source of truth.
@@ -35,6 +43,8 @@ export async function request(path, options = {}) {
   });
 
   if (!response.ok) {
+    // Wrong password is also a 401 — that one belongs to the login form, not here.
+    if (response.status === 401 && !path.startsWith('/auth/')) onUnauthorized?.();
     throw new ApiError(response.status, (await response.text()) || response.statusText);
   }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
@@ -15,6 +15,7 @@ import {
 import { getCalendarSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { bookSlot } from '../api/appointments';
+import { useAuth } from '../lib/authContext';
 import { useToast } from '../lib/toastContext';
 import {
   addDays,
@@ -37,8 +38,10 @@ export default function DoctorCalendar() {
   const doctorId = Number(id);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const showToast = useToast();
+  const { isAuthenticated } = useAuth();
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [selected, setSelected] = useState(null);
@@ -92,6 +95,16 @@ export default function DoctorCalendar() {
       });
     },
   });
+
+  // Booking needs an account. Sending the visitor to the login screen beats
+  // letting the request come back 401 and showing a vague failure.
+  const bookOrSignIn = () => {
+    if (!isAuthenticated) {
+      navigate(`/login?from=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+    book(selected);
+  };
 
   // Общата времева ос за седмицата. Без нея всяка колона изброява само своите
   // слотове и 09:00 в четвъртък не пада на реда на 09:00 в петък.
@@ -224,7 +237,7 @@ export default function DoctorCalendar() {
             </span>
             <Button
               disabled={!selected || isBooking}
-              onClick={() => book(selected)}
+              onClick={bookOrSignIn}
               iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
             >
               {isBooking ? t('calendar.booking') : t('calendar.book')}
