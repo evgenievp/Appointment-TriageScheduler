@@ -1,11 +1,11 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.TriageRequestDto;
 import com.TriageScheduller.Triage.dto.TriageResponseDto;
-import com.TriageScheduller.Triage.models.Appointment;
-import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.TriageService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -30,18 +30,14 @@ public class TriageResultsController {
     public ResponseEntity<TriageResponseDto> submitTriage(
             Authentication authentication,
             @PathVariable Long appointmentId,
-            @RequestBody TriageResponseDto triageResult) {
+            @Valid @RequestBody TriageRequestDto request) {
 
         String email = authentication.getName();
-        User patient = patientsService.findByEmail(email);
 
-        Appointment appointment = appointmentsService.findById(appointmentId);
+        TriageResponseDto result =
+                triageService.submitTriage(appointmentId, request, email);
 
-        if (!appointment.getPatient().getId().equals(patient.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-
-        return ResponseEntity.status(201).body(triageService.save(triageResult));
+        return ResponseEntity.status(201).body(result);
     }
 
     @GetMapping("/{appointmentId}")
