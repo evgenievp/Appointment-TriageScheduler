@@ -127,7 +127,7 @@ if [ -n "${APPT_ID:-}" ]; then
     bad "слотът остава зает след отказ — freeSlot() не се вика"
   fi
 else
-  echo "  — няма id на резервация, пропускаме отказа"
+  bad "AppointmentDto не връща id — DELETE /api/appointments/{id} е невикаем от клиент"
 fi
 
 echo
