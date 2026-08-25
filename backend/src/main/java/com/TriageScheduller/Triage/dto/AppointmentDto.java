@@ -1,9 +1,5 @@
 package com.TriageScheduller.Triage.dto;
-
-
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
-import com.TriageScheduller.Triage.utils.Status;
-
 import java.time.LocalDateTime;
 
 
@@ -12,7 +8,7 @@ public record AppointmentDto(
         Long patientId,
         Long doctorId,
         LocalDateTime appointmentTime,
-        AppointmentStatus status,   // ← промени на AppointmentStatus
+        AppointmentStatus status,
         String notes
 ) {
     public AppointmentDto(Long slotId,
@@ -24,7 +20,7 @@ public record AppointmentDto(
                 patientId,
                 doctorId,
                 appointmentTime,
-                AppointmentStatus.CONFIRMED,  // ← сложи CONFIRMED
+                AppointmentStatus.CONFIRMED,
                 notes);
     }
 }
