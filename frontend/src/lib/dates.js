@@ -56,12 +56,15 @@ export const formatWeekday = (date, locale) =>
 export const formatDayMonth = (date, locale) =>
   new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit' }).format(date);
 
-/** "26 АВГ" / "26 AUG" — датата в AppointmentRow. */
-export const formatDayShort = (date, locale) =>
-  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' })
-    .format(date)
-    .replace('.', '')
-    .toUpperCase();
+/** "26 АВГ" / "26 AUG" — датата в AppointmentRow.
+ *  Сглобява се на ръка: `month: 'short'` дава "26.08" на български, без име на
+ *  месец. Отрязването до три букви е вярно и за двата ни езика (ЯНУ ФЕВ МАР…,
+ *  JAN FEB MAR…); при добавяне на трети език се проверява наново. */
+export const formatDayShort = (date, locale) => {
+  const day = new Intl.DateTimeFormat(locale, { day: 'numeric' }).format(date);
+  const month = new Intl.DateTimeFormat(locale, { month: 'long' }).format(date);
+  return `${day} ${month.slice(0, 3).toUpperCase()}`;
+};
 
 /** "13 август" / "13 August" — за заглавието на седмицата. */
 export const formatDayLong = (date, locale) =>

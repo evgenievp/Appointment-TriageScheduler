@@ -251,7 +251,10 @@
     },
     "myAppointments": {
       "title": "My appointments",
-      "text": "This is where a patient sees their upcoming and past visits and can reschedule or cancel a booked time."
+      "lead": "The visits you have booked at the clinic.",
+      "emptyTitle": "No appointments yet",
+      "emptyText": "Pick a clinician and book a visit — it takes under two minutes.",
+      "emptyAction": "Book a visit"
     },
     "staffDashboard": {
       "title": "Staff dashboard",
