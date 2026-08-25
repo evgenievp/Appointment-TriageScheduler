@@ -72,4 +72,8 @@ public class Appointment {
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
 }
