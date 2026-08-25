@@ -28,13 +28,13 @@ public class SlotsController {
     @PostMapping("/setRestStart")
     public ResponseEntity setRestStart(LocalTime restStart) {
         this.slotsService.setRestStart(restStart);
-        return ResponseEntity.ok(201);
+        return ResponseEntity.status(201).build();
     }
 
     @PostMapping("/setRestEnd")
     public ResponseEntity setRestEnd(LocalTime restEnd) {
         this.slotsService.setRestEnd(restEnd);
-        return ResponseEntity.ok(201);
+        return ResponseEntity.status(201).build();
     }
 
     @GetMapping("/free")
