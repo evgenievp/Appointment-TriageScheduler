@@ -1,15 +1,16 @@
 package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.SlotDto;
+import com.TriageScheduller.Triage.exception.ConflictException;
 import com.TriageScheduller.Triage.models.*;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -163,16 +164,14 @@ public class SlotsService {
         return appointmentsRepo.save(appointment);
     }
 
-    private void reserveSlot(Slot slot,
-                             User patient) {
-        int updated = repo.bookSlot(slot.getId());
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void reserveSlot(Slot slot, User patient) {
+        int updated = repo.bookSlot(slot.getId(), patient.getId());
         if (updated == 0) {
-            throw new RuntimeException("Can't use that slot");
+            throw new ConflictException("Slot already booked");
         }
-        slot.setPatientId(patient.getId());
-        repo.save(slot);
-    }
 
+    }
 
     private void checkIfSlotIsFree(Slot slot) {
         if (slot.getPatientId() != null) {
