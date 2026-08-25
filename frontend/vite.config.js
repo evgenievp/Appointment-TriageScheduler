@@ -5,13 +5,19 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Фронтендът вика /api на собствения си адрес, Vite препраща към Spring от
-    // сървър към сървър — така CORS изобщо не влиза в играта. Бекендът пуска
-    // само localhost:3000, а ние сме на 5173.
+    // The frontend calls /api on its own origin and Vite forwards to Spring
+    // server-to-server, so CORS never comes into play.
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
         changeOrigin: true,
+        configure: (proxy) => {
+          // Browsers attach Origin to POST even for same-origin requests, and
+          // the proxy passes it on. The backend allows only localhost:3174, so
+          // Spring answers "Invalid CORS request". Dropping the header makes it
+          // a plain server-to-server call. Remove once the backend allows 5173.
+          proxy.on('proxyReq', (proxyReq) => proxyReq.removeHeader('origin'))
+        },
       },
     },
   },

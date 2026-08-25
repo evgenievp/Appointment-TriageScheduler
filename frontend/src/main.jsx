@@ -8,7 +8,13 @@ import './ds/styles.css';    // дизайн системата — глобал
 import './ds/app.css';       // локалните токени отгоре
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      // Retrying a dead token only delays the sign-out and doubles the toasts.
+      retry: (count, error) => error?.status !== 401 && count < 1,
+    },
+  },
 });
 
 // Единственият флаг за превключване към истинския бекенд: VITE_USE_MOCKS=false.

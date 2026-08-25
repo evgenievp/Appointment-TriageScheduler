@@ -64,3 +64,46 @@ export const slots = doctors.flatMap((doctor) =>
 );
 
 export const appointments = [];
+
+// Потребители за mock-натата автентикация. Паролите стоят в чист вид нарочно —
+// това е mock, не се доближава до нищо истинско.
+export const users = [
+  {
+    id: 1,
+    email: 'maria@example.bg',
+    password: 'sirma2026',
+    name: 'Мария Илиева',
+    phone: '+359 88 123 4567',
+    role: 'PATIENT',
+  },
+  {
+    id: 2,
+    email: 'staff@example.bg',
+    password: 'sirma2026',
+    name: 'Регистратура',
+    phone: '+359 2 900 0000',
+    role: 'STAFF',
+  },
+];
+
+const base64url = (value) =>
+  btoa(unescape(encodeURIComponent(value)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+// Истински по форма, но неподписан JWT. Фронтендът само чете payload-а и никога
+// не проверява подписа, така че се държи като този от бекенда: { sub, role, iat, exp }.
+export function fakeToken(user) {
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const header = base64url(JSON.stringify({ alg: 'HS512', typ: 'JWT' }));
+  const payload = base64url(
+    JSON.stringify({
+      sub: user.email,
+      role: user.role,
+      iat: issuedAt,
+      exp: issuedAt + 60 * 60, // час, както при бекенда
+    }),
+  );
+  return `${header}.${payload}.mock-signature`;
+}

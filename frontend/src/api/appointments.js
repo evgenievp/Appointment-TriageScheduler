@@ -1,7 +1,7 @@
 import { request } from './client';
 
-// Записването е POST без тяло — слотът е в пътя, пациентът идва от токена.
-// 201 при успех, 409 с code "SLOT_TAKEN", ако някой е взел часа преди нас.
+// The slot is in the path and the patient comes from the token, so no body.
+// 201 on success, 409 if someone booked the slot first.
 export const bookSlot = (slotId) =>
   request(`/appointments/book/${slotId}`, { method: 'POST' });
 

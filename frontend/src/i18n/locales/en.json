@@ -5,6 +5,68 @@
     "loading": "Loading",
     "retry": "Try again"
   },
+  "auth": {
+    "errors": {
+      "required": "This field is required",
+      "emailInvalid": "Check the email address",
+      "passwordShort": "The password must be at least 8 characters",
+      "phoneInvalid": "Check the phone number"
+    },
+    "showPassword": "Show the password",
+    "hidePassword": "Hide the password",
+    "sessionExpired": {
+      "title": "Your session expired",
+      "message": "Log in again to continue."
+    },
+    "login": {
+      "title": "Log in to your account",
+      "lead": "See your booked visits and reschedule or cancel them.",
+      "email": "Email",
+      "emailPlaceholder": "name@example.bg",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "remember": "Remember me on this device",
+      "rememberDescription": "Leave it off on a shared computer — the session then ends when you close the tab.",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "noAccount": "No account yet? It takes two minutes.",
+      "register": "Create an account",
+      "failedTitle": "The email or password does not match",
+      "failedMessage": "Check the email and type the password again.",
+      "errorTitle": "Log in failed",
+      "errorMessage": "The server did not respond. Try again in a moment.",
+      "successTitle": "You are logged in",
+      "successMessage": "Welcome back."
+    },
+    "register": {
+      "title": "Create an account",
+      "lead": "We create an account so you can book visits and see them in one place. It takes under two minutes.",
+      "name": "Full name",
+      "namePlaceholder": "First Last",
+      "email": "Email",
+      "emailPlaceholder": "name@example.bg",
+      "phone": "Mobile phone",
+      "phonePlaceholder": "+359 88 123 4567",
+      "phoneHint": "We send confirmations and reminders to this number.",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "terms": "I accept the terms of use",
+      "termsDescription": "Includes the rules for cancelling up to 12 hours before the visit.",
+      "gdpr": "I agree my health data may be processed for the purpose of the visit",
+      "gdprDescription": "Only the clinician and the clinic team have access.",
+      "consentsRequired": "Both consents are required.",
+      "submit": "Create account",
+      "submitting": "Creating the account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Log in",
+      "successTitle": "Your account is ready",
+      "successMessage": "You are signed in.",
+      "emailTakenTitle": "That email is already registered",
+      "emailTakenMessage": "Log in to your account or use another address.",
+      "failedTitle": "Registration failed",
+      "failedMessage": "Try again in a moment."
+    }
+  },
   "doctors": {
     "title": "Choose your clinician",
     "lead": "Pick a clinician to see their available times.",
@@ -47,6 +109,7 @@
     "appointments": "My appointments",
     "staff": "Staff",
     "login": "Log in",
+    "logout": "Log out",
     "book": "Book a visit",
     "menu": "Menu"
   },
