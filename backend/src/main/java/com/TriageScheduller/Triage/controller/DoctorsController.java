@@ -5,6 +5,7 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.ExceptionDayService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class DoctorsController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<Doctor> getCurrentDoctor(Authentication authentication) {
         String email = authentication.getName();
         Doctor doctor = doctorsService.findByEmail(email);
