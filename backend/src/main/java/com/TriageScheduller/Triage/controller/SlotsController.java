@@ -71,7 +71,7 @@ public class SlotsController {
         );
     }
 
-    @GetMapping("/preview")
+    @PostMapping("/preview")
     public List<SlotDto> previewSlots(@RequestBody GenerateSlotsRequest request) {
 
         Doctor doctor = doctorsService.findById(request.doctorId());
