@@ -118,6 +118,7 @@
     "booking": "Book a visit",
     "appointments": "My appointments",
     "staff": "Staff",
+    "schedule": "My schedule",
     "login": "Log in",
     "logout": "Log out",
     "book": "Book a visit",
@@ -255,6 +256,12 @@
       "emptyTitle": "No appointments yet",
       "emptyText": "Pick a clinician and book a visit — it takes under two minutes.",
       "emptyAction": "Book a visit"
+    },
+    "doctorAppointments": {
+      "title": "My schedule",
+      "lead": "The patients booked with you.",
+      "emptyTitle": "No patients booked",
+      "emptyText": "As soon as someone books with you, they will show up here."
     },
     "staffDashboard": {
       "title": "Staff dashboard",

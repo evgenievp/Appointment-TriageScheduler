@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Doctors from './pages/Doctors';
 import DoctorCalendar from './pages/DoctorCalendar';
 import MyAppointments from './pages/MyAppointments';
+import DoctorAppointments from './pages/DoctorAppointments';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffNewBooking from './pages/StaffNewBooking';
 
@@ -30,6 +31,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <MyAppointments />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/doctor/appointments"
+            element={
+              <RequireAuth role="DOCTOR">
+                <DoctorAppointments />
               </RequireAuth>
             }
           />
