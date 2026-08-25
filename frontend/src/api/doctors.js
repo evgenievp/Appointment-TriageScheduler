@@ -4,3 +4,6 @@ import { request } from './client';
 // ВНИМАНИЕ: бекендът още няма този ендпойнт — има само /api/doctors/me.
 // Поискан е от екипа; дотогава работи само срещу MSW.
 export const getDoctors = () => request('/doctors');
+
+// Единственият начин лекарят да научи своето doctorId — токенът носи само роля.
+export const getCurrentDoctor = () => request('/doctors/me');

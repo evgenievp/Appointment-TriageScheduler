@@ -21,6 +21,11 @@ export default function SiteHeader({ active }) {
             active: active === 'doctor',
             onClick: () => navigate('/doctor/appointments'),
           },
+          {
+            label: t('nav.workingHours'),
+            active: active === 'slots',
+            onClick: () => navigate('/doctor/slots'),
+          },
         ]
       : [
           {
