@@ -4,6 +4,10 @@ import PageShell from '../components/PageShell';
 import LoginForm from '../components/auth/LoginForm';
 import { Button, Card } from '../components/ds';
 import { useToast } from '../lib/toastContext';
+import { readUser } from '../lib/token';
+
+const homeFor = (role) =>
+  role === 'DOCTOR' ? '/doctor/appointments' : role === 'STAFF' ? '/staff' : '/doctors';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -14,7 +18,7 @@ export default function Login() {
   // Guards send patients here with ?from=…, so they land back where they were.
   // Only in-app paths are accepted; an absolute URL would be an open redirect.
   const from = params.get('from');
-  const target = from?.startsWith('/') && !from.startsWith('//') ? from : '/doctors';
+  const returnTo = from?.startsWith('/') && !from.startsWith('//') ? from : null;
 
   const done = () => {
     showToast({
@@ -22,7 +26,8 @@ export default function Login() {
       title: t('auth.login.successTitle'),
       message: t('auth.login.successMessage'),
     });
-    navigate(target, { replace: true });
+    // signIn has already stored the token, so the role is readable here.
+    navigate(returnTo ?? homeFor(readUser()?.role), { replace: true });
   };
 
   return (
