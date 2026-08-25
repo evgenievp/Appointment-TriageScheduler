@@ -25,6 +25,24 @@ const handle = (method, path, resolver) =>
 const inRange = (slot, from, to) =>
   (!from || slot.startTime >= from) && (!to || slot.startTime <= to);
 
+// The real backend rejects an unknown token with 401; the mocks have to do the
+// same, otherwise the expired-session path is untestable.
+function userFromRequest(request) {
+  const header = request.headers.get('Authorization');
+  if (!header?.startsWith('Bearer ')) return null;
+  try {
+    const [, payload] = header.slice(7).split('.');
+    const { sub } = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    );
+    return users.find((u) => u.email === sub) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const unauthorized = () => new HttpResponse('Unauthorized', { status: 401 });
+
 function querySlots(request, onlyFree) {
   const url = new URL(request.url);
   const doctorId = Number(url.searchParams.get('doctorId'));
@@ -100,8 +118,11 @@ export const handlers = [
     return HttpResponse.json(querySlots(request, false));
   }),
 
-  ...handle('post', '/api/appointments/book/:slotId', async ({ params }) => {
+  ...handle('post', '/api/appointments/book/:slotId', async ({ request, params }) => {
     await delay(LATENCY);
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+
     const slot = slots.find((s) => s.id === Number(params.slotId));
 
     if (!slot) {
@@ -130,12 +151,14 @@ export const handlers = [
     return HttpResponse.json(appointment, { status: 201 });
   }),
 
-  ...handle('get', '/api/appointments/me', async () => {
+  ...handle('get', '/api/appointments/me', async ({ request }) => {
+    if (!userFromRequest(request)) return unauthorized();
     await delay(LATENCY);
     return HttpResponse.json(appointments);
   }),
 
-  ...handle('delete', '/api/appointments/:id', async ({ params }) => {
+  ...handle('delete', '/api/appointments/:id', async ({ request, params }) => {
+    if (!userFromRequest(request)) return unauthorized();
     await delay(LATENCY);
     const index = appointments.findIndex((a) => a.slotId === Number(params.id));
     if (index === -1) return new HttpResponse(null, { status: 404 });

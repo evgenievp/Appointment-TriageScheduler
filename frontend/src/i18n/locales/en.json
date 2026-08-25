@@ -14,6 +14,10 @@
     },
     "showPassword": "Show the password",
     "hidePassword": "Hide the password",
+    "sessionExpired": {
+      "title": "Your session expired",
+      "message": "Log in again to continue."
+    },
     "login": {
       "title": "Log in to your account",
       "lead": "See your booked visits and reschedule or cancel them.",

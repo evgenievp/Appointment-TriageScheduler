@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import AuthProvider from './components/AuthProvider';
 import RequireAuth from './components/RequireAuth';
+import SessionWatcher from './components/SessionWatcher';
 import ToastProvider from './components/ToastProvider';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -11,10 +12,13 @@ import MyAppointments from './pages/MyAppointments';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffNewBooking from './pages/StaffNewBooking';
 
+// ToastProvider sits outermost so SessionWatcher can reach both the session and
+// the toasts.
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <SessionWatcher />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -46,7 +50,7 @@ export default function App() {
             }
           />
         </Routes>
-      </ToastProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
