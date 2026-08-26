@@ -75,6 +75,7 @@
       "past": "Past"
     },
     "patientFallback": "Patient #{{id}}",
+    "urgent": "Urgent",
     "errorTitle": "We could not load the appointments",
     "errorText": "The server did not respond. Try again in a moment.",
     "cancel": {
@@ -96,6 +97,23 @@
       "forbiddenMessage": "You can only cancel your own visits.",
       "failedTitle": "The visit was not cancelled",
       "failedMessage": "The server did not respond. Try again in a moment."
+    }
+  },
+  "staffQueue": {
+    "title_one": "Urgent case",
+    "title_other": "Urgent cases ({{count}})",
+    "lead": "Triage moved them up, whichever day they fall on. Click one to open its day below.",
+    "score": "Triage",
+    "noTriage": "No triage on file",
+    "pain": "pain {{level}} of {{max}}",
+    "temperature": "high temperature",
+    "swelling": "swelling",
+    "duration": {
+      "LESS_THAN_DAY": "under a day",
+      "ONE_DAY": "for a day",
+      "THREE_DAYS": "for three days",
+      "ONE_WEEK": "for a week",
+      "MORE_THAN_WEEK": "over a week"
     }
   },
   "doctors": {

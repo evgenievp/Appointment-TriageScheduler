@@ -4,6 +4,7 @@ import {
   slots,
   appointments,
   exceptionDays,
+  triageResults,
   users,
   fakeToken,
   nextId,
@@ -329,6 +330,27 @@ export const handlers = [
     );
   }),
 
+  // `getTriageResult` в бекенда няма никаква проверка — нито роля, нито чий е
+  // часът. Тук е мокнато договореното: само влязъл потребител.
+  ...handle('get', '/api/triage/:appointmentId', async ({ request, params }) => {
+    if (!userFromRequest(request)) return unauthorized();
+    await delay(LATENCY);
+
+    const result = triageResults.find(
+      (r) => r.appointmentId === Number(params.appointmentId),
+    );
+    if (!result) {
+      return new HttpResponse('No triage result for this appointment', { status: 404 });
+    }
+
+    // TriageResponseDto: { score, priority, answers } — без appointmentId.
+    return HttpResponse.json({
+      score: result.score,
+      priority: result.priority,
+      answers: result.answers,
+    });
+  }),
+
   ...handle('delete', '/api/appointments/:id', async ({ request, params }) => {
     if (!userFromRequest(request)) return unauthorized();
     await delay(LATENCY);
@@ -340,6 +362,11 @@ export const handlers = [
       slot.status = 'FREE';
       slot.patientId = null;
     }
+    const triage = triageResults.findIndex(
+      (r) => r.appointmentId === appointments[index].id,
+    );
+    if (triage !== -1) triageResults.splice(triage, 1);
+
     appointments.splice(index, 1);
     return new HttpResponse(null, { status: 204 });
   }),

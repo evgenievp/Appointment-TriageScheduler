@@ -13,6 +13,7 @@ export { default as GlassHeader } from './GlassHeader';
 export { default as Icon } from './Icon';
 export { default as IconButton } from './IconButton';
 export { default as Input } from './Input';
+export { default as PriorityQueueRow } from './PriorityQueueRow';
 export { default as Select } from './Select';
 export { default as Skeleton } from './Skeleton';
 export { default as SlotGrid } from './SlotGrid';
