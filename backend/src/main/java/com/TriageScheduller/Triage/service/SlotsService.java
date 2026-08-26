@@ -3,6 +3,7 @@ package com.TriageScheduller.Triage.service;
 import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.exception.ConflictException;
+import com.TriageScheduller.Triage.exception.NotFoundException;
 import com.TriageScheduller.Triage.models.*;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
@@ -178,7 +179,7 @@ public class SlotsService {
 
     private void checkIfSlotIsFree(Slot slot) {
         if (slot.getPatientId() != null) {
-            throw new RuntimeException("Slot is not free");
+            throw new ConflictException("Slot is not free");
         }
     }
 
@@ -191,7 +192,7 @@ public class SlotsService {
     public void freeSlot(Long slotId) {
         int updated = repo.freeSlot(slotId);
         if (updated == 0) {
-            throw new RuntimeException("Slot is not booked or not found");
+            throw new NotFoundException("Slot is not booked or not found");
         }
 
         Slot slot = repo.findById(slotId)
