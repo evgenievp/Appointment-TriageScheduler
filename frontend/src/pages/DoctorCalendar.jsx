@@ -23,9 +23,11 @@ import {
   formatDayLong,
   formatDayMonth,
   formatWeekday,
+  fromLocalDateTime,
   startOfWeek,
   toLocalDateTime,
 } from '../lib/dates';
+import { useNow } from '../lib/useNow';
 
 const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
 const dayKey = (date) => toLocalDateTime(date).slice(0, 10);
@@ -45,6 +47,9 @@ export default function DoctorCalendar() {
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [selected, setSelected] = useState(null);
+  const now = useNow();
+
+  const isPastTime = (startTime) => fromLocalDateTime(startTime).getTime() <= now;
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const from = toLocalDateTime(weekStart);
@@ -103,7 +108,7 @@ export default function DoctorCalendar() {
       navigate(`/login?from=${encodeURIComponent(location.pathname)}`);
       return;
     }
-    book(selected);
+    book(pick);
   };
 
   // Общата времева ос за седмицата. Без нея всяка колона изброява само своите
@@ -124,14 +129,28 @@ export default function DoctorCalendar() {
       label: formatDayMonth(date, i18n.resolvedLanguage),
       slots: times.map((time) => {
         const slot = byTime.get(time);
-        return slot
-          ? { id: slot.id, time, taken: slot.status !== 'FREE' }
-          : { id: `${key}-${time}`, time, unavailable: true };
+        if (!slot) return { id: `${key}-${time}`, time, unavailable: true };
+
+        // A slot whose time has passed is inert, not "taken" — nobody booked
+        // it, it simply cannot be booked any more, so it gets no strikethrough.
+        const past = isPastTime(slot.startTime);
+        return {
+          id: slot.id,
+          time,
+          startTime: slot.startTime,
+          taken: !past && slot.status !== 'FREE',
+          unavailable: past,
+        };
       }),
     };
   });
 
-  const hasFreeSlot = gridDays.some((day) => day.slots.some((slot) => !slot.taken));
+  const hasFreeSlot = gridDays.some((day) =>
+    day.slots.some((slot) => !slot.taken && !slot.unavailable),
+  );
+
+  // A slot picked a while ago can slip into the past while the page sits open.
+  const pick = selected && !isPastTime(selected.startTime) ? selected : null;
 
   const changeWeek = (delta) => {
     setSelected(null);
@@ -208,7 +227,7 @@ export default function DoctorCalendar() {
 
       {!isPending && !isError && hasFreeSlot && (
         <>
-          <SlotGrid days={gridDays} value={selected?.id} onSelect={setSelected} />
+          <SlotGrid days={gridDays} value={pick?.id} onSelect={setSelected} />
 
           <Card
             tone="sunken"
@@ -225,10 +244,10 @@ export default function DoctorCalendar() {
             <span
               style={{ fontSize: 'var(--text-body-md)', color: 'var(--text-strong-muted)' }}
             >
-              {selected ? (
+              {pick ? (
                 <Trans
                   i18nKey="calendar.selected"
-                  values={{ time: `${selected.time}` }}
+                  values={{ time: `${pick.time}` }}
                   components={{ mono: <span style={mono} /> }}
                 />
               ) : (
@@ -236,7 +255,7 @@ export default function DoctorCalendar() {
               )}
             </span>
             <Button
-              disabled={!selected || isBooking}
+              disabled={!pick || isBooking}
               onClick={bookOrSignIn}
               iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
             >

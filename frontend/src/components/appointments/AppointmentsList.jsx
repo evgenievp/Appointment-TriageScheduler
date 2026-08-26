@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AppointmentRow, Badge, Button, EmptyState, ErrorState, Icon, Skeleton } from '../ds';
 import { getDoctors } from '../../api/doctors';
 import { formatDayShort, fromLocalDateTime } from '../../lib/dates';
+import { useNow } from '../../lib/useNow';
 
 // One list for all three audiences. `AppointmentRow` keeps its design-system
 // prop names, so the three lines are filled differently per variant rather than
@@ -17,6 +18,11 @@ import { formatDayShort, fromLocalDateTime } from '../../lib/dates';
 //
 // The key is `appointmentId` — AppointmentDto spells it out, only SlotDto uses
 // a bare `id`.
+//
+// Nothing marks a visit as done once it happens — the status stays CONFIRMED
+// forever — so "past" is derived from the clock and the row recedes onto the
+// sunken surface. Depth by contrast, as the system asks; dimming the whole row
+// would only make it harder to read.
 
 const tones = { CONFIRMED: 'blue', CANCELLED: 'neutral', DONE: 'free' };
 
@@ -32,6 +38,7 @@ export default function AppointmentsList({
   actions,
 }) {
   const { t, i18n } = useTranslation();
+  const now = useNow();
   const { data: doctors } = useQuery({ queryKey: ['doctors'], queryFn: getDoctors });
 
   const doctorOf = (id) => doctors?.find((d) => d.id === id);
@@ -66,6 +73,7 @@ export default function AppointmentsList({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
       {appointments.map((appointment) => {
         const at = fromLocalDateTime(appointment.appointmentTime);
+        const isPast = at.getTime() <= now;
         const doctor = doctorOf(appointment.doctorId);
         const doctorName =
           appointment.doctorName ?? doctor?.name ?? `#${appointment.doctorId}`;
@@ -88,10 +96,15 @@ export default function AppointmentsList({
             doctor={lines[0]}
             specialty={lines[1]}
             location={lines[2]}
+            style={isPast ? { background: 'var(--surface-sunken)' } : undefined}
             status={
-              <Badge tone={tones[appointment.status] ?? 'neutral'}>
-                {t(`appointments.status.${appointment.status}`, appointment.status)}
-              </Badge>
+              isPast && appointment.status === 'CONFIRMED' ? (
+                <Badge tone="neutral">{t('appointments.status.past')}</Badge>
+              ) : (
+                <Badge tone={tones[appointment.status] ?? 'neutral'}>
+                  {t(`appointments.status.${appointment.status}`, appointment.status)}
+                </Badge>
+              )
             }
             actions={actions?.(appointment)}
           />
