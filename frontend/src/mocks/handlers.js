@@ -3,10 +3,12 @@ import {
   doctors,
   slots,
   appointments,
+  exceptionDays,
   users,
   fakeToken,
   nextId,
   nextSlotId,
+  nextExceptionId,
   toAppointmentDto,
   toLocalDateTime,
 } from './data';
@@ -62,7 +64,8 @@ function querySlots(request, onlyFree) {
 
 // Огледало на `SlotsService.previewSlots`: слотове по 30 минути, събота и неделя
 // се пропускат, 12:00–13:00 също (обедната почивка е поле на самия service —
-// обща за всички лекари и нередактируема отвън, затова е константа и тук).
+// обща за всички лекари и нередактируема отвън, затова е константа и тук),
+// а също и почивните дни на лекаря.
 const SLOT_MINUTES = 30;
 const REST_START = '12:00';
 const REST_END = '13:00';
@@ -72,15 +75,20 @@ const minutesOf = (time) => {
   return h * 60 + m;
 };
 
+const toDateOnly = (date) => toLocalDateTime(date).slice(0, 10);
+
 function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd }) {
   const planned = [];
   const day = new Date(`${startDate}T00:00:00`);
   const last = new Date(`${endDate}T00:00:00`);
   const from = minutesOf(workStart);
   const to = minutesOf(workEnd);
+  const off = new Set(
+    exceptionDays.filter((e) => e.doctor?.id === doctorId).map((e) => e.date),
+  );
 
   while (day <= last) {
-    if (day.getDay() !== 0 && day.getDay() !== 6) {
+    if (day.getDay() !== 0 && day.getDay() !== 6 && !off.has(toDateOnly(day))) {
       for (let m = from; m + SLOT_MINUTES <= to; m += SLOT_MINUTES) {
         const start = new Date(day);
         start.setHours(0, m, 0, 0);
@@ -159,6 +167,49 @@ export const handlers = [
     if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
     await delay(LATENCY);
     return HttpResponse.json(doctors.find((d) => d.id === user.doctorId));
+  }),
+
+  // `/api/doctors/me/exceptions` не се хваща от `requestMatchers("/api/doctors/me")`
+  // — този шаблон е точно съвпадение, без под-пътища — така че в бекенда трите
+  // остават само `authenticated()`. И `deleteExceptionDay(id)` трие по id, без да
+  // гледа чий е денят. Тук е мокнато договореното: само DOCTOR, и то за себе си.
+  ...handle('get', '/api/doctors/me/exceptions', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    return HttpResponse.json(
+      exceptionDays.filter((e) => e.doctor?.id === user.doctorId),
+    );
+  }),
+
+  ...handle('post', '/api/doctors/me/exceptions', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const { date, reason } = await request.json();
+    const day = {
+      id: nextExceptionId(),
+      date,
+      reason,
+      doctor: doctors.find((d) => d.id === user.doctorId),
+    };
+    exceptionDays.push(day);
+    return HttpResponse.json(day, { status: 201 });
+  }),
+
+  ...handle('delete', '/api/doctors/me/exceptions/:id', async ({ request, params }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const index = exceptionDays.findIndex((e) => e.id === Number(params.id));
+    if (index === -1) return new HttpResponse(null, { status: 404 });
+    exceptionDays.splice(index, 1);
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // Бекендът пази тези два зад `anyRequest().authenticated()` и взима doctorId от

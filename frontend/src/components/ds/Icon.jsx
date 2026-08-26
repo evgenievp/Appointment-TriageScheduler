@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Stethoscope,
   Sun,
+  Trash2,
   TriangleAlert,
   X,
 } from 'lucide-react';
@@ -38,6 +39,7 @@ const icons = {
   'shield-check': ShieldCheck,
   stethoscope: Stethoscope,
   sun: Sun,
+  'trash-2': Trash2,
   'triangle-alert': TriangleAlert,
   x: X,
 };

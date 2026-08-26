@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
+import ExceptionDays from '../components/doctor/ExceptionDays';
 import {
   Badge,
   Button,
@@ -236,7 +237,7 @@ export default function DoctorSlots() {
             />
           </p>
 
-          <div style={{ maxHeight: 'var(--slots-preview-height)', overflowY: 'auto' }}>
+          <div className="slots-preview">
             {days.map(([date, daySlots]) => {
               const at = new Date(`${date}T00:00:00`);
               return (
@@ -270,6 +271,8 @@ export default function DoctorSlots() {
           </Button>
         </Card>
       )}
+
+      <ExceptionDays onChange={() => setPlanned(null)} />
     </PageShell>
   );
 }

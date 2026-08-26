@@ -88,6 +88,12 @@ export const nextId = () => nextAppointmentId++;
 let nextSlotIdValue = Math.max(...slots.map((s) => s.id)) + 1;
 export const nextSlotId = () => nextSlotIdValue++;
 
+// ExceptionDayDto: { id, date, reason, doctor }. reason: HOLIDAY | RESTDAY.
+export const exceptionDays = [];
+
+let nextExceptionIdValue = 1;
+export const nextExceptionId = () => nextExceptionIdValue++;
+
 // Booked visits spread over two patients and three doctors, so the three lists
 // actually differ: the patient sees their own, the doctor sees their column,
 // the staff sees everything.
