@@ -1,5 +1,7 @@
 package com.TriageScheduller.Triage.dto;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
+import com.TriageScheduller.Triage.utils.Priority;
+
 import java.time.LocalDateTime;
 
 
@@ -11,7 +13,8 @@ public record AppointmentDto(
         Long doctorId,
         LocalDateTime appointmentTime,
         AppointmentStatus status,
-        String notes
+        String notes,
+        Priority priority
 ) {
 
     public AppointmentDto(
@@ -19,7 +22,8 @@ public record AppointmentDto(
             Long patientId,
             Long doctorId,
             LocalDateTime appointmentTime,
-            String notes) {
+            String notes,
+            Priority priority) {
         this(
                 null,
                 slotId,
@@ -27,7 +31,8 @@ public record AppointmentDto(
                 doctorId,
                 appointmentTime,
                 AppointmentStatus.CONFIRMED,
-                notes
+                notes,
+                priority
         );
     }
 }

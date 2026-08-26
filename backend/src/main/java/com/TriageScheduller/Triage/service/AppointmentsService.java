@@ -8,6 +8,7 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
+import com.TriageScheduller.Triage.utils.Priority;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class AppointmentsService {
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
         appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointment.setPriority(Priority.NORMAL);
 
         return appointmentsRepo.save(appointment);
     }
@@ -67,7 +69,8 @@ public class AppointmentsService {
                 appointment.getDoctor().getId(),
                 appointment.getSlot().getStartsAt(),
                 appointment.getStatus(),
-                null
+                null,
+                appointment.getPriority()
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.models;
 
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
+import com.TriageScheduller.Triage.utils.Priority;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,6 +20,10 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private TriageResults triageResult;
 
 
     public Appointment(Long id,
@@ -31,9 +36,17 @@ public class Appointment {
         this.slot = slot;
         this.patient = patient;
         this.status = status;
+        this.priority = Priority.NORMAL;
+
     }
 
+    public Priority getPriority() {
+        return priority;
+    }
 
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
 
     public Appointment(){}
 

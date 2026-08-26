@@ -297,7 +297,8 @@ public class SlotsService {
                 appointment.getDoctor().getId(),
                 appointment.getSlot().getStartsAt(),
                 appointment.getStatus(),
-                null
+                null,
+                appointment.getPriority()
         );
     }
 

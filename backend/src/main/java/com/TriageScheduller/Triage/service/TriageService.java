@@ -63,7 +63,7 @@ public class TriageService {
         triage.setAnswers(answers);
         triage.setScore(score);
         triage.setPriority(priority);
-
+        appointment.setPriority(priority);
         TriageResults saved = triageRepo.save(triage);
 
         return new TriageResponseDto(
