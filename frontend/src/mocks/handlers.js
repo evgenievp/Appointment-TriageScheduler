@@ -281,6 +281,8 @@ export const handlers = [
       appointmentTime: slot.startTime,
       status: 'CONFIRMED',
       notes: null,
+      // The backend books everything as NORMAL; triage is what raises it.
+      priority: 'NORMAL',
     };
     appointments.push(appointment);
 

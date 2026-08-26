@@ -14,6 +14,9 @@ import { formatDayShort, fromLocalDateTime } from '../../lib/dates';
 //
 // `doctorName` and `patientName` are not in the backend DTO yet, so both fall
 // back: the doctor to the cached /api/doctors list, the patient to an id.
+//
+// The key is `appointmentId` — AppointmentDto spells it out, only SlotDto uses
+// a bare `id`.
 
 const tones = { CONFIRMED: 'blue', CANCELLED: 'neutral', DONE: 'free' };
 
@@ -79,7 +82,7 @@ export default function AppointmentsList({
 
         return (
           <AppointmentRow
-            key={appointment.id ?? appointment.slotId}
+            key={appointment.appointmentId}
             date={formatDayShort(at, i18n.resolvedLanguage)}
             time={appointment.appointmentTime.slice(11, 16)}
             doctor={lines[0]}

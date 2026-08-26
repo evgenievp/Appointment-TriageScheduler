@@ -65,12 +65,12 @@ export const slots = doctors.flatMap((doctor) =>
 
 export const appointments = [];
 
-// AppointmentDto as the backend returns it, plus three fields it does not send
-// yet: `id` (documented in README_BACKEND.md but missing from the record) and
-// the two names. Without those the doctor and staff lists can only show ids.
+// AppointmentDto as the backend returns it, plus the two names it does not send
+// — without those the doctor and staff lists can only show ids.
+// The id field is `appointmentId`; only SlotDto uses a bare `id`.
 export function toAppointmentDto(appointment) {
   return {
-    id: appointment.id,
+    appointmentId: appointment.id,
     slotId: appointment.slotId,
     patientId: appointment.patientId,
     patientName: users.find((u) => u.id === appointment.patientId)?.name ?? null,
@@ -79,6 +79,7 @@ export function toAppointmentDto(appointment) {
     appointmentTime: appointment.appointmentTime,
     status: appointment.status,
     notes: appointment.notes ?? null,
+    priority: appointment.priority ?? 'NORMAL',
   };
 }
 

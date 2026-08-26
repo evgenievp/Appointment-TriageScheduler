@@ -93,7 +93,8 @@ echo
 echo "Записване (слот $SLOT_ID)"
 code=$(status POST "/api/appointments/book/$SLOT_ID" "" "$TOKEN")
 check "записване на свободен слот" 201 "$code"
-APPT_ID=$(body | grep -o '"id":[0-9]*' | head -1 | cut -d: -f2)
+# Полето е appointmentId, не id — SlotDto ползва id, AppointmentDto не.
+APPT_ID=$(body | grep -o '"appointmentId":[0-9]*' | head -1 | cut -d: -f2)
 
 # The one check that catches a booking which "succeeds" without marking the slot.
 code=$(status GET "$SLOTS" "" "$TOKEN")
@@ -127,7 +128,7 @@ if [ -n "${APPT_ID:-}" ]; then
     bad "слотът остава зает след отказ — freeSlot() не се вика"
   fi
 else
-  bad "AppointmentDto не връща id — DELETE /api/appointments/{id} е невикаем от клиент"
+  bad "AppointmentDto не връща appointmentId — DELETE /api/appointments/{id} е невикаем от клиент"
 fi
 
 echo
