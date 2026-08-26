@@ -9,6 +9,7 @@ import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
+import com.TriageScheduller.Triage.utils.Status;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
@@ -197,6 +198,7 @@ public class SlotsService {
 
         Slot slot = repo.findById(slotId)
                 .orElseThrow(() -> new RuntimeException("Slot not found"));
+        slot.setStatus(Status.FREE);
         slot.setPatientId(null);
         repo.save(slot);
     }
