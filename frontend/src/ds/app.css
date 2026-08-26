@@ -48,6 +48,7 @@
   --priority-time-width: 100px; /* дата и час вдясно в същия ред */
   --control-size: 20px; /* кутийката на checkbox/radio */
   --control-icon-size: 12px; /* отметката вътре в нея */
+  --control-dot-size: 10px; /* точката вътре в radio */
   --icon-btn-size: 40px;
   --icon-btn-size-sm: 28px; /* напр. окото в полето за парола */
   --surface-on-dark-tile: rgba(255, 255, 255, 0.12);
@@ -158,7 +159,15 @@
 /* Checkbox-ът крие истинския `input`, затова фокусът от клавиатурата не се вижда
    никъде. Дизайнът не го покрива, но системата има токен за фокус пръстен и без
    него компонентът е недостъпен с Tab. */
-.sirma-checkbox:focus-within .sirma-checkbox__box {
+.sirma-checkbox:focus-within .sirma-checkbox__box,
+.sirma-choice:focus-within .sirma-choice__mark {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+/* Скалата за болка: числата се цъкат едно до друго, а истинският radio е скрит
+   под тях, затова фокусът се рисува на видимото квадратче. */
+.sirma-scale:focus-within .sirma-scale__step {
   border-color: var(--border-focus);
   box-shadow: var(--focus-ring);
 }

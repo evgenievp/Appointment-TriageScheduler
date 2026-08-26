@@ -15,6 +15,7 @@ export { default as IconButton } from './IconButton';
 export { default as Input } from './Input';
 export { default as PriorityQueueRow } from './PriorityQueueRow';
 export { default as QuestionCard } from './QuestionCard';
+export { default as Radio } from './Radio';
 export { default as Select } from './Select';
 export { default as Skeleton } from './Skeleton';
 export { default as Stepper } from './Stepper';
