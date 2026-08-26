@@ -3,7 +3,9 @@ import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import java.time.LocalDateTime;
 
 
+
 public record AppointmentDto(
+        Long appointmentId,
         Long slotId,
         Long patientId,
         Long doctorId,
@@ -11,16 +13,21 @@ public record AppointmentDto(
         AppointmentStatus status,
         String notes
 ) {
-    public AppointmentDto(Long slotId,
-                          Long patientId,
-                          Long doctorId,
-                          LocalDateTime appointmentTime,
-                          String notes) {
-        this(slotId,
+
+    public AppointmentDto(
+            Long slotId,
+            Long patientId,
+            Long doctorId,
+            LocalDateTime appointmentTime,
+            String notes) {
+        this(
+                null,
+                slotId,
                 patientId,
                 doctorId,
                 appointmentTime,
                 AppointmentStatus.CONFIRMED,
-                notes);
+                notes
+        );
     }
 }

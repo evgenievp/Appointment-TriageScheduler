@@ -61,6 +61,7 @@ public class AppointmentsService {
 
     public AppointmentDto toDto(Appointment appointment) {
         return new AppointmentDto(
+                appointment.getId(),
                 appointment.getSlot().getId(),
                 appointment.getPatient().getId(),
                 appointment.getDoctor().getId(),

@@ -42,7 +42,6 @@ public class AppointmentsController {
     public ResponseEntity<List<AppointmentDto>> getMyAppointments(Authentication authentication) {
         String email = authentication.getName();
         User patient = patientsService.findByEmail(email);
-
         return ResponseEntity.ok(appointmentsService.findByPatientId(patient.getId()));
     }
 
