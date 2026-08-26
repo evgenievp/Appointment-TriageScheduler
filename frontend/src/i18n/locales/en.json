@@ -271,7 +271,7 @@
       "endDate": "To",
       "workStart": "Day starts",
       "workEnd": "Day ends",
-      "rules": "Saturdays and Sundays are skipped, as is the 12:00 – 13:00 break.",
+      "rules": "Saturdays, Sundays, the 12:00 – 13:00 break and the days off below are all skipped.",
       "errors": {
         "dateOrder": "The end date is before the start date.",
         "timeOrder": "The day must end after it starts.",
@@ -292,7 +292,29 @@
       "noneTitle": "Nothing new to create",
       "noneMessage": "Every slot in this range is already in your schedule.",
       "failedTitle": "We could not create the slots",
-      "failedMessage": "The server did not respond. Try again in a moment."
+      "failedMessage": "The server did not respond. Try again in a moment.",
+      "exceptions": {
+        "title": "Days off",
+        "lead": "The days you do not see patients. No slots are created for them and nobody can book with you.",
+        "empty": "You have no days off marked.",
+        "date": "Date",
+        "reasonLabel": "Reason",
+        "reason": {
+          "RESTDAY": "Day off",
+          "HOLIDAY": "Leave"
+        },
+        "hint": "Visits already booked for that day stay — get in touch with those patients.",
+        "duplicate": "That day is already marked.",
+        "add": "Mark the day",
+        "adding": "Marking…",
+        "addedTitle": "The day is marked",
+        "remove": "Delete the day",
+        "removedTitle": "The day is deleted",
+        "errorTitle": "We could not load your days off",
+        "errorText": "The server did not respond. Try again in a moment.",
+        "failedTitle": "The change did not go through",
+        "failedMessage": "Try again in a moment."
+      }
     },
     "staffDashboard": {
       "title": "Staff dashboard",
