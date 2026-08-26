@@ -99,7 +99,7 @@ export const nextExceptionId = () => nextExceptionIdValue++;
 // three lists actually differ: the patient sees their own, the doctor sees their
 // column, the staff sees one day at a time and can page through them.
 // Огледало на `TriageService.calculateScore`: 0–10, URGENT при 5 и нагоре.
-function triageScore({ painLevel, painDuration, highTemperature, swelling }) {
+export function triageScore({ painLevel, painDuration, highTemperature, swelling }) {
   const pain = painLevel >= 9 ? 3 : painLevel >= 7 ? 2 : painLevel >= 4 ? 1 : 0;
   const duration =
     { THREE_DAYS: 1, ONE_WEEK: 2, MORE_THAN_WEEK: 3 }[painDuration] ?? 0;

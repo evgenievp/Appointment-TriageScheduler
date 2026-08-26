@@ -99,6 +99,37 @@
       "failedMessage": "The server did not respond. Try again in a moment."
     }
   },
+  "triage": {
+    "yes": "Yes",
+    "no": "No",
+    "required": "Pick an answer.",
+    "missing_one": "{{count}} question left.",
+    "missing_other": "{{count}} questions left.",
+    "privacy": "Only the clinician and the clinic team see these answers.",
+    "sending": "Sending…",
+    "pain": {
+      "question": "How bad is the pain right now?",
+      "help": "One means barely noticeable, ten the worst you can imagine.",
+      "low": "1 · barely there",
+      "high": "10 · unbearable"
+    },
+    "duration": {
+      "question": "How long have you had it?",
+      "LESS_THAN_DAY": "Less than a day",
+      "ONE_DAY": "About a day",
+      "THREE_DAYS": "Three days",
+      "ONE_WEEK": "About a week",
+      "MORE_THAN_WEEK": "More than a week"
+    },
+    "temperature": {
+      "question": "Do you have a temperature?",
+      "help": "Above 37.5 °C, measured in the last 24 hours."
+    },
+    "swelling": {
+      "question": "Is there any swelling?",
+      "help": "At the site of the complaint or around it."
+    }
+  },
   "staffQueue": {
     "title_one": "Urgent case",
     "title_other": "Urgent cases ({{count}})",

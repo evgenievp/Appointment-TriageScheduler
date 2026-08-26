@@ -10,6 +10,16 @@ import { request } from './client';
 // целия ден.
 export const getTriageResult = (appointmentId) => request(`/triage/${appointmentId}`);
 
+// TriageRequestDto: { painLevel 1-10, painDuration, highTemperature, swelling }
+// Score-ът и приоритетът се смятат на сървъра — ние пращаме само отговорите.
+// Двата булеви задължително са true/false: `calculateScore` ги разопакова без
+// проверка, тоест липсващо поле е 500, а не 400.
+export const submitTriage = (appointmentId, answers) =>
+  request(`/triage/${appointmentId}`, {
+    method: 'POST',
+    body: JSON.stringify(answers),
+  });
+
 export function parseAnswers(answers) {
   if (!answers) return null;
   try {
