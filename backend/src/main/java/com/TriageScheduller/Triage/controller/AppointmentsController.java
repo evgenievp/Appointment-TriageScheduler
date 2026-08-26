@@ -46,8 +46,15 @@ public class AppointmentsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
-        appointmentsService.delete(id);
+    public ResponseEntity<Void> cancelAppointment(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        String email = authentication.getName();
+        boolean isStaff = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_STAFF"));
+
+        appointmentsService.delete(id, email, isStaff);
         return ResponseEntity.noContent().build();
     }
 }
