@@ -95,16 +95,27 @@ export const exceptionDays = [];
 let nextExceptionIdValue = 1;
 export const nextExceptionId = () => nextExceptionIdValue++;
 
-// Booked visits spread over two patients and three doctors, so the three lists
-// actually differ: the patient sees their own, the doctor sees their column,
-// the staff sees everything.
+// Booked visits spread over two patients, three doctors and three days, so the
+// three lists actually differ: the patient sees their own, the doctor sees their
+// column, the staff sees one day at a time and can page through them.
+const dayStamp = (offset) => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + offset);
+  return toLocalDateTime(date).slice(0, 10);
+};
+
 [
-  { patientId: 1, doctorId: 1 },
-  { patientId: 1, doctorId: 2 },
-  { patientId: 4, doctorId: 1 },
-  { patientId: 4, doctorId: 3 },
-].forEach(({ patientId, doctorId }) => {
-  const slot = slots.find((s) => s.doctorId === doctorId && s.status === 'FREE');
+  { patientId: 1, doctorId: 1, day: 0 },
+  { patientId: 1, doctorId: 2, day: 0 },
+  { patientId: 4, doctorId: 1, day: 1 },
+  { patientId: 4, doctorId: 3, day: 1 },
+  { patientId: 1, doctorId: 2, day: 2 },
+].forEach(({ patientId, doctorId, day }) => {
+  const stamp = dayStamp(day);
+  const slot = slots.find(
+    (s) => s.doctorId === doctorId && s.status === 'FREE' && s.startTime.startsWith(stamp),
+  );
   if (!slot) return;
   slot.status = 'BOOKED';
   slot.patientId = patientId;

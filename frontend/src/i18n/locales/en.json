@@ -82,6 +82,7 @@
       "title": "Cancel this visit?",
       "text": "The time is freed straight away and someone else can book it. There is no undo.",
       "which": "You are cancelling <mono>{{when}}</mono>.",
+      "whichFor": "You are cancelling the visit of {{patient}} — <mono>{{when}}</mono>.",
       "keep": "Keep the visit",
       "confirm": "Cancel the visit",
       "cancelling": "Cancelling…",
@@ -349,7 +350,16 @@
     },
     "staffDashboard": {
       "title": "Staff dashboard",
-      "text": "This will hold the day schedule per doctor and hour, plus the priority queue for the day — urgent cases on top with their triage score."
+      "lead": "The day's visits, in time order.",
+      "isToday": "today",
+      "count_one": "{{count}} visit",
+      "count_other": "{{count}} visits",
+      "prev": "Yesterday",
+      "today": "Today",
+      "next": "Tomorrow",
+      "pickDate": "Pick a date",
+      "emptyTitle": "No visits booked for this day",
+      "emptyText": "Try a neighbouring day or pick a date."
     },
     "staffNewBooking": {
       "title": "New booking by phone",

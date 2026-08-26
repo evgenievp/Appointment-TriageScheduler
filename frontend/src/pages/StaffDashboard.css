@@ -1,0 +1,36 @@
+.staff-daybar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+/* `flex: 1` вместо ширина по съдържание: иначе контейнерът се свива точно до
+   ширината на бутоните и полето за дата пада на втори ред. */
+.staff-daybar__controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* `Input` носи `width: 100%` инлайн, а инлайн стил не се надвива от клас —
+   затова ширината се задава на обвивката, а полето я запълва. */
+.staff-daybar__date {
+  width: var(--date-field-width);
+}
+
+/* CSS променливи не работят в media query условия — точката остава литерал. */
+@media (max-width: 700px) {
+  .staff-daybar__controls {
+    width: 100%;
+  }
+
+  .staff-daybar__date {
+    width: 100%;
+  }
+}
