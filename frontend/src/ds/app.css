@@ -42,6 +42,7 @@
   --slot-col-min: 78px; /* под тази ширина колоната става нечетима */
   --slots-preview-height: 320px; /* прегледът по дни скролва след тази височина */
   --tab-indicator: 2px; /* подчертаването на активния раздел */
+  --date-field-width: 180px; /* поле за дата до бутони, за да не се разтяга */
   --control-size: 20px; /* кутийката на checkbox/radio */
   --control-icon-size: 12px; /* отметката вътре в нея */
   --icon-btn-size: 40px;

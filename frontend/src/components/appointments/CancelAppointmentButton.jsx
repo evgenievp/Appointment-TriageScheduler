@@ -4,16 +4,18 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Dialog } from '../ds';
 import { cancelAppointment } from '../../api/appointments';
 import { formatDayLong, fromLocalDateTime } from '../../lib/dates';
+import { useAuth } from '../../lib/authContext';
 import { useToast } from '../../lib/toastContext';
 import { useNow } from '../../lib/useNow';
 import { CLINIC } from '../../clinic';
 
 // The backend deletes the row instead of marking it CANCELLED, so there is no
-// undo — hence the confirmation step.
+// undo — hence the confirmation step. `delete` accepts the patient who owns the
+// visit or any STAFF member, so the same button serves both.
 //
-// The 12-hour window comes from the terms the patient accepts at registration.
-// Nothing on the server enforces it; this only keeps the interface honest about
-// the rule the clinic states.
+// The 12-hour window comes from the terms the patient accepts at registration,
+// and it exists so that late changes go through reception. Reception itself is
+// therefore not subject to it — it is the escape hatch.
 const CANCEL_WINDOW_HOURS = 12;
 const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
 
@@ -21,9 +23,11 @@ export default function CancelAppointmentButton({ appointment }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const showToast = useToast();
+  const { user } = useAuth();
 
   const [open, setOpen] = useState(false);
   const now = useNow();
+  const isStaff = user?.role === 'STAFF';
 
   const at = fromLocalDateTime(appointment.appointmentTime);
   const hoursAway = (at.getTime() - now) / 3_600_000;
@@ -63,9 +67,13 @@ export default function CancelAppointmentButton({ appointment }) {
   // cancel — the row marks it as past instead.
   if (appointment.status !== 'CONFIRMED' || hoursAway <= 0) return null;
 
-  const tooLate = hoursAway < CANCEL_WINDOW_HOURS;
+  const tooLate = !isStaff && hoursAway < CANCEL_WINDOW_HOURS;
   const when = `${formatDayLong(at, i18n.resolvedLanguage)}, ${appointment.appointmentTime.slice(11, 16)}`;
   const close = () => !mutation.isPending && setOpen(false);
+
+  // Reception sees rows that look alike; naming the patient makes cancelling the
+  // wrong one much harder, and there is no undo.
+  const forPatient = isStaff && appointment.patientName;
 
   return (
     <>
@@ -108,9 +116,13 @@ export default function CancelAppointmentButton({ appointment }) {
         <p>
           <Trans
             i18nKey={
-              tooLate ? 'appointments.cancel.lateCall' : 'appointments.cancel.which'
+              tooLate
+                ? 'appointments.cancel.lateCall'
+                : forPatient
+                  ? 'appointments.cancel.whichFor'
+                  : 'appointments.cancel.which'
             }
-            values={{ when, phone: CLINIC.phone }}
+            values={{ when, phone: CLINIC.phone, patient: appointment.patientName }}
             components={{ mono: <span style={mono} /> }}
           />
         </p>
