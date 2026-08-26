@@ -71,11 +71,31 @@
     "status": {
       "CONFIRMED": "Confirmed",
       "CANCELLED": "Cancelled",
-      "DONE": "Done"
+      "DONE": "Done",
+      "past": "Past"
     },
     "patientFallback": "Patient #{{id}}",
     "errorTitle": "We could not load the appointments",
-    "errorText": "The server did not respond. Try again in a moment."
+    "errorText": "The server did not respond. Try again in a moment.",
+    "cancel": {
+      "action": "Cancel",
+      "title": "Cancel this visit?",
+      "text": "The time is freed straight away and someone else can book it. There is no undo.",
+      "which": "You are cancelling <mono>{{when}}</mono>.",
+      "keep": "Keep the visit",
+      "confirm": "Cancel the visit",
+      "cancelling": "Cancelling…",
+      "doneTitle": "The visit is cancelled",
+      "doneMessage": "We freed the time.",
+      "lateTitle": "Less than {{hours}} hours to go",
+      "lateText": "This close to the visit, cancelling goes through reception.",
+      "lateCall": "Call <mono>{{phone}}</mono> and we will sort it out.",
+      "close": "Close",
+      "forbiddenTitle": "This visit is not yours",
+      "forbiddenMessage": "You can only cancel your own visits.",
+      "failedTitle": "The visit was not cancelled",
+      "failedMessage": "The server did not respond. Try again in a moment."
+    }
   },
   "doctors": {
     "title": "Choose your clinician",
@@ -256,7 +276,18 @@
       "lead": "The visits you have booked at the clinic.",
       "emptyTitle": "No appointments yet",
       "emptyText": "Pick a clinician and book a visit — it takes under two minutes.",
-      "emptyAction": "Book a visit"
+      "emptyAction": "Book a visit",
+      "tabs": {
+        "all": "All",
+        "upcoming": "Upcoming",
+        "past": "Past"
+      },
+      "empty": {
+        "all": "No appointments",
+        "upcoming": "No upcoming visits",
+        "past": "No past visits"
+      },
+      "emptyTabText": "Check the other tabs."
     },
     "doctorAppointments": {
       "title": "My schedule",
