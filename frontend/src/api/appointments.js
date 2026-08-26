@@ -11,8 +11,9 @@ export const getMyAppointments = () => request('/appointments/me');
 // findByDoctorId, so both are a controller method away. Mocked for now.
 export const getDoctorAppointments = () => request('/appointments/doctor/me');
 
+// Без `date` връща всичко — така опашката със спешните вижда отвъд избрания ден.
 export const getStaffAppointments = (date) =>
-  request(`/staff/appointments?date=${date}`);
+  request(`/staff/appointments${date ? `?date=${date}` : ''}`);
 
 export const cancelAppointment = (id) =>
   request(`/appointments/${id}`, { method: 'DELETE' });

@@ -98,6 +98,14 @@ export const nextExceptionId = () => nextExceptionIdValue++;
 // Booked visits spread over two patients, three doctors and three days, so the
 // three lists actually differ: the patient sees their own, the doctor sees their
 // column, the staff sees one day at a time and can page through them.
+// Огледало на `TriageService.calculateScore`: 0–10, URGENT при 5 и нагоре.
+function triageScore({ painLevel, painDuration, highTemperature, swelling }) {
+  const pain = painLevel >= 9 ? 3 : painLevel >= 7 ? 2 : painLevel >= 4 ? 1 : 0;
+  const duration =
+    { THREE_DAYS: 1, ONE_WEEK: 2, MORE_THAN_WEEK: 3 }[painDuration] ?? 0;
+  return pain + duration + (highTemperature ? 2 : 0) + (swelling ? 2 : 0);
+}
+
 const dayStamp = (offset) => {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
@@ -105,29 +113,104 @@ const dayStamp = (offset) => {
   return toLocalDateTime(date).slice(0, 10);
 };
 
+// TriageResults: { appointmentId, score, priority, answers }. Връзката към
+// резервацията е `unique, nullable = false` в бекенда — триаж без резервация не
+// може да съществува, затова тук се пазят по appointmentId.
+export const triageResults = [];
+
 [
-  { patientId: 1, doctorId: 1, day: 0 },
+  {
+    patientId: 1,
+    doctorId: 1,
+    day: 0,
+    // Попълнен триаж, но слаб: болка 3 → 0, под ден → 0. Общо 0, значи NORMAL.
+    // Стои тук нарочно — опашката филтрира по приоритет, не по „има ли триаж“.
+    triage: {
+      painLevel: 3,
+      painDuration: 'LESS_THAN_DAY',
+      highTemperature: false,
+      swelling: false,
+    },
+  },
   { patientId: 1, doctorId: 2, day: 0 },
-  { patientId: 4, doctorId: 1, day: 1 },
-  { patientId: 4, doctorId: 3, day: 1 },
-  { patientId: 1, doctorId: 2, day: 2 },
-].forEach(({ patientId, doctorId, day }) => {
+
+  // Един натоварен ден, за да има какво да превърта таблото на персонала.
+  { patientId: 4, doctorId: 1, day: 1, time: '09:00' },
+  { patientId: 1, doctorId: 2, day: 1, time: '09:30' },
+  { patientId: 4, doctorId: 4, day: 1, time: '10:00' },
+  { patientId: 1, doctorId: 1, day: 1, time: '10:30' },
+  { patientId: 4, doctorId: 2, day: 1, time: '11:00' },
+  { patientId: 1, doctorId: 4, day: 1, time: '11:30' },
+  { patientId: 4, doctorId: 1, day: 1, time: '13:00' },
+  { patientId: 1, doctorId: 2, day: 1, time: '14:00' },
+  { patientId: 4, doctorId: 4, day: 1, time: '15:00' },
+  {
+    patientId: 4,
+    doctorId: 3,
+    day: 1,
+    // Нарочно късно през деня: спешният случай е далеч надолу в списъка, така че
+    // се вижда дали превъртането от опашката работи.
+    time: '16:00',
+    // Точките са по правилата на `TriageService`: болка 9 → 3, над седмица → 3,
+    // температура → 2. Общо 8, а праг за URGENT е 5.
+    triage: {
+      painLevel: 9,
+      painDuration: 'MORE_THAN_WEEK',
+      highTemperature: true,
+      swelling: false,
+    },
+  },
+  { patientId: 1, doctorId: 1, day: 1, time: '16:30' },
+  {
+    patientId: 1,
+    doctorId: 2,
+    day: 2,
+    // Болка 7 → 2, седмица → 2, подуване → 2. Общо 6, тоест URGENT, но по-нисък
+    // от другия — така се вижда, че опашката ги подрежда, а не просто ги изброява.
+    triage: {
+      painLevel: 7,
+      painDuration: 'ONE_WEEK',
+      highTemperature: false,
+      swelling: true,
+    },
+  },
+].forEach(({ patientId, doctorId, day, time, triage }) => {
   const stamp = dayStamp(day);
-  const slot = slots.find(
+  const free = slots.filter(
     (s) => s.doctorId === doctorId && s.status === 'FREE' && s.startTime.startsWith(stamp),
   );
+  // `time` е предпочитание, не изискване: част от слотовете са заети още при
+  // раждането им, а сравнението на "HH:MM" като низове върши работа.
+  const slot = (time && free.find((s) => s.startTime.slice(11, 16) >= time)) || free[0];
   if (!slot) return;
   slot.status = 'BOOKED';
   slot.patientId = patientId;
+
+  const id = nextId();
+  const score = triage ? triageScore(triage) : null;
+  const priority = score == null ? 'NORMAL' : score >= 5 ? 'URGENT' : 'NORMAL';
+
   appointments.push({
-    id: nextId(),
+    id,
     slotId: slot.id,
     patientId,
     doctorId,
     appointmentTime: slot.startTime,
     status: 'CONFIRMED',
     notes: null,
+    priority,
   });
+
+  if (triage) {
+    // `answers` идва като JSON низ, не като обект — колоната е jsonb, но полето
+    // в record-а е String, така че Jackson го праща така.
+    triageResults.push({
+      appointmentId: id,
+      score,
+      priority,
+      answers: JSON.stringify(triage),
+    });
+  }
 });
 
 // Потребители за mock-натата автентикация. Паролите стоят в чист вид нарочно —

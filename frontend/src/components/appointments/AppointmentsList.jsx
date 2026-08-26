@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { AppointmentRow, Badge, Button, EmptyState, ErrorState, Icon, Skeleton } from '../ds';
@@ -23,6 +24,9 @@ import { useNow } from '../../lib/useNow';
 // forever — so "past" is derived from the clock and the row recedes onto the
 // sunken surface. Depth by contrast, as the system asks; dimming the whole row
 // would only make it harder to read.
+//
+// `highlightId` paints one row's border in the danger colour — the same red as
+// the urgent panel — so picking a case up there is visible down here too.
 
 const tones = { CONFIRMED: 'blue', CANCELLED: 'neutral', DONE: 'free' };
 
@@ -36,10 +40,21 @@ export default function AppointmentsList({
   emptyText,
   emptyAction,
   actions,
+  highlightId,
 }) {
   const { t, i18n } = useTranslation();
   const now = useNow();
   const { data: doctors } = useQuery({ queryKey: ['doctors'], queryFn: getDoctors });
+
+  // A callback ref rather than an effect: it fires exactly when the highlighted
+  // row attaches, which also covers the row arriving after the query resolves.
+  // `useCallback` keeps its identity stable, so an ordinary re-render does not
+  // re-trigger it.
+  const scrollIntoView = useCallback((node) => {
+    if (!node) return;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    node.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
+  }, []);
 
   const doctorOf = (id) => doctors?.find((d) => d.id === id);
 
@@ -74,6 +89,7 @@ export default function AppointmentsList({
       {appointments.map((appointment) => {
         const at = fromLocalDateTime(appointment.appointmentTime);
         const isPast = at.getTime() <= now;
+        const isHighlighted = appointment.appointmentId === highlightId;
         const doctor = doctorOf(appointment.doctorId);
         const doctorName =
           appointment.doctorName ?? doctor?.name ?? `#${appointment.doctorId}`;
@@ -91,20 +107,36 @@ export default function AppointmentsList({
         return (
           <AppointmentRow
             key={appointment.appointmentId}
+            ref={isHighlighted ? scrollIntoView : undefined}
             date={formatDayShort(at, i18n.resolvedLanguage)}
             time={appointment.appointmentTime.slice(11, 16)}
             doctor={lines[0]}
             specialty={lines[1]}
             location={lines[2]}
-            style={isPast ? { background: 'var(--surface-sunken)' } : undefined}
+            style={{
+              ...(isPast ? { background: 'var(--surface-sunken)' } : null),
+              ...(isHighlighted ? { borderColor: 'var(--danger)' } : null),
+            }}
             status={
-              isPast && appointment.status === 'CONFIRMED' ? (
-                <Badge tone="neutral">{t('appointments.status.past')}</Badge>
-              ) : (
-                <Badge tone={tones[appointment.status] ?? 'neutral'}>
-                  {t(`appointments.status.${appointment.status}`, appointment.status)}
-                </Badge>
-              )
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {appointment.priority === 'URGENT' && (
+                  <Badge tone="urgent">{t('appointments.urgent')}</Badge>
+                )}
+                {isPast && appointment.status === 'CONFIRMED' ? (
+                  <Badge tone="neutral">{t('appointments.status.past')}</Badge>
+                ) : (
+                  <Badge tone={tones[appointment.status] ?? 'neutral'}>
+                    {t(`appointments.status.${appointment.status}`, appointment.status)}
+                  </Badge>
+                )}
+              </span>
             }
             actions={actions?.(appointment)}
           />

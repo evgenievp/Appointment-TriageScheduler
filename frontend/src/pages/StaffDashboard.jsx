@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
+import PriorityQueue from '../components/staff/PriorityQueue';
 import { Button, Input } from '../components/ds';
 import { getStaffAppointments } from '../api/appointments';
 import { formatDayLong, formatWeekday, shiftDateInput, toDateInput } from '../lib/dates';
@@ -18,8 +19,15 @@ export default function StaffDashboard() {
 
   // null means "today" and keeps meaning it after midnight; picking a date pins it.
   const [picked, setPicked] = useState(null);
+  // The urgent case opened from the queue, so the list can mark the same row.
+  const [selectedId, setSelectedId] = useState(null);
   const today = toDateInput(new Date(now));
   const date = picked ?? today;
+
+  const openFromQueue = (appointment) => {
+    setPicked(appointment.appointmentTime.slice(0, 10));
+    setSelectedId(appointment.appointmentId);
+  };
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['appointments', 'staff', date],
@@ -45,6 +53,14 @@ export default function StaffDashboard() {
       >
         {t('pages.staffDashboard.lead')}
       </p>
+
+      {/* Above the day bar on purpose: an urgent case does not stop being urgent
+          because reception is looking at another date. */}
+      <PriorityQueue
+        selectedId={selectedId}
+        onPick={openFromQueue}
+        actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
+      />
 
       <div className="staff-daybar">
         <div>
@@ -101,6 +117,7 @@ export default function StaffDashboard() {
         onRetry={refetch}
         emptyTitle={t('pages.staffDashboard.emptyTitle')}
         emptyText={t('pages.staffDashboard.emptyText')}
+        highlightId={selectedId}
         actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
       />
     </PageShell>
