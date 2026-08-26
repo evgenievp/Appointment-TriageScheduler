@@ -43,6 +43,7 @@
   --slots-preview-height: 320px; /* прегледът по дни скролва след тази височина */
   --tab-indicator: 2px; /* подчертаването на активния раздел */
   --date-field-width: 180px; /* поле за дата до бутони, за да не се разтяга */
+  --stepper-dot: 26px; /* номерираното кръгче в Stepper */
   --priority-chip-width: 34px; /* чипът P1/P2/P3 в PriorityQueueRow */
   --priority-time-width: 100px; /* дата и час вдясно в същия ред */
   --control-size: 20px; /* кутийката на checkbox/radio */
