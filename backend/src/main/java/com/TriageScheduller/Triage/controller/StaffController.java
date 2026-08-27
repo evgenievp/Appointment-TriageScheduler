@@ -6,7 +6,7 @@ import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import com.TriageScheduller.Triage.service.StaffService;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +25,7 @@ public class StaffController {
 
     @PutMapping("/slots/{slotId}/assign")
     public ResponseEntity<SlotDto> changePatient(@PathVariable Long slotId, Authentication authentication) {
-        User user = this.patientsService.findByEmail(authentication.name());
+        User user = this.patientsService.findByEmail(authentication.getName());
         return ResponseEntity.status(201).body(this.slotsService.changePatientOfSlot(slotId, user.getId()));
     }
 

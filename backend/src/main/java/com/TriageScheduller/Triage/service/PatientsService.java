@@ -19,6 +19,28 @@ public class PatientsService {
         this.doctorsRepo = doctorsRepo;
     }
 
+    public String normalizePhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return null;
+        }
+
+        String cleaned = phone.replaceAll("[^0-9+]", "");
+
+        if (cleaned.startsWith("0") && cleaned.length() == 10) {
+            return "+359" + cleaned.substring(1);
+        }
+
+        if (cleaned.startsWith("359") && cleaned.length() == 12) {
+            return "+" + cleaned;
+        }
+
+        if (cleaned.startsWith("+")) {
+            return cleaned;
+        }
+
+        return "+" + cleaned;
+    }
+
     public User findById(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
@@ -30,20 +52,21 @@ public class PatientsService {
     }
 
     public User save(User patient) {
+        patient.setPhone(this.normalizePhone(patient.getPhone()));
         return repo.save(patient);
     }
 
 
     public UserDto findSlotByUserPhone(String phoneNumber) {
-        Optional<User> user = this.repo.findByPhone(phoneNumber);
+        String normalized = normalizePhone(phoneNumber);
+        Optional<User> user = this.repo.findByPhone(normalized);
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("No such user");
         }
-
         return toDto(user.get());
-
     }
+
 
     private UserDto toDto(User user) {
         return  new UserDto(
