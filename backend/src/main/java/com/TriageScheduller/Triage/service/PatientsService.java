@@ -1,9 +1,15 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.SlotDto;
+import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
+import jakarta.persistence.EntityNotFoundException;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class PatientsService {
@@ -27,5 +33,26 @@ public class PatientsService {
 
     public User save(User patient) {
         return repo.save(patient);
+    }
+
+
+    public UserDto findSlotByUserPhone(String phoneNumber) {
+        Optional<User> user = this.repo.findByPhoneNumber(phoneNumber);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("No such user");
+        }
+
+        return toDto(user.get());
+
+    }
+
+    private UserDto toDto(User user) {
+        return  new UserDto(
+                user.getId(),
+                user.getName(),
+                user.getPhone(),
+                user.getEmail()
+        );
     }
 }

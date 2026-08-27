@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.controller;
 
 import com.TriageScheduller.Triage.dto.SlotDto;
+import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.PatientsService;
@@ -8,10 +9,7 @@ import com.TriageScheduller.Triage.service.SlotsService;
 import com.TriageScheduller.Triage.service.StaffService;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/staff")
@@ -31,5 +29,11 @@ public class StaffController {
         User user = this.patientsService.findByEmail(authentication.name());
         return ResponseEntity.status(201).body(this.slotsService.changePatientOfSlot(slotId, user.getId()));
     }
+
+    @GetMapping("/patient/{phoneNumber}")
+    public ResponseEntity<UserDto> findSlotByUserPhone(@PathVariable String phoneNumber) {
+        return ResponseEntity.status(201).body(this.patientsService.findSlotByUserPhone(phoneNumber));
+    }
+
 
 }
