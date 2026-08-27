@@ -1,29 +1,19 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
-import {
-  Button,
-  DoctorCard,
-  EmptyState,
-  ErrorState,
-  Icon,
-  Skeleton,
-  Tag,
-} from '../components/ds';
+import { DoctorCard, Icon, Tag } from '../components/ds';
 import BookingSteps from '../components/triage/BookingSteps';
+import DoctorsFallback from '../components/doctors/DoctorsFallback';
 import { getDoctors } from '../api/doctors';
 import { iconForSpeciality } from '../lib/specialities';
-import { useAuth } from '../lib/authContext';
 import { useTriageDraft } from '../lib/triageDraft';
 import './Doctors.css';
 
 export default function Doctors() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated } = useAuth();
   const { answers } = useTriageDraft();
   const [filterIdx, setFilterIdx] = useState(0);
 
@@ -61,55 +51,13 @@ export default function Doctors() {
       {/* Само на човек, който е в потока — иначе „Оплакване ✓“ би било лъжа. */}
       {answers && <BookingSteps current={1} style={{ marginTop: 'var(--space-6)' }} />}
 
-      {isPending && (
-        <div style={{ marginTop: 'var(--space-8)' }}>
-          <Skeleton variant="doctor-grid" count={6} label={t('common.loading')} />
-        </div>
-      )}
-
-      {/* Бекендът държи и списъка с лекари зад `authenticated()`, тоест невлязъл
-          посетител получава 403. Да го наречем „грешка във връзката“ е лъжа —
-          човекът ще реши, че сайтът е счупен, а всъщност само не е влязъл. */}
-      {isError && !isAuthenticated && (
-        <div style={{ marginTop: 'var(--space-8)' }}>
-          <EmptyState
-            icon={<Icon name="shield-check" size="var(--icon-md)" />}
-            title={t('doctors.signInTitle')}
-            description={t('doctors.signInText')}
-            action={
-              <Button onClick={() => navigate(`/login?from=${location.pathname}`)}>
-                {t('nav.login')}
-              </Button>
-            }
-            secondaryAction={
-              <Button variant="secondary" onClick={() => navigate('/register')}>
-                {t('auth.login.register')}
-              </Button>
-            }
-          />
-        </div>
-      )}
-
-      {isError && isAuthenticated && (
-        <div style={{ marginTop: 'var(--space-8)' }}>
-          <ErrorState
-            icon={<Icon name="triangle-alert" size="var(--icon-md)" />}
-            title={t('doctors.errorTitle')}
-            description={t('doctors.errorText')}
-            action={<Button onClick={() => refetch()}>{t('common.retry')}</Button>}
-          />
-        </div>
-      )}
-
-      {!isPending && !isError && doctors.length === 0 && (
-        <div style={{ marginTop: 'var(--space-8)' }}>
-          <EmptyState
-            icon={<Icon name="calendar-x" size="var(--icon-md)" />}
-            title={t('doctors.emptyTitle')}
-            description={t('doctors.emptyText')}
-          />
-        </div>
-      )}
+      <DoctorsFallback
+        isPending={isPending}
+        isError={isError}
+        isEmpty={doctors?.length === 0}
+        onRetry={refetch}
+        style={{ marginTop: 'var(--space-8)' }}
+      />
 
       {!isPending && !isError && doctors.length > 0 && (
         <>

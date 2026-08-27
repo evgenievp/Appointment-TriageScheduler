@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import SiteHeader from '../components/SiteHeader';
+import DoctorsFallback from '../components/doctors/DoctorsFallback';
 import {
   AppointmentRow,
   Badge,
@@ -11,6 +13,8 @@ import {
   Icon,
   Tag,
 } from '../components/ds';
+import { getDoctors } from '../api/doctors';
+import { iconForSpeciality } from '../lib/specialities';
 import { CLINIC } from '../clinic';
 import './Home.css';
 
@@ -158,12 +162,30 @@ function Doctors() {
   const [filterIdx, setFilterIdx] = useState(0);
   const [selected, setSelected] = useState(null);
 
-  // TODO(Фаза 1): идва от GET /api/doctors
-  const doctors = t('home.demo.doctors', { returnObjects: true });
+  // Истинските лекари, не примерните: измислените карти водеха към календар на
+  // несъществуващ лекар. Заявката е същата, която ползва и `/doctors`, тоест
+  // втората страница я взима от кеша.
+  const {
+    data: doctors,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({ queryKey: ['doctors'], queryFn: getDoctors });
+
   // Индекс 0 е „всички“; филтърът се пази като индекс, а не като текст, за да
   // преживее смяна на езика.
-  const specialties = [t('home.doctors.filterAll'), ...new Set(doctors.map((d) => d.specialty))];
-  const list = filterIdx === 0 ? doctors : doctors.filter((d) => d.specialty === specialties[filterIdx]);
+  const specialties = [
+    t('home.doctors.filterAll'),
+    ...new Set((doctors ?? []).map((d) => d.speciality)),
+  ];
+  const list =
+    filterIdx === 0
+      ? (doctors ?? [])
+      : (doctors ?? []).filter((d) => d.speciality === specialties[filterIdx]);
+
+  // Мрежата се рисува само когато наистина има какво — иначе `DoctorsFallback`
+  // казва защо я няма и се връща `null`, щом всичко е наред.
+  const ready = !isPending && !isError && doctors?.length > 0;
 
   return (
     <section style={section}>
@@ -178,12 +200,18 @@ function Doctors() {
       >
         <div>
           <h2>{t('home.doctors.title')}</h2>
+          {/* Броят се показва само когато го знаем — „0 лекари“ докато се зарежда
+              е по-лошо от нищо. */}
           <p style={{ color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
-            <Trans
-              i18nKey="home.doctors.count"
-              values={{ count: list.length }}
-              components={{ mono: <span style={mono} /> }}
-            />
+            {list.length > 0 ? (
+              <Trans
+                i18nKey="home.doctors.count"
+                values={{ count: list.length }}
+                components={{ mono: <span style={mono} /> }}
+              />
+            ) : (
+              t('home.doctors.lead')
+            )}
           </p>
         </div>
         <Button variant="secondary" onClick={() => navigate('/doctors')}>
@@ -191,50 +219,62 @@ function Doctors() {
         </Button>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--space-2)',
-          flexWrap: 'wrap',
-          margin: 'var(--space-6) 0',
-        }}
-      >
-        {specialties.map((s, i) => (
-          <span key={s} onClick={() => setFilterIdx(i)} style={{ cursor: 'pointer' }}>
-            <Tag selected={filterIdx === i}>{s}</Tag>
-          </span>
-        ))}
-      </div>
+      <DoctorsFallback
+        isPending={isPending}
+        isError={isError}
+        isEmpty={doctors?.length === 0}
+        onRetry={refetch}
+        style={{ marginTop: 'var(--space-6)' }}
+      />
 
-      <div className="home-docs">
-        {list.map((d) => (
-          <DoctorCard
-            key={d.id}
-            icon={<Icon name={d.icon} size="var(--icon-md)" />}
-            name={d.name}
-            specialty={d.specialty}
-            description={d.description}
-            nextSlot={d.next}
-            selected={selected === d.id}
-            onClick={() => setSelected(d.id)}
-          />
-        ))}
-      </div>
+      {ready && (
+        <>
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--space-2)',
+              flexWrap: 'wrap',
+              margin: 'var(--space-6) 0',
+            }}
+          >
+            {specialties.map((s, i) => (
+              <span key={s} onClick={() => setFilterIdx(i)} style={{ cursor: 'pointer' }}>
+                <Tag selected={filterIdx === i}>{s}</Tag>
+              </span>
+            ))}
+          </div>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          marginTop: 'var(--space-6)',
-        }}
-      >
-        <Button
-          disabled={!selected}
-          onClick={() => navigate(`/doctors/${selected}/calendar`)}
-        >
-          {t('home.doctors.seeSlots')}
-        </Button>
-      </div>
+          <div className="home-docs">
+            {list.map((d) => (
+              <DoctorCard
+                key={d.id}
+                icon={
+                  <Icon name={iconForSpeciality(d.speciality)} size="var(--icon-md)" />
+                }
+                name={d.name}
+                specialty={d.speciality}
+                selected={selected === d.id}
+                onClick={() => setSelected(d.id)}
+              />
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: 'var(--space-6)',
+            }}
+          >
+            <Button
+              disabled={!selected}
+              onClick={() => navigate(`/doctors/${selected}/calendar`)}
+            >
+              {t('home.doctors.seeSlots')}
+            </Button>
+          </div>
+        </>
+      )}
     </section>
   );
 }
