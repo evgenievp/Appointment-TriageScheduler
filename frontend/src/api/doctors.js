@@ -1,9 +1,10 @@
 import { request } from './client';
 
 // DoctorDto: { id, name, speciality, role }
-// ВНИМАНИЕ: бекендът още няма този ендпойнт — има само /api/doctors/me.
-// Поискан е от екипа; дотогава работи само срещу MSW.
-export const getDoctors = () => request('/doctors');
+// Единственият публичен път към списъка: `/api/doctors` изисква вход, а
+// `/allDoctors` е `permitAll` — така непознат посетител вижда кой приема,
+// преди да се регистрира.
+export const getDoctors = () => request('/doctors/allDoctors');
 
 // Единственият начин лекарят да научи своето doctorId — токенът носи само роля.
 export const getCurrentDoctor = () => request('/doctors/me');

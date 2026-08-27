@@ -1,6 +1,6 @@
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, EmptyState, ErrorState, Icon, Skeleton } from '../ds';
+import SignInRequired from '../SignInRequired';
 import { useAuth } from '../../lib/authContext';
 
 // Четирите състояния, в които списъкът с лекари не може да се покаже. Стоят на
@@ -17,8 +17,6 @@ export default function DoctorsFallback({
   style,
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { isAuthenticated } = useAuth();
 
   // Обвивката е вътре, а не около компонента: празен `div` с отстъп отвън би
@@ -35,23 +33,7 @@ export default function DoctorsFallback({
   // посетител получава 403. Да го наречем „грешка във връзката“ е лъжа — човекът
   // ще реши, че сайтът е счупен, а всъщност само не е влязъл.
   if (isError && !isAuthenticated) {
-    return wrap(
-      <EmptyState
-        icon={<Icon name="shield-check" size="var(--icon-md)" />}
-        title={t('doctors.signInTitle')}
-        description={t('doctors.signInText')}
-        action={
-          <Button onClick={() => navigate(`/login?from=${location.pathname}`)}>
-            {t('nav.login')}
-          </Button>
-        }
-        secondaryAction={
-          <Button variant="secondary" onClick={() => navigate('/register')}>
-            {t('auth.login.register')}
-          </Button>
-        }
-      />,
-    );
+    return <SignInRequired style={style} />;
   }
 
   if (isError) {
