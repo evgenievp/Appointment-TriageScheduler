@@ -10,6 +10,7 @@ import {
   nextId,
   nextSlotId,
   nextExceptionId,
+  triageScore,
   toAppointmentDto,
   toLocalDateTime,
 } from './data';
@@ -328,6 +329,56 @@ export const handlers = [
         .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
         .map(toAppointmentDto),
     );
+  }),
+
+  ...handle('post', '/api/triage/:appointmentId', async ({ request, params }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    await delay(LATENCY);
+
+    const appointment = appointments.find(
+      (a) => a.id === Number(params.appointmentId),
+    );
+    if (!appointment) {
+      return new HttpResponse('Appointment not found', { status: 404 });
+    }
+    // `submitTriage` пуска само пациента на този час, никого другиго.
+    if (appointment.patientId !== user.id) {
+      return new HttpResponse(
+        'You are not authorized to submit triage for this appointment',
+        { status: 403 },
+      );
+    }
+
+    const answers = await request.json();
+    // `@Valid` на контролера: painLevel е @Min(1) @Max(10), painDuration @NotNull.
+    if (
+      !(answers.painLevel >= 1 && answers.painLevel <= 10) ||
+      !answers.painDuration
+    ) {
+      return new HttpResponse('Validation failed', { status: 400 });
+    }
+
+    const score = triageScore(answers);
+    const priority = score >= 5 ? 'URGENT' : 'NORMAL';
+
+    // Един триаж на резервация — колоната е unique в бекенда.
+    const existing = triageResults.findIndex(
+      (r) => r.appointmentId === appointment.id,
+    );
+    const result = {
+      appointmentId: appointment.id,
+      score,
+      priority,
+      answers: JSON.stringify(answers),
+    };
+    if (existing === -1) triageResults.push(result);
+    else triageResults[existing] = result;
+
+    // `submitTriage` вдига и приоритета на самата резервация.
+    appointment.priority = priority;
+
+    return HttpResponse.json({ score, priority, answers: result.answers }, { status: 201 });
   }),
 
   // `getTriageResult` в бекенда няма никаква проверка — нито роля, нито чий е

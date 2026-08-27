@@ -99,6 +99,42 @@
       "failedMessage": "The server did not respond. Try again in a moment."
     }
   },
+  "triage": {
+    "yes": "Yes",
+    "no": "No",
+    "required": "Pick an answer.",
+    "missing_one": "{{count}} question left.",
+    "missing_other": "{{count}} questions left.",
+    "privacy": "Only the clinician and the clinic team see these answers.",
+    "sending": "Sending…",
+    "pain": {
+      "question": "How bad is the pain right now?",
+      "help": "One means barely noticeable, ten the worst you can imagine.",
+      "low": "1 · barely there",
+      "high": "10 · unbearable"
+    },
+    "duration": {
+      "question": "How long have you had it?",
+      "LESS_THAN_DAY": "Less than a day",
+      "ONE_DAY": "About a day",
+      "THREE_DAYS": "Three days",
+      "ONE_WEEK": "About a week",
+      "MORE_THAN_WEEK": "More than a week"
+    },
+    "temperature": {
+      "question": "Do you have a temperature?",
+      "help": "Above 37.5 °C, measured in the last 24 hours."
+    },
+    "swelling": {
+      "question": "Is there any swelling?",
+      "help": "At the site of the complaint or around it."
+    },
+    "page": {
+      "title": "A few questions about your complaint",
+      "lead": "Under a minute. Your answers decide who sees you sooner, which is why they come before the time.",
+      "submit": "See available times"
+    }
+  },
   "staffQueue": {
     "title_one": "Urgent case",
     "title_other": "Urgent cases ({{count}})",
@@ -123,7 +159,9 @@
     "emptyTitle": "No clinicians",
     "emptyText": "No clinician currently has a public schedule.",
     "errorTitle": "We could not load the clinicians",
-    "errorText": "Check your connection and try again."
+    "errorText": "Check your connection and try again.",
+    "signInTitle": "Log in to see the times",
+    "signInText": "Clinician schedules are open to registered patients only."
   },
   "calendar": {
     "backToDoctors": "All clinicians",
@@ -138,6 +176,8 @@
     "pickPrompt": "Pick a free time from the grid.",
     "book": "Book this time",
     "booking": "Booking…",
+    "bookedNoTriageTitle": "Your time is booked",
+    "bookedNoTriageMessage": "The questionnaire did not go through — fill it in from My appointments.",
     "emptyTitle": "No free times this week",
     "emptyText": "Try next week or pick another clinician.",
     "errorTitle": "We could not load the times",
@@ -382,6 +422,16 @@
     "staffNewBooking": {
       "title": "New booking by phone",
       "text": "This is where staff book on the clinic's behalf while the patient is on the phone — find or create the patient, pick a slot, and fill in the triage for them."
+    }
+  },
+  "booking": {
+    "steps": {
+      "triage": "Complaint",
+      "doctor": "Clinician",
+      "time": "Time",
+      "done": "done",
+      "current": "current step",
+      "todo": "to come"
     }
   }
 }

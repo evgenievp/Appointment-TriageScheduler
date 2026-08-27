@@ -67,8 +67,10 @@ export default function SiteHeader({ active }) {
     </>
   );
 
+  // Бутонът е действие и започва потока от въпросите; линкът „Запазване на час“
+  // е раздел и води направо към списъка с лекари.
   const bookButton = (fullWidth) => (
-    <Button size="sm" fullWidth={fullWidth} onClick={() => navigate('/doctors')}>
+    <Button size="sm" fullWidth={fullWidth} onClick={() => navigate('/triage')}>
       {t('nav.book')}
     </Button>
   );
