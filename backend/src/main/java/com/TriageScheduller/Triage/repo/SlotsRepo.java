@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.ScopedValue;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SlotsRepo extends JpaRepository<Slot, Long> {
 
@@ -41,4 +43,5 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
             "WHERE s.id = :slotId AND s.status = 'FREE'")
     int bookSlot(@Param("slotId") Long slotId, @Param("patientId") Long patientId);
 
+    Optional<Slot> findByUserEmail(String email);
 }

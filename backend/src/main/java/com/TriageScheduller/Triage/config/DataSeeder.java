@@ -30,7 +30,7 @@ public class DataSeeder implements CommandLineRunner {
         if (doctorsRepo.count() > 0) {
             return;
         }
-        Doctor doc1 = new Doctor("Стоматология", "Д-р Иванов");
+        Doctor doc1 = new Doctor("Д-р Иванов", "Стоматология" );
         Appointment appointment = new Appointment();
         User gosho = new User(
             "gosho@abv.bg",

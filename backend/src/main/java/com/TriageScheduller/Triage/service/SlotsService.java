@@ -7,9 +7,11 @@ import com.TriageScheduller.Triage.exception.NotFoundException;
 import com.TriageScheduller.Triage.models.*;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
+import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Status;
+import org.jspecify.annotations.Nullable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,15 +32,17 @@ public class SlotsService {
     private final SlotsRepo repo;
     private final AppointmentsRepo appointmentsRepo;
     private final ExceptionDayRepo exceptionDayRepo;
+    private final PatientsRepo patientsRepo;
     private LocalTime restStart;
     private LocalTime restEnd;
 
     public SlotsService(SlotsRepo repo,
                         AppointmentsRepo appointmentsRepo,
-                        ExceptionDayRepo exceptionDayRepo) {
+                        ExceptionDayRepo exceptionDayRepo, PatientsRepo patientsRepo) {
         this.repo = repo;
         this.appointmentsRepo = appointmentsRepo;
         this.exceptionDayRepo = exceptionDayRepo;
+        this.patientsRepo = patientsRepo;
         this.restStart = LocalTime.of(12,0);
         this.restEnd = LocalTime.of(13,0);
 
@@ -306,4 +311,23 @@ public class SlotsService {
     }
 
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public SlotDto changePatientOfSlot(Long slotId, Long id) {
+        Optional<User> user = this.patientsRepo.findById(id);
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("Something went wrong - no such user");
+        }
+        Optional<Slot> slot = this.repo.findById(slotId);
+        if (slot.isEmpty()) {
+            throw new EntityNotFoundException("No such slot");
+        }
+
+        Slot slotEntity = slot.get();
+        User userEntity = user.get();
+
+        slotEntity.setPatientId(userEntity.getId());
+        repo.save(slotEntity);
+        return toDto(slotEntity);
+
+    }
 }

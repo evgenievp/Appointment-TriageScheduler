@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/triage/**").permitAll()
                         .requestMatchers("/api/appointments/**").authenticated()
                         .requestMatchers("/api/patients/**").hasRole("PATIENT")
-                        .requestMatchers("/api/doctors/me").hasRole("DOCTOR")
+                        .requestMatchers("/api/doctors/me/**").hasRole("DOCTOR")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .anyRequest().authenticated()
                 )
