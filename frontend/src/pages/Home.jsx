@@ -77,7 +77,10 @@ function Hero() {
               flexWrap: 'wrap',
             }}
           >
-            <Button size="lg" onClick={() => navigate('/doctors')}>
+            {/* Призивът започва потока и води към въпросите — точно както обещава
+                разделът „Как работи“ отдолу. Линкът „Вижте всички лекари“ си
+                остава разглеждане и води направо към списъка. */}
+            <Button size="lg" onClick={() => navigate('/triage')}>
               {t('home.hero.book')}
             </Button>
             <Button

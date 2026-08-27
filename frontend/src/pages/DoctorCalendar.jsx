@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
@@ -12,9 +12,11 @@ import {
   Skeleton,
   SlotGrid,
 } from '../components/ds';
+import BookingSteps from '../components/triage/BookingSteps';
 import { getCalendarSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { bookSlot } from '../api/appointments';
+import { submitTriage } from '../api/triage';
 import { useAuth } from '../lib/authContext';
 import { useToast } from '../lib/toastContext';
 import {
@@ -28,6 +30,7 @@ import {
   toLocalDateTime,
 } from '../lib/dates';
 import { useNow } from '../lib/useNow';
+import { useTriageDraft } from '../lib/triageDraft';
 
 const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
 const dayKey = (date) => toLocalDateTime(date).slice(0, 10);
@@ -49,6 +52,12 @@ export default function DoctorCalendar() {
   const [selected, setSelected] = useState(null);
   const now = useNow();
 
+  // Отговорите идват от `/triage`. Липсват само ако някой е отворил календара
+  // директно — тогава го пращаме да ги даде и се връща на същия час.
+  const { answers, clear: clearAnswers } = useTriageDraft();
+  const [params] = useSearchParams();
+  const wanted = params.get('slot');
+
   const isPastTime = (startTime) => fromLocalDateTime(startTime).getTime() <= now;
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -69,26 +78,50 @@ export default function DoctorCalendar() {
     queryFn: () => getCalendarSlots(doctorId, from, to),
   });
 
-  const { mutate: book, isPending: isBooking } = useMutation({
-    mutationFn: (slot) => bookSlot(slot.id),
-    onSuccess: (_data, slot) => {
-      showToast({
-        tone: 'success',
-        title: t('calendar.bookedTitle'),
-        message: t('calendar.bookedMessage', { time: slot.time }),
-      });
-      setSelected(null);
+  // Записване и триаж, в този ред: `submitTriage` иска appointmentId, тоест часът
+  // трябва да съществува преди въпросника да има за какво да се закачи.
+  const { mutate: confirm, isPending: isBooking } = useMutation({
+    mutationFn: async ({ slot, answers }) => {
+      const appointment = await bookSlot(slot.id);
+      try {
+        await submitTriage(appointment.appointmentId, answers);
+        return { appointment, triaged: true };
+      } catch {
+        // Часът е запазен — това е важното. Въпросникът се допълва после.
+        return { appointment, triaged: false };
+      }
+    },
+    onSuccess: ({ triaged }, { slot }) => {
+      // Отговорите са свършили работа — нямат причина да живеят по-нататък.
+      clearAnswers();
       queryClient.invalidateQueries({ queryKey: ['slots'] });
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+
+      showToast(
+        triaged
+          ? {
+              tone: 'success',
+              title: t('calendar.bookedTitle'),
+              message: t('calendar.bookedMessage', { time: slot.time }),
+            }
+          : {
+              tone: 'warning',
+              title: t('calendar.bookedNoTriageTitle'),
+              message: t('calendar.bookedNoTriageMessage'),
+            },
+      );
+      navigate('/me/appointments');
     },
     onError: (error) => {
-      // Someone took the slot between loading the grid and the click.
+      // Someone took the slot between loading the grid and the click. The
+      // answers stay in state, so picking another time costs nothing.
       if (error.status === 409) {
         showToast({
           tone: 'danger',
           title: t('calendar.takenTitle'),
           message: t('calendar.takenMessage'),
         });
+        // Отговорите остават — губи се само часът.
         setSelected(null);
         queryClient.invalidateQueries({ queryKey: ['slots'] });
         return;
@@ -101,14 +134,20 @@ export default function DoctorCalendar() {
     },
   });
 
-  // Booking needs an account. Sending the visitor to the login screen beats
-  // letting the request come back 401 and showing a vague failure.
-  const bookOrSignIn = () => {
+  // Три спирки преди записването, всяка от които има смисъл сама по себе си:
+  // вход, ако човекът не е влязъл; въпросите, ако е стигнал дотук без тях; иначе
+  // направо записваме.
+  const book = () => {
     if (!isAuthenticated) {
       navigate(`/login?from=${encodeURIComponent(location.pathname)}`);
       return;
     }
-    book(pick);
+    if (!answers) {
+      const back = encodeURIComponent(location.pathname);
+      navigate(`/triage?from=${back}&slot=${pick.id}`);
+      return;
+    }
+    confirm({ slot: pick, answers });
   };
 
   // Общата времева ос за седмицата. Без нея всяка колона изброява само своите
@@ -150,7 +189,16 @@ export default function DoctorCalendar() {
   );
 
   // A slot picked a while ago can slip into the past while the page sits open.
-  const pick = selected && !isPastTime(selected.startTime) ? selected : null;
+  // `?slot=` е връщането от въпросите: човекът е избрал час, пратен е да отговори
+  // и заслужава да го намери избран, а не да го търси наново.
+  const fromUrl =
+    wanted && !selected
+      ? gridDays
+          .flatMap((day) => day.slots)
+          .find((slot) => String(slot.id) === wanted && !slot.taken && !slot.unavailable)
+      : null;
+  const chosen = selected ?? fromUrl;
+  const pick = chosen && !isPastTime(chosen.startTime) ? chosen : null;
 
   const changeWeek = (delta) => {
     setSelected(null);
@@ -173,6 +221,10 @@ export default function DoctorCalendar() {
           </p>
         )}
       </div>
+
+      {/* Лентата се показва само на човек, който е в потока. На случаен посетител
+          „Оплакване ✓“ би било лъжа. */}
+      {answers && <BookingSteps current={2} style={{ marginTop: 'var(--space-8)' }} />}
 
       <div
         style={{
@@ -256,7 +308,7 @@ export default function DoctorCalendar() {
             </span>
             <Button
               disabled={!pick || isBooking}
-              onClick={bookOrSignIn}
+              onClick={book}
               iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
             >
               {isBooking ? t('calendar.booking') : t('calendar.book')}
@@ -264,6 +316,7 @@ export default function DoctorCalendar() {
           </Card>
         </>
       )}
+
     </PageShell>
   );
 }
