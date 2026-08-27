@@ -388,5 +388,22 @@
       "current": "current step",
       "todo": "to come"
     }
+  },
+  "notFound": {
+    "title": "No such page",
+    "lead": "The address you opened does not exist. It may be mistyped, or the page may have moved.",
+    "attempted": "You tried:",
+    "toHome": "Go to the start",
+    "toSchedule": "Go to the schedule",
+    "toStaff": "Go to the dashboard",
+    "back": "Back",
+    "imageAlt": "An eye chart whose top line reads 404, with the lines below it blurring away"
+  },
+  "appError": {
+    "title": "Something went wrong",
+    "lead": "This page stopped working. Reloading usually fixes it; if it happens again, please call the front desk.",
+    "reload": "Reload the page",
+    "home": "Go to the start",
+    "imageAlt": "A stethoscope tied in a knot"
   }
 }

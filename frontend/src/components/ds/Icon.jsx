@@ -1,5 +1,6 @@
 import {
   Activity,
+  ArrowLeft,
   Brain,
   CalendarCheck,
   CalendarX,
@@ -7,9 +8,11 @@ import {
   Eye,
   EyeOff,
   HeartPulse,
+  House,
   Menu,
   PersonStanding,
   Phone,
+  RotateCw,
   ShieldCheck,
   Stethoscope,
   Sun,
@@ -26,6 +29,7 @@ import {
 // and how `iconForSpeciality` and the demo data spell them.
 const icons = {
   activity: Activity,
+  'arrow-left': ArrowLeft,
   brain: Brain,
   'calendar-check': CalendarCheck,
   'calendar-x': CalendarX,
@@ -33,9 +37,11 @@ const icons = {
   eye: Eye,
   'eye-off': EyeOff,
   'heart-pulse': HeartPulse,
+  house: House,
   menu: Menu,
   'person-standing': PersonStanding,
   phone: Phone,
+  'rotate-cw': RotateCw,
   'shield-check': ShieldCheck,
   stethoscope: Stethoscope,
   sun: Sun,
