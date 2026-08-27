@@ -156,9 +156,9 @@ export const handlers = [
     return HttpResponse.json({ token: fakeToken(user) });
   }),
 
-  // TODO: този ендпойнт го няма в бекенда — има само /api/doctors/me.
-  // Поискан е от екипа; ако решат друг път, се сменя само тук и в api/doctors.js.
-  ...handle('get', '/api/doctors', async () => {
+  // Публичен по същия начин като в бекенда — без проверка за токен. Пътят е
+  // `/allDoctors`, защото голото `/api/doctors` там иска вход.
+  ...handle('get', '/api/doctors/allDoctors', async () => {
     await delay(LATENCY);
     return HttpResponse.json(doctors);
   }),

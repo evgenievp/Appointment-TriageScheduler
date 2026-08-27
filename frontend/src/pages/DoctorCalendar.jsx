@@ -12,9 +12,10 @@ import {
   Skeleton,
   SlotGrid,
 } from '../components/ds';
+import SignInRequired from '../components/SignInRequired';
 import BookingSteps from '../components/triage/BookingSteps';
 import useBookWithTriage from '../components/triage/useBookWithTriage';
-import { getCalendarSlots } from '../api/slots';
+import { getCalendarSlots, getFreeSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { useAuth } from '../lib/authContext';
 import {
@@ -70,8 +71,18 @@ export default function DoctorCalendar() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['slots', doctorId, from],
-    queryFn: () => getCalendarSlots(doctorId, from, to),
+    // `/slots/calendar` иска вход, `/slots/free` не. Затова непознат посетител
+    // получава само свободните — по-малко подробно, но достатъчно, за да види
+    // кога го приемат, вместо да опре в стена за вход.
+    //
+    // Разликата на екрана: заетите часове ги няма изобщо, тоест излизат като
+    // „не се предлага“ вместо задраскани. Щом човекът влезе, ключът се сменя и
+    // гридът се дозарежда с пълната картина.
+    queryKey: ['slots', doctorId, from, isAuthenticated],
+    queryFn: () =>
+      isAuthenticated
+        ? getCalendarSlots(doctorId, from, to)
+        : getFreeSlots(doctorId, from, to),
   });
 
   // Тук провалът значи само „избери друг час“ — гридът вече е пред човека.
@@ -206,7 +217,12 @@ export default function DoctorCalendar() {
         <Skeleton variant="slot-grid" days={7} rows={8} label={t('common.loading')} />
       )}
 
-      {isError && (
+      {/* Списъкът с лекари вече е публичен, но `/api/slots/calendar` не е — тоест
+          непознат посетител стига дотук и получава 403. Казваме му го честно,
+          вместо да го наречем повреда в мрежата. */}
+      {isError && !isAuthenticated && <SignInRequired />}
+
+      {isError && isAuthenticated && (
         <ErrorState
           icon={<Icon name="triangle-alert" size="var(--icon-md)" />}
           title={t('calendar.errorTitle')}
