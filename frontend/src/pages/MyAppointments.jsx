@@ -52,7 +52,7 @@ export default function MyAppointments() {
         title: t('pages.myAppointments.emptyTitle'),
         text: t('pages.myAppointments.emptyText'),
         action: (
-          <Button onClick={() => navigate('/doctors')}>
+          <Button onClick={() => navigate('/triage')}>
             {t('pages.myAppointments.emptyAction')}
           </Button>
         ),
