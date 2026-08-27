@@ -42,5 +42,5 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
             "WHERE s.id = :slotId AND s.status = 'FREE'")
     int bookSlot(@Param("slotId") Long slotId, @Param("patientId") Long patientId);
 
-    Optional<Slot> findByUserEmail(String email);
+
 }

@@ -35,7 +35,7 @@ public class PatientsService {
 
 
     public UserDto findSlotByUserPhone(String phoneNumber) {
-        Optional<User> user = this.repo.findByPhoneNumber(phoneNumber);
+        Optional<User> user = this.repo.findByPhone(phoneNumber);
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("No such user");
