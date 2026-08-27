@@ -5,6 +5,7 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,4 +48,11 @@ public class DoctorsService {
     }
 
 
+    public List<DoctorDto> getAll() {
+        List<DoctorDto> dtos = new ArrayList<>();
+        for (var doctor: this.repo.findAll()) {
+            dtos.add(toDto(doctor));
+        }
+        return dtos;
+    }
 }
