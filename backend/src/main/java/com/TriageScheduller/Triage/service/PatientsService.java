@@ -1,12 +1,10 @@
 package com.TriageScheduller.Triage.service;
 
-import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import jakarta.persistence.EntityNotFoundException;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

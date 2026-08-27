@@ -11,7 +11,6 @@ import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Status;
-import org.jspecify.annotations.Nullable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;

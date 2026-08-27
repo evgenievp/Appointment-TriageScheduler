@@ -10,7 +10,6 @@ import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

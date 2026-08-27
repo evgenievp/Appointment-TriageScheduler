@@ -2,7 +2,6 @@ package com.TriageScheduller.Triage.controller;
 
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.dto.UserDto;
-import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
