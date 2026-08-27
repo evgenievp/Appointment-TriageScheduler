@@ -93,16 +93,22 @@ export default function DoctorCalendar() {
   // Три спирки преди записването, всяка от които има смисъл сама по себе си:
   // вход, ако човекът не е влязъл; въпросите, ако е стигнал дотук без тях; иначе
   // направо записваме.
+  // Въпросите с вече избран час. `at` е само за показване — записва се по `slot`
+  // — но човекът ще отговаря на четири въпроса и заслужава да види какво
+  // потвърждава накрая.
+  const questionsFor = (slot) =>
+    `/triage?from=${encodeURIComponent(location.pathname)}&slot=${slot.id}&at=${slot.startTime}`;
+
   const book = () => {
+    // Изборът не бива да се губи заради вход. Пращаме към него с адрес за
+    // връщане, който вече носи часа — така след влизане човекът продължава от
+    // въпросите, вместо да търси наново кой час беше избрал.
     if (!isAuthenticated) {
-      navigate(`/login?from=${encodeURIComponent(location.pathname)}`);
+      navigate(`/login?from=${encodeURIComponent(questionsFor(pick))}`);
       return;
     }
     if (!answers) {
-      // `at` е само за показване — записва се по `slot`. Но човекът ще отговаря
-      // на четири въпроса и заслужава да види какво потвърждава накрая.
-      const back = encodeURIComponent(location.pathname);
-      navigate(`/triage?from=${back}&slot=${pick.id}&at=${pick.startTime}`);
+      navigate(questionsFor(pick));
       return;
     }
     confirm({ slot: pick, answers });

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageShell from '../components/PageShell';
 import RegisterForm from '../components/auth/RegisterForm';
@@ -8,7 +8,14 @@ import { useToast } from '../lib/toastContext';
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const showToast = useToast();
+
+  // Човек без профил, който е избрал час, минава именно оттук — а не през входа.
+  // Затова и регистрацията трябва да го върне там, откъдето е тръгнал.
+  // Приемат се само вътрешни пътища; абсолютен адрес би бил отворен пренасочвач.
+  const from = params.get('from');
+  const returnTo = from?.startsWith('/') && !from.startsWith('//') ? from : null;
 
   const done = () => {
     showToast({
@@ -16,7 +23,7 @@ export default function Register() {
       title: t('auth.register.successTitle'),
       message: t('auth.register.successMessage'),
     });
-    navigate('/doctors');
+    navigate(returnTo ?? '/doctors', { replace: true });
   };
 
   return (
@@ -55,7 +62,13 @@ export default function Register() {
           >
             {t('auth.register.haveAccount')}
           </span>
-          <Button size="sm" variant="secondary" onClick={() => navigate('/login')}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              navigate(returnTo ? `/login?from=${encodeURIComponent(returnTo)}` : '/login')
+            }
+          >
             {t('auth.register.signIn')}
           </Button>
         </Card>

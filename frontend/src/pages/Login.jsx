@@ -63,7 +63,15 @@ export default function Login() {
           >
             {t('auth.login.noAccount')}
           </span>
-          <Button size="sm" variant="secondary" onClick={() => navigate('/register')}>
+          {/* Пренасяме накъде е тръгнал човекът — иначе смяната на вход с
+              регистрация губи избрания час. */}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              navigate(returnTo ? `/register?from=${encodeURIComponent(returnTo)}` : '/register')
+            }
+          >
             {t('auth.login.register')}
           </Button>
         </Card>
