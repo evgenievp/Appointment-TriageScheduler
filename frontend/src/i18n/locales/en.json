@@ -132,7 +132,9 @@
     "page": {
       "title": "A few questions about your complaint",
       "lead": "Under a minute. Your answers decide who sees you sooner, which is why they come before the time.",
-      "submit": "See available times"
+      "submit": "See available times",
+      "leadWithSlot": "Under a minute. As soon as you answer, we book you for <mono>{{when}}</mono>.",
+      "submitAndBook": "Book this time"
     }
   },
   "staffQueue": {
@@ -218,10 +220,11 @@
     },
     "doctors": {
       "title": "Choose your clinician",
-      "count": "<mono>{{count}}</mono> free this week.",
+      "count": "<mono>{{count}}</mono> clinicians see patients here.",
       "seeAll": "See all clinicians",
       "filterAll": "All",
-      "seeSlots": "See available times"
+      "seeSlots": "See available times",
+      "lead": "Pick a clinician to see their available times."
     },
     "how": {
       "title": "How it works",
@@ -253,56 +256,6 @@
     },
     "demo": {
       "time": "08:12",
-      "doctors": [
-        {
-          "id": "1",
-          "icon": "heart-pulse",
-          "name": "Dr Ana Ferrer",
-          "specialty": "Cardiology",
-          "description": "Rhythm disorders, hypertension, prevention",
-          "next": "today 14:30"
-        },
-        {
-          "id": "2",
-          "icon": "stethoscope",
-          "name": "Dr Martin Lund",
-          "specialty": "General medicine",
-          "description": "Acute complaints, referrals, sick notes",
-          "next": "today 15:45"
-        },
-        {
-          "id": "3",
-          "icon": "activity",
-          "name": "Dr Irina Koleva",
-          "specialty": "Orthopaedics",
-          "description": "Joints, spine, sports injuries",
-          "next": "tomorrow 09:15"
-        },
-        {
-          "id": "4",
-          "icon": "brain",
-          "name": "Dr Emil Stoev",
-          "specialty": "Neurology",
-          "description": "Headaches, dizziness, neuropathies",
-          "next": "tomorrow 11:00"
-        },
-        {
-          "id": "5",
-          "icon": "person-standing",
-          "name": "Dr Sonya Raycheva",
-          "specialty": "Paediatrics",
-          "description": "Children aged 0 to 18, vaccinations",
-          "next": "Thu 10:20"
-        },
-        {
-          "id": "6",
-          "icon": "sun",
-          "name": "Dr Nikola Grozdev",
-          "specialty": "Dermatology",
-          "description": "Rashes, moles, allergic reactions",
-          "next": "Fri 16:40"
-        }
-      ],
       "nextFree": [
         "14:30 · Dr Ferrer, Cardiology",
         "15:45 · Dr Lund, General medicine",

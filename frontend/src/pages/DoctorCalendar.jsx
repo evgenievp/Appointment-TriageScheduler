@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import {
   Button,
@@ -13,12 +13,10 @@ import {
   SlotGrid,
 } from '../components/ds';
 import BookingSteps from '../components/triage/BookingSteps';
+import useBookWithTriage from '../components/triage/useBookWithTriage';
 import { getCalendarSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
-import { bookSlot } from '../api/appointments';
-import { submitTriage } from '../api/triage';
 import { useAuth } from '../lib/authContext';
-import { useToast } from '../lib/toastContext';
 import {
   addDays,
   endOfDay,
@@ -44,8 +42,6 @@ export default function DoctorCalendar() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
-  const showToast = useToast();
   const { isAuthenticated } = useAuth();
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
@@ -54,7 +50,7 @@ export default function DoctorCalendar() {
 
   // Отговорите идват от `/triage`. Липсват само ако някой е отворил календара
   // директно — тогава го пращаме да ги даде и се връща на същия час.
-  const { answers, clear: clearAnswers } = useTriageDraft();
+  const { answers } = useTriageDraft();
   const [params] = useSearchParams();
   const wanted = params.get('slot');
 
@@ -78,60 +74,9 @@ export default function DoctorCalendar() {
     queryFn: () => getCalendarSlots(doctorId, from, to),
   });
 
-  // Записване и триаж, в този ред: `submitTriage` иска appointmentId, тоест часът
-  // трябва да съществува преди въпросника да има за какво да се закачи.
-  const { mutate: confirm, isPending: isBooking } = useMutation({
-    mutationFn: async ({ slot, answers }) => {
-      const appointment = await bookSlot(slot.id);
-      try {
-        await submitTriage(appointment.appointmentId, answers);
-        return { appointment, triaged: true };
-      } catch {
-        // Часът е запазен — това е важното. Въпросникът се допълва после.
-        return { appointment, triaged: false };
-      }
-    },
-    onSuccess: ({ triaged }, { slot }) => {
-      // Отговорите са свършили работа — нямат причина да живеят по-нататък.
-      clearAnswers();
-      queryClient.invalidateQueries({ queryKey: ['slots'] });
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-
-      showToast(
-        triaged
-          ? {
-              tone: 'success',
-              title: t('calendar.bookedTitle'),
-              message: t('calendar.bookedMessage', { time: slot.time }),
-            }
-          : {
-              tone: 'warning',
-              title: t('calendar.bookedNoTriageTitle'),
-              message: t('calendar.bookedNoTriageMessage'),
-            },
-      );
-      navigate('/me/appointments');
-    },
-    onError: (error) => {
-      // Someone took the slot between loading the grid and the click. The
-      // answers stay in state, so picking another time costs nothing.
-      if (error.status === 409) {
-        showToast({
-          tone: 'danger',
-          title: t('calendar.takenTitle'),
-          message: t('calendar.takenMessage'),
-        });
-        // Отговорите остават — губи се само часът.
-        setSelected(null);
-        queryClient.invalidateQueries({ queryKey: ['slots'] });
-        return;
-      }
-      showToast({
-        tone: 'danger',
-        title: t('calendar.failedTitle'),
-        message: t('calendar.failedMessage'),
-      });
-    },
+  // Тук провалът значи само „избери друг час“ — гридът вече е пред човека.
+  const { mutate: confirm, isPending: isBooking } = useBookWithTriage({
+    onConflict: () => setSelected(null),
   });
 
   // Три спирки преди записването, всяка от които има смисъл сама по себе си:
@@ -143,8 +88,10 @@ export default function DoctorCalendar() {
       return;
     }
     if (!answers) {
+      // `at` е само за показване — записва се по `slot`. Но човекът ще отговаря
+      // на четири въпроса и заслужава да види какво потвърждава накрая.
       const back = encodeURIComponent(location.pathname);
-      navigate(`/triage?from=${back}&slot=${pick.id}`);
+      navigate(`/triage?from=${back}&slot=${pick.id}&at=${pick.startTime}`);
       return;
     }
     confirm({ slot: pick, answers });

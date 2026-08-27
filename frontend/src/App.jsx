@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import AuthProvider from './components/AuthProvider';
 import TriageDraftProvider from './components/TriageDraftProvider';
 import RequireAuth from './components/RequireAuth';
+import ScrollToTop from './components/ScrollToTop';
 import SessionWatcher from './components/SessionWatcher';
 import ToastProvider from './components/ToastProvider';
 import Home from './pages/Home';
@@ -23,6 +24,7 @@ export default function App() {
     <ToastProvider>
       <AuthProvider>
         <TriageDraftProvider>
+          <ScrollToTop />
           <SessionWatcher />
           <Routes>
             <Route path="/" element={<Home />} />
