@@ -7,6 +7,8 @@ import com.TriageScheduller.Triage.repo.PatientsRepo;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -57,14 +59,16 @@ public class PatientsService {
     }
 
 
-    public UserDto findSlotByUserPhone(String phoneNumber) {
+    public List<UserDto> findSlotByUserPhone(String phoneNumber) {
         String normalized = normalizePhone(phoneNumber);
-        Optional<User> user = this.repo.findByPhone(normalized);
+        List<User> users = this.repo.findByPhoneLastFiveDigits(normalized);
 
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("No such user");
+        List<UserDto> dtos = new ArrayList<>();
+        for (var user : users) {
+            dtos.add(toDto(user));
         }
-        return toDto(user.get());
+
+        return dtos;
     }
 
 

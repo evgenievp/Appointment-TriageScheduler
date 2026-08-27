@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/staff")
 public class StaffController {
@@ -30,7 +32,7 @@ public class StaffController {
     }
 
     @GetMapping("/patient/{phoneNumber}")
-    public ResponseEntity<UserDto> findSlotByUserPhone(@PathVariable String phoneNumber) {
+    public ResponseEntity<List<UserDto>> findSlotByUserPhone(@PathVariable String phoneNumber) {
         return ResponseEntity.status(201).body(this.patientsService.findSlotByUserPhone(phoneNumber));
     }
 
