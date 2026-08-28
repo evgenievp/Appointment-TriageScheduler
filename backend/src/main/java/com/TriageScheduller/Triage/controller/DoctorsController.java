@@ -1,8 +1,10 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
 import com.TriageScheduller.Triage.models.Doctor;
+import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.ExceptionDayService;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,13 @@ public class DoctorsController {
 
     private final DoctorsService doctorsService;
     private final ExceptionDayService exceptionDayService;
+    private final AppointmentsService appointmentsService;
 
-    public DoctorsController(DoctorsService doctorsService, ExceptionDayService exceptionDayService) {
+    public DoctorsController(DoctorsService doctorsService,
+                             ExceptionDayService exceptionDayService, AppointmentsService appointmentsService) {
         this.doctorsService = doctorsService;
         this.exceptionDayService = exceptionDayService;
+        this.appointmentsService = appointmentsService;
     }
 
     @GetMapping("/allDoctors")
@@ -46,6 +51,13 @@ public class DoctorsController {
         return ResponseEntity.ok(
                 exceptionDayService.getExceptionDays(doctor.getId())
         );
+    }
+
+    @GetMapping("/me/doctor")
+    public ResponseEntity<List<AppointmentDto>> getMyDoctorAppointments(Authentication authentication) {
+        String email = authentication.getName();
+        Doctor doctor = doctorsService.findByEmail(email);
+        return ResponseEntity.ok(appointmentsService.findByDoctorId(doctor.getId()));
     }
 
     @PostMapping("/me/exceptions")

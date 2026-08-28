@@ -54,21 +54,19 @@ public class PatientsService {
     }
 
     public User save(User patient) {
-        patient.setPhone(this.normalizePhone(patient.getPhone()));
+        patient.setPhone(patient.getPhone());
         return repo.save(patient);
     }
 
 
-    public List<UserDto> findSlotByUserPhone(String phoneNumber) {
-        String normalized = normalizePhone(phoneNumber);
-        List<User> users = this.repo.findByPhoneLastFiveDigits(normalized);
+    public UserDto findSlotByUserPhone(String phoneNumber) {
+        Optional<User> user = this.repo.findByPhoneNumber(phoneNumber);
 
-        List<UserDto> dtos = new ArrayList<>();
-        for (var user : users) {
-            dtos.add(toDto(user));
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("No such user");
         }
 
-        return dtos;
+        return toDto(user.get());
     }
 
 
@@ -79,5 +77,12 @@ public class PatientsService {
                 user.getPhone(),
                 user.getEmail()
         );
+    }
+
+    public UserDto findByPhone(String phone) {
+        String normalized = normalizePhone(phone);
+        User user = repo.findByPhoneNumber(normalized)
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
+        return toDto(user);
     }
 }

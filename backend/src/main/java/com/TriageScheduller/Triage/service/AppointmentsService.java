@@ -10,6 +10,7 @@ import com.TriageScheduller.Triage.repo.AppointmentsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -81,5 +82,21 @@ public class AppointmentsService {
                 null,
                 appointment.getPriority()
         );
+    }
+
+    public List<AppointmentDto> findByDoctorId(Long id) {
+        List<AppointmentDto> dtos = new ArrayList<>();
+        for (var appointment: this.appointmentsRepo.findByDoctorId(id)) {
+            dtos.add(toDto(appointment));
+        }
+        return dtos;
+    }
+
+    public @Nullable List<AppointmentDto> findAll() {
+        List<AppointmentDto> dtos = new ArrayList<>();
+        for (var appointment: this.appointmentsRepo.findAll()) {
+            dtos.add(toDto(appointment));
+        }
+        return dtos;
     }
 }
