@@ -11,6 +11,8 @@ import com.TriageScheduller.Triage.service.StaffService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,6 +30,12 @@ public class StaffController {
         this.slotsService = slotsService;
         this.appointmentsService = appointmentsService;
     }
+
+    @GetMapping("/api/staff/appointments/{date}")
+    public ResponseEntity<List<AppointmentDto>> getAppointmentsForTheDay(@PathVariable LocalDate date) {
+        return ResponseEntity.status(200).body(this.appointmentsService.getAppointmentsForTheDay(date));
+    }
+
 
     @PutMapping("/slots/{slotId}/assign")
     public ResponseEntity<SlotDto> changePatientFromStaffWithPatientByPhone(

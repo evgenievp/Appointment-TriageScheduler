@@ -18,7 +18,7 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
 
     @Query("SELECT s FROM Slot s WHERE s.doctor.id = :doctorId " +
             "AND s.startsAt BETWEEN :from AND :to " +
-            "AND s.status = 'FREE'")   // ← промяна
+            "AND s.status = 'FREE'")
     List<Slot> findFreeSlots(@Param("doctorId") Long doctorId,
                              @Param("from") LocalDateTime from,
                              @Param("to") LocalDateTime to);

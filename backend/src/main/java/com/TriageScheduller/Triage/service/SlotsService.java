@@ -170,6 +170,8 @@ public class SlotsService {
         appointment.setPatient(patient);
         appointment.setDoctor(slot.getDoctor());
         appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointment.setPatientName(patient.getName());
+        appointment.setPatientPhone(appointment.getPatientPhone());
         return appointmentsRepo.save(appointment);
     }
 
@@ -305,7 +307,9 @@ public class SlotsService {
                 appointment.getSlot().getStartsAt(),
                 appointment.getStatus(),
                 null,
-                appointment.getPriority()
+                appointment.getPriority(),
+                appointment.getPatientName(),
+                appointment.getPatientPhone()
         );
     }
 

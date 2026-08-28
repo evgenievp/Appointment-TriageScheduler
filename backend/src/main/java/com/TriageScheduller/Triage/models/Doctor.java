@@ -12,6 +12,7 @@ public class Doctor {
     private String name;
     private String speciality;
     private Role role = Role.DOCTOR;
+    private String email;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
@@ -20,10 +21,11 @@ public class Doctor {
     protected Doctor() {
     }
 
-    public Doctor(Long id, String speciality, String name) {
+    public Doctor(Long id, String speciality, String name, String email) {
         this.id = id;
         this.speciality = speciality;
         this.name = name;
+        this.email = email;
     }
 
     public Doctor(String name, String speciality) {
@@ -36,6 +38,23 @@ public class Doctor {
         this.name = name;
         this.speciality = speciality;
         this.role = role;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Long getId() {

@@ -8,12 +8,14 @@ import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
+import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
 import jakarta.persistence.EntityNotFoundException;
 import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -29,14 +32,18 @@ public class AppointmentsService {
     private final SlotsRepo slotsRepo;
     private final SlotsService slotsService;
     private final PatientsRepo patientsRepo;
+    private final DoctorsRepo doctorsRepo;
 
     public AppointmentsService(AppointmentsRepo appointmentsRepo,
                                SlotsRepo slotsRepo,
-                               SlotsService slotsService, PatientsRepo patientsRepo) {
+                               SlotsService slotsService,
+                               PatientsRepo patientsRepo,
+                               DoctorsRepo doctorsRepo) {
         this.appointmentsRepo = appointmentsRepo;
         this.slotsRepo = slotsRepo;
         this.slotsService = slotsService;
         this.patientsRepo = patientsRepo;
+        this.doctorsRepo = doctorsRepo;
     }
 
     public Appointment createAppointment(Long slotId, User patient, Doctor doctor) {
@@ -146,5 +153,18 @@ public class AppointmentsService {
             dtos.add(toDto(appointment));
         }
         return dtos;
+    }
+
+    public List<AppointmentDto> findByDoctorAuthentication(Authentication authentication) {
+
+        Doctor doctor = this.doctorsRepo.findByEmail(authentication.getName())
+                .orElseThrow(() -> new EntityNotFoundException("No such doctor"));
+        List<AppointmentDto> dtos = new ArrayList<>();
+
+        for (var appointment : this.appointmentsRepo.findByDoctorId(doctor.getId())) {
+            dtos.add(toDto(appointment));
+        }
+        return dtos;
+
     }
 }
