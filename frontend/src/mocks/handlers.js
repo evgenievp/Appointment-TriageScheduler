@@ -313,19 +313,17 @@ export const handlers = [
     );
   }),
 
-  ...handle('get', '/api/staff/appointments', async ({ request }) => {
+  // Всички резервации наведнъж; пресяването по ден е при викащия. Има и
+  // ендпойнт за един ден, но той е на удвоен път (`@GetMapping` повтаря префикса
+  // на класа), затова не се ползва.
+  ...handle('get', '/api/staff/all', async ({ request }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();
     if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
     await delay(LATENCY);
 
-    const date = new URL(request.url).searchParams.get('date');
-    const onDate = date
-      ? appointments.filter((a) => a.appointmentTime.startsWith(date))
-      : appointments;
-
     return HttpResponse.json(
-      [...onDate]
+      [...appointments]
         .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime))
         .map(toAppointmentDto),
     );

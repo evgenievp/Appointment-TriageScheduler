@@ -25,9 +25,11 @@ export default function PriorityQueue({ selectedId, onPick, actions }) {
   const { t, i18n } = useTranslation();
   const now = useNow();
 
+  // Същият ключ като на таблото: сървърът връща всички резервации наведнъж и
+  // двата изгледа четат от един отговор, вместо да го теглят по два пъти.
   const { data } = useQuery({
-    queryKey: ['appointments', 'staff', 'all'],
-    queryFn: () => getStaffAppointments(),
+    queryKey: ['appointments', 'staff'],
+    queryFn: getStaffAppointments,
   });
 
   // A visit that has already happened needs nothing from reception.
