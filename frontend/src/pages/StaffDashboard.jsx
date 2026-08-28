@@ -31,14 +31,17 @@ export default function StaffDashboard() {
     setSelectedId(appointment.appointmentId);
   };
 
+  // Сървърът връща всички резервации наведнъж, затова ключът не носи датата:
+  // смяната на деня не тръгва по мрежата, а само пресява вече взетото. Същият
+  // отговор ползва и опашката със спешните.
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ['appointments', 'staff', date],
-    queryFn: () => getStaffAppointments(date),
+    queryKey: ['appointments', 'staff'],
+    queryFn: getStaffAppointments,
   });
 
-  const appointments = [...(data ?? [])].sort((a, b) =>
-    a.appointmentTime.localeCompare(b.appointmentTime),
-  );
+  const appointments = (data ?? [])
+    .filter((a) => a.appointmentTime.startsWith(date))
+    .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
 
   const at = new Date(`${date}T00:00:00`);
   const shift = (days) => setPicked(shiftDateInput(date, days));
