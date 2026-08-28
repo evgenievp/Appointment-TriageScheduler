@@ -29,6 +29,7 @@ import { useNow } from '../../lib/useNow';
 // the urgent panel — so picking a case up there is visible down here too.
 
 const tones = { CONFIRMED: 'blue', CANCELLED: 'neutral', DONE: 'free' };
+const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
 
 export default function AppointmentsList({
   appointments,
@@ -117,6 +118,23 @@ export default function AppointmentsList({
               ...(isPast ? { background: 'var(--surface-sunken)' } : null),
               ...(isHighlighted ? { borderColor: 'var(--danger)' } : null),
             }}
+            // Само за персонала: те се обаждат на хората, а номерът не се
+            // виждаше никъде. Пациентът вижда своя лекар, не своя телефон.
+            meta={
+              variant === 'staff' &&
+              appointment.patientPhone && (
+                <div
+                  style={{
+                    ...mono,
+                    fontSize: 'var(--text-body-sm)',
+                    color: 'var(--text-strong-muted)',
+                    marginTop: 'var(--space-1)',
+                  }}
+                >
+                  {appointment.patientPhone}
+                </div>
+              )
+            }
             status={
               <span
                 style={{
