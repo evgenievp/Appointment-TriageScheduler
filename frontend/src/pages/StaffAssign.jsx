@@ -73,14 +73,15 @@ export default function StaffAssign() {
 
   const search = useMutation({
     mutationFn: () => findPatientByPhone(normalized),
-    onSuccess: setFound,
+    // `null` при празен резултат се държи като ненамерен, а не като успех.
+    onSuccess: (patient) => setFound(patient ?? null),
   });
 
   // Сървърът не различава „няма такъв пациент“ от повреда — и двете идват като
   // 500. Затова всяка грешка води до един и същ изход: ръчно въведени име и
   // телефон. Скриването му при провал би оставило служителя без ход насред
   // разговор.
-  const notFound = search.isError;
+  const notFound = search.isError || (search.isSuccess && !found);
 
   const give = useMutation({
     mutationFn: () => assignSlot(held.slotId, normalized),
