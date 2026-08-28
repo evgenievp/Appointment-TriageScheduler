@@ -14,8 +14,14 @@ import { request } from './client';
 // от истинска грешка: и в двата случая пътят напред е ръчно въведени име и
 // телефон. Номерът се праща в E.164; този ендпойнт не нормализира входа (за
 // разлика от `assign`), тоест номер с интервали би гръмнал.
-export const findPatientByPhone = (phone) =>
-  request(`/staff/patient/${encodeURIComponent(phone)}`);
+// Приема и списък: `users.phone` няма уникален индекс и регистрацията не го
+// проверява, тоест два профила с един номер са възможни. Днес това дава 500,
+// защото `findByPhone` връща `Optional`; щом го поправят на списък, тук нищо
+// не се променя.
+export const findPatientByPhone = async (phone) => {
+  const found = await request(`/staff/patient/${encodeURIComponent(phone)}`);
+  return Array.isArray(found) ? (found[0] ?? null) : found;
+};
 
 // SlotDto. Прехвърля задържания час на пациента, намерен по телефон.
 //
