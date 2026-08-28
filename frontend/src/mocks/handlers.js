@@ -331,10 +331,12 @@ export const handlers = [
     );
   }),
 
-  // Търсене на пациент по телефон. Точно съвпадение върху E.164 — така се иска
-  // от бекенда. Днешната заявка там е `RIGHT(u.phone, 5) = :lastFiveDigits`, на
-  // която се подава пълният номер, тоест не съвпада с нищо и връща празен списък
-  // за всеки вход.
+  // Търсене на пациент по телефон — точно съвпадение върху E.164. Връща един
+  // UserDto, не списък: съвпадението е точно, значи резултатът е най-много един.
+  //
+  // Разминаване с бекенда, оставено нарочно: там ненамерен идва като 500, защото
+  // `findSlotByUserPhone` хвърля `EntityNotFoundException`. Тук е 404, както се
+  // иска от тях. За викащия няма разлика — и двете са грешка.
   ...handle('get', '/api/staff/patient/:phone', async ({ request, params }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();
@@ -342,17 +344,21 @@ export const handlers = [
     await delay(LATENCY);
 
     const phone = decodeURIComponent(params.phone);
-    return HttpResponse.json(
-      users
-        .filter((u) => u.role === 'PATIENT' && u.phone === phone)
-        .map((u) => ({ id: u.id, name: u.name, phone: u.phone, email: u.email })),
-    );
+    const found = users.find((u) => u.role === 'PATIENT' && u.phone === phone);
+    if (!found) return new HttpResponse('No such user', { status: 404 });
+
+    return HttpResponse.json({
+      id: found.id,
+      name: found.name,
+      phone: found.phone,
+      email: found.email,
+    });
   }),
 
-  // Прехвърляне на задържания час. Бекендът днес не приема на кого: взима
-  // пациента от токена, тоест прехвърля на самия викащ, и пипа само
-  // `slot.patientId`, докато резервацията остава на служителя. Тук е мокнато
-  // договореното — местят се и двете.
+  // Прехвърляне на задържания час. Пациентът идва като `?phone=`, не в тялото —
+  // сървърът го търси наново, вместо да приеме ид-то, което търсенето вече е
+  // върнало. Затова непознат номер е грешка: пациент без профил още не се
+  // поддържа, макар полетата за име и телефон да съществуват.
   ...handle('put', '/api/staff/slots/:slotId/assign', async ({ request, params }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();
@@ -366,23 +372,26 @@ export const handlers = [
     const appointment = appointments.find((a) => a.slotId === slotId);
     if (!appointment) return new HttpResponse('Slot is not booked', { status: 404 });
 
-    const { patientId, name, phone } = await request.json();
+    const phone = new URL(request.url).searchParams.get('phone');
+    const patient = users.find((u) => u.phone === phone);
+    if (!patient) return new HttpResponse('No such user', { status: 404 });
 
-    if (patientId != null) {
-      const patient = users.find((u) => u.id === patientId);
-      if (!patient) return new HttpResponse('No such user', { status: 404 });
+    // Резервацията се мести, не се пресъздава: id-то, триажът и приоритетът
+    // остават. Името и телефонът се обновяват заедно с пациента — иначе часът
+    // продължава да носи името на служителя.
+    slot.patientId = patient.id;
+    appointment.patientId = patient.id;
+    appointment.patientName = patient.name;
+    appointment.patientPhone = patient.phone;
 
-      slot.patientId = patient.id;
-      appointment.patientId = patient.id;
-      appointment.contactName = null;
-      appointment.contactPhone = null;
-    } else {
-      // Нерегистриран: часът остава на служителя, но носи име и телефон.
-      appointment.contactName = name;
-      appointment.contactPhone = phone;
-    }
-
-    return HttpResponse.json(toAppointmentDto(appointment));
+    return HttpResponse.json({
+      id: slot.id,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      status: slot.status,
+      doctorId: slot.doctorId,
+      patientId: slot.patientId,
+    });
   }),
 
   ...handle('post', '/api/triage/:appointmentId', async ({ request, params }) => {

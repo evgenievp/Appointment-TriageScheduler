@@ -16,7 +16,7 @@ import {
 } from '../components/ds';
 import { cancelAppointment, getMyAppointments } from '../api/appointments';
 import { getDoctors } from '../api/doctors';
-import { assignSlot, findPatientsByPhone } from '../api/staff';
+import { assignSlot, findPatientByPhone } from '../api/staff';
 import { countries, DEFAULT_COUNTRY, isValidPhone, toE164 } from '../lib/phone';
 import { formatDayLong, fromLocalDateTime } from '../lib/dates';
 import { useToast } from '../lib/toastContext';
@@ -41,7 +41,8 @@ export default function StaffAssign() {
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
-  // null — още не е търсено; масив — резултатът от последното търсене.
+  // null — още не е търсено; обект — намереният пациент. Ненамерен не се пази
+  // тук, а в `search.isError`: сървърът връща 500, не празен резултат.
   const [found, setFound] = useState(null);
 
   const countryList = useMemo(() => countries(i18n.resolvedLanguage), [i18n.resolvedLanguage]);
@@ -71,21 +72,21 @@ export default function StaffAssign() {
     });
 
   const search = useMutation({
-    mutationFn: () => findPatientsByPhone(normalized),
+    mutationFn: () => findPatientByPhone(normalized),
     onSuccess: setFound,
   });
 
-  // Ръчното записване не бива да зависи от това дали търсенето е успяло. Днес
-  // ендпойнтът за търсене е счупен в бекенда и връща празно за всеки номер;
-  // ако при провал скриехме и полето за име, служителят оставаше без изход.
-  const noAccount = found?.length === 0;
-  const searchBroke = search.isError;
+  // Сървърът не различава „няма такъв пациент“ от повреда — и двете идват като
+  // 500. Затова всяка грешка води до един и същ изход: ръчно въведени име и
+  // телефон. Скриването му при провал би оставило служителя без ход насред
+  // разговор.
+  const notFound = search.isError;
 
   const give = useMutation({
-    mutationFn: (target) => assignSlot(held.slotId, target),
-    onSuccess: (_, target) =>
+    mutationFn: () => assignSlot(held.slotId, normalized),
+    onSuccess: () =>
       done('staffBooking.assign.doneTitle', 'staffBooking.assign.doneMessage', {
-        name: target.name ?? found?.find((p) => p.id === target.patientId)?.name,
+        name: found?.name ?? name.trim(),
       }),
     onError: failed,
   });
@@ -229,49 +230,44 @@ export default function StaffAssign() {
           </Button>
         </form>
 
-        {found?.length > 0 && (
-          <div style={{ marginTop: 'var(--space-6)', display: 'grid', gap: 'var(--space-3)' }}>
-            {found.map((patient) => (
-              <Card key={patient.id}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 'var(--space-4)',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 'var(--fw-semibold)', color: 'var(--navy-900)' }}>
-                      {patient.name}
-                    </div>
-                    <div style={{ ...mono, marginTop: 'var(--space-2)', color: 'var(--text-muted)' }}>
-                      {patient.phone}
-                    </div>
-                  </div>
-                  <Button
-                    disabled={busy}
-                    onClick={() => give.mutate({ patientId: patient.id })}
-                    iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
-                  >
-                    {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.give')}
-                  </Button>
+        {found && (
+          <Card style={{ marginTop: 'var(--space-6)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 'var(--space-4)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 'var(--fw-semibold)', color: 'var(--navy-900)' }}>
+                  {found.name}
                 </div>
-              </Card>
-            ))}
-          </div>
+                <div style={{ ...mono, marginTop: 'var(--space-2)', color: 'var(--text-muted)' }}>
+                  {found.phone}
+                </div>
+              </div>
+              <Button
+                disabled={busy}
+                onClick={() => give.mutate()}
+                iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
+              >
+                {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.give')}
+              </Button>
+            </div>
+          </Card>
         )}
 
-        {/* Ненамерен не значи край на разговора: часът се записва на име и
-            телефон и остава да се води на служителя. Същото важи и когато самото
-            търсене се провали — тогава просто не знаем дали има профил. */}
-        {(noAccount || searchBroke) && (
+        {/* Ненамерен и „търсенето гръмна“ са едно и също нещо откъм сървъра —
+            и двете са 500. Разговорът обаче продължава: часът се записва на име
+            и телефон. Срещу днешния бекенд бутонът ще гръмне, защото `assign`
+            приема само телефон на съществуващ пациент. */}
+        {notFound && (
           <Card style={{ marginTop: 'var(--space-6)' }}>
             <h2 style={{ fontSize: 'var(--text-h4)' }}>
-              {t(searchBroke
-                ? 'staffBooking.assign.searchBrokeTitle'
-                : 'staffBooking.assign.notFoundTitle')}
+              {t('staffBooking.assign.notFoundTitle')}
             </h2>
             <p
               style={{
@@ -280,9 +276,7 @@ export default function StaffAssign() {
                 marginBottom: 'var(--space-4)',
               }}
             >
-              {t(searchBroke
-                ? 'staffBooking.assign.searchBrokeText'
-                : 'staffBooking.assign.notFoundText')}
+              {t('staffBooking.assign.notFoundText')}
             </p>
             <Input
               label={t('staffBooking.assign.name')}
@@ -293,7 +287,7 @@ export default function StaffAssign() {
             />
             <Button
               disabled={!name.trim() || busy}
-              onClick={() => give.mutate({ name: name.trim(), phone: normalized })}
+              onClick={() => give.mutate()}
               style={{ marginTop: 'var(--space-4)' }}
             >
               {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.saveGuest')}

@@ -75,11 +75,11 @@ export function toAppointmentDto(appointment) {
     appointmentId: appointment.id,
     slotId: appointment.slotId,
     patientId: appointment.patientId,
-    // Контактните полета бият релацията. При нерегистриран пациент часът стои на
-    // служителя — `patient_id` е `nullable = false` — но списъците трябва да
-    // показват човека, който ще дойде, не онзи, който е вдигнал телефона.
-    patientName: appointment.contactName ?? patient?.name ?? null,
-    patientPhone: appointment.contactPhone ?? patient?.phone ?? null,
+    // Бекендът пази името и телефона върху самата резервация, а не ги чете през
+    // релацията — за да може един ден да носи и пациент без профил. Тук е същото,
+    // с връщане към релацията за резервациите от сийда.
+    patientName: appointment.patientName ?? patient?.name ?? null,
+    patientPhone: appointment.patientPhone ?? patient?.phone ?? null,
     doctorId: appointment.doctorId,
     doctorName: doctors.find((d) => d.id === appointment.doctorId)?.name ?? null,
     appointmentTime: appointment.appointmentTime,
