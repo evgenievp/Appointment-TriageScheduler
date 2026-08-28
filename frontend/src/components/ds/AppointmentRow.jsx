@@ -7,6 +7,7 @@ export default function AppointmentRow({
   doctor,
   specialty,
   location,
+  meta,
   status,
   actions,
   style,
@@ -75,6 +76,9 @@ export default function AppointmentRow({
         >
           {[specialty, location].filter(Boolean).join(' · ')}
         </div>
+        {/* Добавено спрямо оригинала: втората линия слепва низове, а телефонът
+            трябва да е в mono — затова се подава като възел, не като текст. */}
+        {meta}
       </div>
       {status}
       {actions && <div style={{ display: 'flex', gap: 'var(--space-2)' }}>{actions}</div>}

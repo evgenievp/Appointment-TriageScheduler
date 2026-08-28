@@ -102,6 +102,7 @@ export default function PriorityQueue({ selectedId, onPick, actions }) {
                 appointment.patientName ??
                 t('appointments.patientFallback', { id: appointment.patientId })
               }
+              phone={appointment.patientPhone}
               reason={triage ? reasonOf(triage.answers) : t('staffQueue.noTriage')}
               score={triage ? `${triage.score}/${MAX_SCORE}` : undefined}
               scoreLabel={t('staffQueue.score')}

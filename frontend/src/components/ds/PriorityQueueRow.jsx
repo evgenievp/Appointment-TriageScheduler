@@ -9,7 +9,8 @@
 //
 // Добавено спрямо оригинала: при `onClick` редът става достижим с клавиатура
 // (role/tabIndex/Enter/Space), а действията отдясно спират разпространението —
-// иначе клик по „Откажете“ щеше да задейства и самия ред.
+// иначе клик по „Откажете“ щеше да задейства и самия ред. И `phone` — целият
+// смисъл на опашката е да се обадиш, а номерът го нямаше никъде.
 
 const priorities = {
   urgent: { background: 'var(--danger)', label: 'P1' },
@@ -22,6 +23,7 @@ export default function PriorityQueueRow({
   score,
   scoreLabel,
   patient,
+  phone,
   reason,
   waiting,
   actions,
@@ -80,12 +82,33 @@ export default function PriorityQueueRow({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 'var(--text-body-md)',
-            fontWeight: 'var(--fw-semibold)',
-            color: 'var(--navy-900)',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 'var(--space-3)',
+            flexWrap: 'wrap',
           }}
         >
-          {patient}
+          <span
+            style={{
+              fontSize: 'var(--text-body-md)',
+              fontWeight: 'var(--fw-semibold)',
+              color: 'var(--navy-900)',
+            }}
+          >
+            {patient}
+          </span>
+          {phone && (
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 'var(--fw-mono)',
+                fontSize: 'var(--text-body-sm)',
+                color: 'var(--text-strong-muted)',
+              }}
+            >
+              {phone}
+            </span>
+          )}
         </div>
         {reason && (
           <div
