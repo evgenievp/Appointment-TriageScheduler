@@ -56,18 +56,30 @@ export const isSameDay = (a, b) =>
   a.getDate() === b.getDate();
 
 /** "пн" / "Mon" — според избрания език. */
+/** Нативните полета за дата изпразват `value`, докато датата е непълна — един
+ *  клавиш в годината стига. Тогава `new Date('T00:00:00')` е Invalid Date, а
+ *  `Intl` хвърля `Invalid time value` и сваля целия екран в ErrorBoundary.
+ *  Затова форматиращите се държат тихо: липсваща дата е тире, не срив. */
+const isValidDate = (date) => date instanceof Date && !Number.isNaN(date.getTime());
+const NO_DATE = '—';
+
 export const formatWeekday = (date, locale) =>
-  new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date);
+  isValidDate(date)
+    ? new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date)
+    : NO_DATE;
 
 /** "13.08" / "13/08" — според избрания език. */
 export const formatDayMonth = (date, locale) =>
-  new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit' }).format(date);
+  isValidDate(date)
+    ? new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit' }).format(date)
+    : NO_DATE;
 
 /** "26 АВГ" / "26 AUG" — датата в AppointmentRow.
  *  Сглобява се на ръка: `month: 'short'` дава "26.08" на български, без име на
  *  месец. Отрязването до три букви е вярно и за двата ни езика (ЯНУ ФЕВ МАР…,
  *  JAN FEB MAR…); при добавяне на трети език се проверява наново. */
 export const formatDayShort = (date, locale) => {
+  if (!isValidDate(date)) return NO_DATE;
   const day = new Intl.DateTimeFormat(locale, { day: 'numeric' }).format(date);
   const month = new Intl.DateTimeFormat(locale, { month: 'long' }).format(date);
   return `${day} ${month.slice(0, 3).toUpperCase()}`;
@@ -75,7 +87,11 @@ export const formatDayShort = (date, locale) => {
 
 /** "13 август" / "13 August" — за заглавието на седмицата. */
 export const formatDayLong = (date, locale) =>
-  new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(date);
+  isValidDate(date)
+    ? new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(date)
+    : NO_DATE;
 
 export const formatTime = (date, locale) =>
-  new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(date);
+  isValidDate(date)
+    ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(date)
+    : NO_DATE;

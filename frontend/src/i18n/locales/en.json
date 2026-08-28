@@ -3,7 +3,8 @@
     "clinicName": "Sirma Clinic",
     "documentTitle": "Sirma Clinic — book an appointment",
     "loading": "Loading",
-    "retry": "Try again"
+    "retry": "Try again",
+    "pickDate": "Pick a date"
   },
   "auth": {
     "errors": {

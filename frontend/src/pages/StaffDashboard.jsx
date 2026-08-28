@@ -6,7 +6,7 @@ import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
 import PriorityQueue from '../components/staff/PriorityQueue';
-import { Button, Icon, Input, Select } from '../components/ds';
+import { Button, DatePicker, Icon, Select } from '../components/ds';
 import { getStaffAppointments } from '../api/appointments';
 import { getDoctors } from '../api/doctors';
 import { formatDayLong, formatWeekday, shiftDateInput, toDateInput } from '../lib/dates';
@@ -124,12 +124,13 @@ export default function StaffDashboard() {
             {t('pages.staffDashboard.next')} →
           </Button>
           <div className="staff-daybar__date">
-            <Input
-              type="date"
-              mono
-              aria-label={t('pages.staffDashboard.pickDate')}
+            <DatePicker
+              label={t('pages.staffDashboard.pickDate')}
               value={date}
-              onChange={(event) => setPicked(event.target.value)}
+              onChange={setPicked}
+              // Полето е долепено вдясно — панелът се отваря наляво от него,
+              // иначе излиза извън екрана.
+              align="right"
             />
           </div>
         </div>
