@@ -14,7 +14,9 @@ public record AppointmentDto(
         LocalDateTime appointmentTime,
         AppointmentStatus status,
         String notes,
-        Priority priority
+        Priority priority,
+        String patientName,
+        String patientPhone
 ) {
 
     public AppointmentDto(
@@ -23,7 +25,9 @@ public record AppointmentDto(
             Long doctorId,
             LocalDateTime appointmentTime,
             String notes,
-            Priority priority) {
+            Priority priority,
+            String patientName,
+            String patientPhone) {
         this(
                 null,
                 slotId,
@@ -32,7 +36,9 @@ public record AppointmentDto(
                 appointmentTime,
                 AppointmentStatus.CONFIRMED,
                 notes,
-                priority
+                priority,
+                patientName,
+                patientPhone
         );
     }
 }

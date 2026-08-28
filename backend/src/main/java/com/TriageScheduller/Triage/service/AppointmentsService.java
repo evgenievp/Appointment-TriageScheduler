@@ -12,16 +12,16 @@ import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
-import com.TriageScheduller.Triage.utils.Status;
 import jakarta.persistence.EntityNotFoundException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class AppointmentsService {
@@ -88,7 +88,9 @@ public class AppointmentsService {
                 appointment.getSlot().getStartsAt(),
                 appointment.getStatus(),
                 null,
-                appointment.getPriority()
+                appointment.getPriority(),
+                appointment.getPatientName(),
+                appointment.getPatientPhone()
         );
     }
 
@@ -132,6 +134,15 @@ public class AppointmentsService {
     public @Nullable List<AppointmentDto> findAll() {
         List<AppointmentDto> dtos = new ArrayList<>();
         for (var appointment: this.appointmentsRepo.findAll()) {
+            dtos.add(toDto(appointment));
+        }
+        return dtos;
+    }
+
+    public List<AppointmentDto> getAppointmentsForTheDay(LocalDate date) {
+        List<AppointmentDto> dtos = new ArrayList<>();
+
+        for (var appointment : this.appointmentsRepo.findByDate(date)) {
             dtos.add(toDto(appointment));
         }
         return dtos;

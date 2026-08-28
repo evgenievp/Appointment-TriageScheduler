@@ -24,7 +24,29 @@ public class Appointment {
     private Priority priority;
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
     private TriageResults triageResult;
+    private String patientName;
+    private String patientPhone;
 
+
+    public Appointment(Long id,
+                       Slot slot,
+                       User patient,
+                       AppointmentStatus status,
+                       Doctor doctor,
+                       Priority priority,
+                       TriageResults triageResult,
+                       String patientName,
+                       String patientPhone) {
+        this.id = id;
+        this.slot = slot;
+        this.patient = patient;
+        this.status = status;
+        this.doctor = doctor;
+        this.priority = priority;
+        this.triageResult = triageResult;
+        this.patientName = patientName;
+        this.patientPhone = patientPhone;
+    }
 
     public Appointment(Long id,
                        Doctor doctor,
@@ -88,5 +110,29 @@ public class Appointment {
 
     public Doctor getDoctor() {
         return doctor;
+    }
+
+    public TriageResults getTriageResult() {
+        return triageResult;
+    }
+
+    public void setTriageResult(TriageResults triageResult) {
+        this.triageResult = triageResult;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public String getPatientPhone() {
+        return patientPhone;
+    }
+
+    public void setPatientPhone(String patientPhone) {
+        this.patientPhone = patientPhone;
     }
 }
