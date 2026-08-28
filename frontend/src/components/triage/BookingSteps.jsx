@@ -4,7 +4,10 @@ import { Stepper } from '../ds';
 // Трите стъпки на записването, в реда, който обещава началната страница.
 // Стои на едно място, защото се показва на три различни страници и разминаване
 // в надписите щеше да се забележи веднага.
-export default function BookingSteps({ current, style }) {
+//
+// Регистратурата минава по същия път, но има четвърта стъпка: часът се задържа
+// на служителя и чак после отива при пациента.
+export default function BookingSteps({ current, style, forStaff }) {
   const { t } = useTranslation();
 
   return (
@@ -13,6 +16,7 @@ export default function BookingSteps({ current, style }) {
         t('booking.steps.triage'),
         t('booking.steps.doctor'),
         t('booking.steps.time'),
+        ...(forStaff ? [t('booking.steps.patient')] : []),
       ]}
       current={current}
       labels={{

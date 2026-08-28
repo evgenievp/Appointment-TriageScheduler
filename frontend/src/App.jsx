@@ -16,6 +16,7 @@ import MyAppointments from './pages/MyAppointments';
 import DoctorAppointments from './pages/DoctorAppointments';
 import DoctorSlots from './pages/DoctorSlots';
 import NotFound from './pages/NotFound';
+import StaffAssign from './pages/StaffAssign';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffNewBooking from './pages/StaffNewBooking';
 
@@ -83,6 +84,14 @@ export default function App() {
                 element={
                   <RequireAuth role="STAFF">
                     <StaffNewBooking />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/staff/assign/:id"
+                element={
+                  <RequireAuth role="STAFF">
+                    <StaffAssign />
                   </RequireAuth>
                 }
               />
