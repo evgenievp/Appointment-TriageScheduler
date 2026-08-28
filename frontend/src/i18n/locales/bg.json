@@ -373,6 +373,10 @@
       "pickDate": "Изберете дата",
       "emptyTitle": "Няма записани часове за този ден",
       "emptyText": "Вижте съседен ден или изберете дата.",
+      "doctorFilter": "Лекар",
+      "allDoctors": "Всички лекари",
+      "emptyForDoctorTitle": "Няма часове при този лекар",
+      "emptyForDoctorText": "Изберете друг лекар или ден.",
       "newByPhone": "Запишете по телефона"
     },
     "staffNewBooking": {

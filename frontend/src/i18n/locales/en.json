@@ -373,6 +373,10 @@
       "pickDate": "Pick a date",
       "emptyTitle": "No visits booked for this day",
       "emptyText": "Try a neighbouring day or pick a date.",
+      "doctorFilter": "Doctor",
+      "allDoctors": "All doctors",
+      "emptyForDoctorTitle": "No visits with this doctor",
+      "emptyForDoctorText": "Pick another doctor or day.",
       "newByPhone": "Book by phone"
     },
     "staffNewBooking": {
