@@ -110,21 +110,16 @@ public class AppointmentsService {
         Slot slot = slotsRepo.findById(slotId)
                 .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
 
-        Appointment oldAppointment = appointmentsRepo.findBySlotId(slotId)
+        Appointment appointment = appointmentsRepo.findBySlotId(slotId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        appointmentsRepo.delete(oldAppointment);
 
         slot.setPatientId(newPatientId);
         slotsRepo.save(slot);
 
-        Appointment newAppointment = new Appointment();
-        newAppointment.setSlot(slot);
-        newAppointment.setPatient(newPatient);
-        newAppointment.setDoctor(slot.getDoctor());
-        newAppointment.setStatus(AppointmentStatus.CONFIRMED);
-        newAppointment.setPriority(Priority.NORMAL);
-        appointmentsRepo.save(newAppointment);
+        appointment.setPatient(newPatient);
+
+        appointmentsRepo.save(appointment);
 
         return slotsService.toDto(slot);
 
