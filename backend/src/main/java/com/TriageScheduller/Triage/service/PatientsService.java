@@ -60,7 +60,7 @@ public class PatientsService {
 
 
     public UserDto findSlotByUserPhone(String phoneNumber) {
-        Optional<User> user = this.repo.findByPhoneNumber(phoneNumber);
+        Optional<User> user = this.repo.findByPhone(phoneNumber);
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("No such user");
@@ -81,7 +81,7 @@ public class PatientsService {
 
     public UserDto findByPhone(String phone) {
         String normalized = normalizePhone(phone);
-        User user = repo.findByPhoneNumber(normalized)
+        User user = repo.findByPhone(normalized)
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         return toDto(user);
     }
