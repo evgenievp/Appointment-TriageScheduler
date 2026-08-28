@@ -429,8 +429,6 @@
       "giving": "Transferring…",
       "notFoundTitle": "No account with this number",
       "notFoundText": "Record the slot against a name and phone — it stays with you on the dashboard.",
-      "searchBrokeTitle": "The search did not respond",
-      "searchBrokeText": "Record the slot against a name and phone.",
       "name": "Full name",
       "saveGuest": "Record the slot for them",
       "doneTitle": "The slot was transferred",
