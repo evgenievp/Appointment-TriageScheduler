@@ -30,12 +30,12 @@ public class StaffController {
     }
 
     @PutMapping("/slots/{slotId}/assign")
-    public ResponseEntity<SlotDto> changePatientByPhone(
+    public ResponseEntity<SlotDto> changePatientFromStaffWithPatientByPhone(
             @PathVariable Long slotId,
             @RequestParam String phone) {
 
         UserDto patient = patientsService.findByPhone(phone);
-
+        appointmentsService.changePatient(patient.id(), slotId);
         return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, patient.id()));
     }
 

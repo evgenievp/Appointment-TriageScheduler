@@ -1,17 +1,23 @@
 package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.AppointmentDto;
+import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.exception.ForbiddenException;
 import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.repo.AppointmentsRepo;
+import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
+import com.TriageScheduller.Triage.utils.Status;
+import jakarta.persistence.EntityNotFoundException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +28,15 @@ public class AppointmentsService {
     private final AppointmentsRepo appointmentsRepo;
     private final SlotsRepo slotsRepo;
     private final SlotsService slotsService;
+    private final PatientsRepo patientsRepo;
 
     public AppointmentsService(AppointmentsRepo appointmentsRepo,
                                SlotsRepo slotsRepo,
-                               SlotsService slotsService) {
+                               SlotsService slotsService, PatientsRepo patientsRepo) {
         this.appointmentsRepo = appointmentsRepo;
         this.slotsRepo = slotsRepo;
         this.slotsService = slotsService;
+        this.patientsRepo = patientsRepo;
     }
 
     public Appointment createAppointment(Long slotId, User patient, Doctor doctor) {
@@ -82,6 +90,35 @@ public class AppointmentsService {
                 null,
                 appointment.getPriority()
         );
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public SlotDto changePatient(Long newPatientId, Long slotId) {
+
+        User newPatient = patientsRepo.findById(newPatientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        Slot slot = slotsRepo.findById(slotId)
+                .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
+
+        Appointment oldAppointment = appointmentsRepo.findBySlotId(slotId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        appointmentsRepo.delete(oldAppointment);
+
+        slot.setPatientId(newPatientId);
+        slotsRepo.save(slot);
+
+        Appointment newAppointment = new Appointment();
+        newAppointment.setSlot(slot);
+        newAppointment.setPatient(newPatient);
+        newAppointment.setDoctor(slot.getDoctor());
+        newAppointment.setStatus(AppointmentStatus.CONFIRMED);
+        newAppointment.setPriority(Priority.NORMAL);
+        appointmentsRepo.save(newAppointment);
+
+        return slotsService.toDto(slot);
+
     }
 
     public List<AppointmentDto> findByDoctorId(Long id) {
