@@ -42,8 +42,10 @@
   --slot-col-min: 78px; /* под тази ширина колоната става нечетима */
   --slots-preview-height: 320px; /* прегледът по дни скролва след тази височина */
   --tab-indicator: 2px; /* подчертаването на активния раздел */
-  --date-field-width: 180px; /* поле за дата до бутони, за да не се разтяга */
+  --date-field-width: 200px; /* поле за дата до бутони, за да не се разтяга */
   --filter-field-width: 260px; /* падащ филтър над списък */
+  --datepicker-width: 300px; /* панелът с месеца */
+  --datepicker-cell: 36px; /* клетка за ден в него */
   --stepper-dot: 26px; /* номерираното кръгче в Stepper */
   --priority-chip-width: 34px; /* чипът P1/P2/P3 в PriorityQueueRow */
   --priority-time-width: 100px; /* дата и час вдясно в същия ред */
@@ -65,6 +67,7 @@
 
   /* --- Слоеве --------------------------------------------------------- */
   --z-header: 20;
+  --z-popover: 25; /* панел, закачен за поле — над хедъра, под диалога */
   --z-dialog: 30; /* над хедъра, под toast-а */
   --z-toast: 40; /* над sticky хедъра */
 
@@ -214,4 +217,115 @@
   .sirma-skeleton-block {
     animation: none;
   }
+}
+
+/* Изборът на дата. Кутията повтаря тази на `Input`, за да стоят на един ред
+   заедно; панелът е закачен под нея и затова иска свой слой. */
+.sirma-datepicker {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.sirma-datepicker__label {
+  display: block;
+  font-size: var(--text-body-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--navy-500);
+  margin-bottom: var(--space-2);
+}
+
+.sirma-datepicker__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  background: var(--white);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius);
+  padding: var(--field-padding);
+  color: var(--navy-900);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.sirma-datepicker__trigger:hover {
+  border-color: var(--border-strong);
+}
+
+.sirma-datepicker__trigger:focus-visible {
+  outline: 0;
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.sirma-datepicker__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: var(--z-popover);
+  width: var(--datepicker-width);
+  background: var(--white);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.sirma-datepicker__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.sirma-datepicker__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-size-sm);
+  height: var(--icon-btn-size-sm);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--navy-500);
+  cursor: pointer;
+}
+
+.sirma-datepicker__nav:hover {
+  background: var(--neutral-50);
+}
+
+.sirma-datepicker__weekdays,
+.sirma-datepicker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  justify-items: center;
+  gap: var(--space-1);
+}
+
+.sirma-datepicker__weekdays {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-caption);
+  color: var(--text-subtle);
+  text-transform: lowercase;
+}
+
+.sirma-datepicker__grid button:hover {
+  background: var(--neutral-50);
+}
+
+.sirma-datepicker__grid button:focus-visible {
+  outline: 0;
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.sirma-datepicker__hint {
+  display: block;
+  font-size: var(--text-caption);
+  margin-top: var(--space-2);
+  color: var(--text-muted);
 }

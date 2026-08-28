@@ -5,10 +5,10 @@ import {
   Badge,
   Button,
   Card,
+  DatePicker,
   ErrorState,
   Icon,
   IconButton,
-  Input,
   Select,
   Skeleton,
 } from '../ds';
@@ -159,12 +159,10 @@ export default function ExceptionDays({ onChange }) {
 
           <form onSubmit={submit} noValidate>
             <div className="slots-fields">
-              <Input
+              <DatePicker
                 label={t('pages.doctorSlots.exceptions.date')}
-                type="date"
-                mono
                 value={form.date}
-                onChange={set('date')}
+                onChange={(value) => setForm((current) => ({ ...current, date: value }))}
               />
               <Select
                 label={t('pages.doctorSlots.exceptions.reasonLabel')}

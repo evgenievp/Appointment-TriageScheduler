@@ -7,10 +7,10 @@ import {
   Badge,
   Button,
   Card,
+  DatePicker,
   EmptyState,
   ErrorState,
   Icon,
-  Input,
   Select,
 } from '../components/ds';
 import { getCurrentDoctor } from '../api/doctors';
@@ -144,19 +144,15 @@ export default function DoctorSlots() {
       <Card>
         <form onSubmit={submit} noValidate>
           <div className="slots-fields">
-            <Input
+            <DatePicker
               label={t('pages.doctorSlots.startDate')}
-              type="date"
-              mono
               value={form.startDate}
-              onChange={set('startDate')}
+              onChange={(value) => setForm((current) => ({ ...current, startDate: value }))}
             />
-            <Input
+            <DatePicker
               label={t('pages.doctorSlots.endDate')}
-              type="date"
-              mono
               value={form.endDate}
-              onChange={set('endDate')}
+              onChange={(value) => setForm((current) => ({ ...current, endDate: value }))}
             />
             <Select
               label={t('pages.doctorSlots.workStart')}
