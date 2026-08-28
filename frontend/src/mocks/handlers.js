@@ -331,6 +331,60 @@ export const handlers = [
     );
   }),
 
+  // Търсене на пациент по телефон. Точно съвпадение върху E.164 — така се иска
+  // от бекенда. Днешната заявка там е `RIGHT(u.phone, 5) = :lastFiveDigits`, на
+  // която се подава пълният номер, тоест не съвпада с нищо и връща празен списък
+  // за всеки вход.
+  ...handle('get', '/api/staff/patient/:phone', async ({ request, params }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const phone = decodeURIComponent(params.phone);
+    return HttpResponse.json(
+      users
+        .filter((u) => u.role === 'PATIENT' && u.phone === phone)
+        .map((u) => ({ id: u.id, name: u.name, phone: u.phone, email: u.email })),
+    );
+  }),
+
+  // Прехвърляне на задържания час. Бекендът днес не приема на кого: взима
+  // пациента от токена, тоест прехвърля на самия викащ, и пипа само
+  // `slot.patientId`, докато резервацията остава на служителя. Тук е мокнато
+  // договореното — местят се и двете.
+  ...handle('put', '/api/staff/slots/:slotId/assign', async ({ request, params }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const slotId = Number(params.slotId);
+    const slot = slots.find((s) => s.id === slotId);
+    if (!slot) return new HttpResponse('No such slot', { status: 404 });
+
+    const appointment = appointments.find((a) => a.slotId === slotId);
+    if (!appointment) return new HttpResponse('Slot is not booked', { status: 404 });
+
+    const { patientId, name, phone } = await request.json();
+
+    if (patientId != null) {
+      const patient = users.find((u) => u.id === patientId);
+      if (!patient) return new HttpResponse('No such user', { status: 404 });
+
+      slot.patientId = patient.id;
+      appointment.patientId = patient.id;
+      appointment.contactName = null;
+      appointment.contactPhone = null;
+    } else {
+      // Нерегистриран: часът остава на служителя, но носи име и телефон.
+      appointment.contactName = name;
+      appointment.contactPhone = phone;
+    }
+
+    return HttpResponse.json(toAppointmentDto(appointment));
+  }),
+
   ...handle('post', '/api/triage/:appointmentId', async ({ request, params }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();

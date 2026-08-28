@@ -69,11 +69,17 @@ export const appointments = [];
 // — without those the doctor and staff lists can only show ids.
 // The id field is `appointmentId`; only SlotDto uses a bare `id`.
 export function toAppointmentDto(appointment) {
+  const patient = users.find((u) => u.id === appointment.patientId);
+
   return {
     appointmentId: appointment.id,
     slotId: appointment.slotId,
     patientId: appointment.patientId,
-    patientName: users.find((u) => u.id === appointment.patientId)?.name ?? null,
+    // Контактните полета бият релацията. При нерегистриран пациент часът стои на
+    // служителя — `patient_id` е `nullable = false` — но списъците трябва да
+    // показват човека, който ще дойде, не онзи, който е вдигнал телефона.
+    patientName: appointment.contactName ?? patient?.name ?? null,
+    patientPhone: appointment.contactPhone ?? patient?.phone ?? null,
     doctorId: appointment.doctorId,
     doctorName: doctors.find((d) => d.id === appointment.doctorId)?.name ?? null,
     appointmentTime: appointment.appointmentTime,
@@ -215,13 +221,15 @@ export const triageResults = [];
 
 // Потребители за mock-натата автентикация. Паролите стоят в чист вид нарочно —
 // това е mock, не се доближава до нищо истинско.
+// Телефоните са E.164, както ги праща формата за регистрация. Търсенето на
+// пациент е точно съвпадение, тоест всеки друг запис просто не се намира.
 export const users = [
   {
     id: 1,
     email: 'maria@example.bg',
     password: 'sirma2026',
     name: 'Мария Илиева',
-    phone: '+359 88 123 4567',
+    phone: '+359881234567',
     role: 'PATIENT',
   },
   {
@@ -229,7 +237,7 @@ export const users = [
     email: 'staff@example.bg',
     password: 'sirma2026',
     name: 'Регистратура',
-    phone: '+359 2 900 0000',
+    phone: '+35929000000',
     role: 'STAFF',
   },
   // The backend cannot create a doctor account — registration always makes a
@@ -239,7 +247,7 @@ export const users = [
     email: 'doctor@example.bg',
     password: 'sirma2026',
     name: 'Д-р Иванов',
-    phone: '+359 2 900 0001',
+    phone: '+35929000001',
     role: 'DOCTOR',
     doctorId: 1,
   },
@@ -248,7 +256,7 @@ export const users = [
     email: 'ivan@example.bg',
     password: 'sirma2026',
     name: 'Иван Петров',
-    phone: '+359 88 555 1234',
+    phone: '+359885551234',
     role: 'PATIENT',
   },
 ];
