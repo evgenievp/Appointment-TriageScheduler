@@ -31,6 +31,7 @@ public class ExceptionDayService {
         Doctor doctor = doctorsService.findById(doctorId);
         ExceptionDay day = new ExceptionDay();
         day.setDate(dto.date());
+
         day.setReason(dto.reason());
         day.setDoctor(doctor);
         ExceptionDay saved = repo.save(day);

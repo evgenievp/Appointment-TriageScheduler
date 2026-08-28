@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/doctors/me/**").hasRole("DOCTOR")
                         .requestMatchers("/api/doctors/allDoctors").permitAll()
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

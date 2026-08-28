@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.AppointmentDto;
+import com.TriageScheduller.Triage.dto.ExceptionDayDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.exception.ConflictException;
 import com.TriageScheduller.Triage.exception.NotFoundException;
@@ -209,6 +210,14 @@ public class SlotsService {
         repo.save(slot);
     }
 
+    @Transactional
+    public void makeSlotBlocked(Long slotId) {
+        int updated = repo.blockSlot(slotId);
+        if (updated == 0) {
+            throw new NotFoundException("Slot is not blocked or not found");
+        }
+    }
+
     public List<SlotDto> getSlotsForCalendar(Long doctorId,
                                              LocalDateTime from,
                                              LocalDateTime to) {
@@ -290,6 +299,27 @@ public class SlotsService {
             }
             Slot virtualSlot = new Slot(doctor,
                     current);
+            daySlots.add(toDto(virtualSlot));
+            current = slotEnd;
+        }
+
+        return daySlots;
+    }
+
+    public List<SlotDto> blockSlotsForDay(ExceptionDayDto dto, Doctor doctor) {
+        List<SlotDto> daySlots = new ArrayList<>();
+        LocalDateTime current = LocalDateTime.of(dto.date(), LocalTime.of(8,0));
+        LocalDateTime endOfWorkDay = LocalDateTime.of(dto.date(), LocalTime.of(18,30));
+
+        while (current.isBefore(endOfWorkDay)) {
+            LocalDateTime slotEnd = current.plusMinutes(30);
+
+            if (slotEnd.isAfter(endOfWorkDay)) {
+                break;
+            }
+            Slot virtualSlot = new Slot(doctor,
+                    current);
+            makeSlotBlocked(virtualSlot.getId());
             daySlots.add(toDto(virtualSlot));
             current = slotEnd;
         }

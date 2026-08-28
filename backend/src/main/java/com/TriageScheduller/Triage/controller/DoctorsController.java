@@ -7,6 +7,7 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.ExceptionDayService;
+import com.TriageScheduller.Triage.service.SlotsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +21,16 @@ public class DoctorsController {
     private final DoctorsService doctorsService;
     private final ExceptionDayService exceptionDayService;
     private final AppointmentsService appointmentsService;
+    private final SlotsService slotsService;
 
     public DoctorsController(DoctorsService doctorsService,
-                             ExceptionDayService exceptionDayService, AppointmentsService appointmentsService) {
+                             ExceptionDayService exceptionDayService,
+                             AppointmentsService appointmentsService,
+                             SlotsService slotsService) {
         this.doctorsService = doctorsService;
         this.exceptionDayService = exceptionDayService;
         this.appointmentsService = appointmentsService;
+        this.slotsService = slotsService;
     }
 
     @GetMapping("/allDoctors")
@@ -69,6 +74,7 @@ public class DoctorsController {
 
         Doctor doctor = doctorsService.findByEmail(email);
 
+        slotsService.blockSlotsForDay(dto, doctor);
         ExceptionDayDto saved =
                 exceptionDayService.addExceptionDay(doctor.getId(), dto);
 
