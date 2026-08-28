@@ -6,8 +6,9 @@ import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
 import PriorityQueue from '../components/staff/PriorityQueue';
-import { Button, Icon, Input } from '../components/ds';
+import { Button, Icon, Input, Select } from '../components/ds';
 import { getStaffAppointments } from '../api/appointments';
+import { getDoctors } from '../api/doctors';
 import { formatDayLong, formatWeekday, shiftDateInput, toDateInput } from '../lib/dates';
 import { useNow } from '../lib/useNow';
 import './StaffDashboard.css';
@@ -23,12 +24,16 @@ export default function StaffDashboard() {
   const [picked, setPicked] = useState(null);
   // The urgent case opened from the queue, so the list can mark the same row.
   const [selectedId, setSelectedId] = useState(null);
+  // '' значи всички лекари.
+  const [doctorId, setDoctorId] = useState('');
   const today = toDateInput(new Date(now));
   const date = picked ?? today;
 
   const openFromQueue = (appointment) => {
     setPicked(appointment.appointmentTime.slice(0, 10));
     setSelectedId(appointment.appointmentId);
+    // Иначе редът, който току-що избра, остава скрит зад филтъра.
+    setDoctorId('');
   };
 
   // Сървърът връща всички резервации наведнъж, затова ключът не носи датата:
@@ -39,8 +44,11 @@ export default function StaffDashboard() {
     queryFn: getStaffAppointments,
   });
 
+  const { data: doctors } = useQuery({ queryKey: ['doctors'], queryFn: getDoctors });
+
   const appointments = (data ?? [])
     .filter((a) => a.appointmentTime.startsWith(date))
+    .filter((a) => !doctorId || a.doctorId === Number(doctorId))
     .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
 
   const at = new Date(`${date}T00:00:00`);
@@ -127,14 +135,31 @@ export default function StaffDashboard() {
         </div>
       </div>
 
+      {/* Филтърът е под лентата с деня, а не в нея: там вече има три бутона и поле
+          за дата, а и е за списъка отдолу, не за навигацията. */}
+      <div className="staff-filter">
+        <Select
+          label={t('pages.staffDashboard.doctorFilter')}
+          value={doctorId}
+          onChange={(event) => setDoctorId(event.target.value)}
+        >
+          <option value="">{t('pages.staffDashboard.allDoctors')}</option>
+          {(doctors ?? []).map((doctor) => (
+            <option key={doctor.id} value={doctor.id}>
+              {doctor.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+
       <AppointmentsList
         variant="staff"
         appointments={appointments}
         isPending={isPending}
         isError={isError}
         onRetry={refetch}
-        emptyTitle={t('pages.staffDashboard.emptyTitle')}
-        emptyText={t('pages.staffDashboard.emptyText')}
+        emptyTitle={t(doctorId ? 'pages.staffDashboard.emptyForDoctorTitle' : 'pages.staffDashboard.emptyTitle')}
+        emptyText={t(doctorId ? 'pages.staffDashboard.emptyForDoctorText' : 'pages.staffDashboard.emptyText')}
         highlightId={selectedId}
         actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
       />

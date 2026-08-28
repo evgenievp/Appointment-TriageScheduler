@@ -34,3 +34,16 @@
     width: 100%;
   }
 }
+
+/* Филтърът стои сам на реда си и не се разтяга: падащо меню на цялата ширина на
+   страницата се чете като поле за въвеждане, а не като филтър. */
+.staff-filter {
+  width: var(--filter-field-width);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: 700px) {
+  .staff-filter {
+    width: 100%;
+  }
+}
