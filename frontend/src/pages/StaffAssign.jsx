@@ -73,8 +73,13 @@ export default function StaffAssign() {
   const search = useMutation({
     mutationFn: () => findPatientsByPhone(normalized),
     onSuccess: setFound,
-    onError: failed,
   });
+
+  // Ръчното записване не бива да зависи от това дали търсенето е успяло. Днес
+  // ендпойнтът за търсене е счупен в бекенда и връща празно за всеки номер;
+  // ако при провал скриехме и полето за име, служителят оставаше без изход.
+  const noAccount = found?.length === 0;
+  const searchBroke = search.isError;
 
   const give = useMutation({
     mutationFn: (target) => assignSlot(held.slotId, target),
@@ -177,6 +182,7 @@ export default function StaffAssign() {
                 onChange={(event) => {
                   setCountry(event.target.value);
                   setFound(null);
+                  search.reset();
                 }}
               >
                 {countryList.map((item) => (
@@ -197,6 +203,7 @@ export default function StaffAssign() {
                 onChange={(event) => {
                   setPhone(event.target.value);
                   setFound(null);
+                  search.reset();
                 }}
                 hint={
                   normalized ? (
@@ -257,11 +264,14 @@ export default function StaffAssign() {
         )}
 
         {/* Ненамерен не значи край на разговора: часът се записва на име и
-            телефон и остава да се води на служителя. */}
-        {found?.length === 0 && (
+            телефон и остава да се води на служителя. Същото важи и когато самото
+            търсене се провали — тогава просто не знаем дали има профил. */}
+        {(noAccount || searchBroke) && (
           <Card style={{ marginTop: 'var(--space-6)' }}>
             <h2 style={{ fontSize: 'var(--text-h4)' }}>
-              {t('staffBooking.assign.notFoundTitle')}
+              {t(searchBroke
+                ? 'staffBooking.assign.searchBrokeTitle'
+                : 'staffBooking.assign.notFoundTitle')}
             </h2>
             <p
               style={{
@@ -270,7 +280,9 @@ export default function StaffAssign() {
                 marginBottom: 'var(--space-4)',
               }}
             >
-              {t('staffBooking.assign.notFoundText')}
+              {t(searchBroke
+                ? 'staffBooking.assign.searchBrokeText'
+                : 'staffBooking.assign.notFoundText')}
             </p>
             <Input
               label={t('staffBooking.assign.name')}
