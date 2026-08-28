@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
 import PriorityQueue from '../components/staff/PriorityQueue';
-import { Button, Input } from '../components/ds';
+import { Button, Icon, Input } from '../components/ds';
 import { getStaffAppointments } from '../api/appointments';
 import { formatDayLong, formatWeekday, shiftDateInput, toDateInput } from '../lib/dates';
 import { useNow } from '../lib/useNow';
@@ -15,6 +16,7 @@ import './StaffDashboard.css';
 // urgent cases get their own queue above this list rather than re-sorting it.
 export default function StaffDashboard() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const now = useNow();
 
   // null means "today" and keeps meaning it after midnight; picking a date pins it.
@@ -43,16 +45,29 @@ export default function StaffDashboard() {
 
   return (
     <PageShell active="staff">
-      <h1>{t('pages.staffDashboard.title')}</h1>
-      <p
+      <div
         style={{
-          color: 'var(--text-muted)',
-          marginTop: 'var(--space-3)',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 'var(--space-4)',
+          flexWrap: 'wrap',
           marginBottom: 'var(--space-8)',
         }}
       >
-        {t('pages.staffDashboard.lead')}
-      </p>
+        <div>
+          <h1>{t('pages.staffDashboard.title')}</h1>
+          <p style={{ color: 'var(--text-muted)', marginTop: 'var(--space-3)' }}>
+            {t('pages.staffDashboard.lead')}
+          </p>
+        </div>
+        <Button
+          onClick={() => navigate('/staff/new')}
+          iconLeft={<Icon name="phone" size="var(--icon-sm)" />}
+        >
+          {t('pages.staffDashboard.newByPhone')}
+        </Button>
+      </div>
 
       {/* Above the day bar on purpose: an urgent case does not stop being urgent
           because reception is looking at another date. */}
