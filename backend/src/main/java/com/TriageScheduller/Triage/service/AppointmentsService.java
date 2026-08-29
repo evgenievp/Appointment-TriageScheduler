@@ -13,6 +13,7 @@ import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Priority;
+import com.TriageScheduller.Triage.utils.Status;
 import jakarta.persistence.EntityNotFoundException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.Authentication;
@@ -74,6 +75,7 @@ public class AppointmentsService {
         return dtos;
     }
 
+    @Transactional
     public void delete(Long appointmentId, String userEmail, boolean isStaff) {
         Appointment appointment = appointmentsRepo.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -81,11 +83,15 @@ public class AppointmentsService {
         if (!isStaff && !appointment.getPatient().getEmail().equals(userEmail)) {
             throw new ForbiddenException("You are not authorized to cancel this appointment");
         }
+
         Slot slot = appointment.getSlot();
-        slotsService.freeSlot(slot.getId());
+
+        slot.setStatus(Status.FREE);
+        slot.setPatientId(null);
+        slotsRepo.save(slot);
+
         appointmentsRepo.deleteById(appointmentId);
     }
-
     public AppointmentDto toDto(Appointment appointment) {
         return new AppointmentDto(
                 appointment.getId(),
@@ -112,7 +118,7 @@ public class AppointmentsService {
         Appointment appointment = appointmentsRepo.findBySlotId(slotId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-
+        slot.setStatus(Status.BOOKED);
         slot.setPatientId(newPatientId);
         slotsRepo.save(slot);
 

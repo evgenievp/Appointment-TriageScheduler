@@ -224,13 +224,18 @@ public class SlotsService {
 
     @Transactional
     public void freeSlot(Long slotId) {
+        Slot slot = repo.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Slot not found"));
+
+        if (slot.getStatus() == Status.FREE) {
+            return;
+        }
+
         int updated = repo.freeSlot(slotId);
         if (updated == 0) {
             throw new NotFoundException("Slot is not booked or not found");
         }
 
-        Slot slot = repo.findById(slotId)
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
         slot.setStatus(Status.FREE);
         slot.setPatientId(null);
         repo.save(slot);

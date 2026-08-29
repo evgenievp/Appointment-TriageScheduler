@@ -44,11 +44,20 @@ public class DataSeeder implements CommandLineRunner {
         appointment.setPatient(gosho);
 
         doctorsRepo.save(doc1);
-        LocalDate start = LocalDate.now();
-        LocalDate end = start.plusDays(14);
+        LocalDate start = LocalDate.of(2026, 8, 11);
+        LocalDate end = start.plusDays(60);
         LocalTime workStart = LocalTime.of(9, 0);
         LocalTime workEnd = LocalTime.of(18, 0);
 
         slotsService.generateSlots(doc1, start, end, workStart, workEnd);
+
+
+
+        Doctor doc2 = new Doctor("Д-р Филчев", "Педиатър");
+
+        slotsService.generateSlots(doc2, start, end, workStart, workEnd);
+
+
+
     }
 }
