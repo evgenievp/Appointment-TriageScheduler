@@ -13,7 +13,7 @@ public class Appointment {
     @JoinColumn(name = "slot_id", unique = true, nullable = false)
     private Slot slot;
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = true)
     private User patient;
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
@@ -26,6 +26,7 @@ public class Appointment {
     private TriageResults triageResult;
     private String patientName;
     private String patientPhone;
+
 
 
     public Appointment(Long id,

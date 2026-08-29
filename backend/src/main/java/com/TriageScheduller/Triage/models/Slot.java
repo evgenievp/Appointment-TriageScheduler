@@ -28,6 +28,7 @@ public class Slot {
     @Enumerated(EnumType.STRING)
     private Status status = Status.FREE;
     private final static int slotTime = 30;
+    @Column(name = "patient_id", nullable = true)
     private Long patientId;
     @Version
     private Long version;

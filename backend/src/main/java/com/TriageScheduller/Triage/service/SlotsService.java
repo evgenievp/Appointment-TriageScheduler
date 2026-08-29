@@ -154,15 +154,41 @@ public class SlotsService {
         return repo.findFreeSlots(doctorId, from, to);
     }
 
-    @Transactional
-    public AppointmentDto bookSlot(Long slotId, User patient) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public AppointmentDto bookSlot(Long slotId, User patient, String patientName, String patientPhone) {
         Slot slot = validateAndGetSlot(slotId);
         checkIfSlotIsFree(slot);
         validateSlotIsWorkingDay(slot);
-        reserveSlot(slot, patient);
-        Appointment appointment = createAppointment(slot, patient);
-        AppointmentDto dto = toDto(appointment);
-        return dto;
+
+        int updated = repo.bookSlot(slot.getId(), patient != null ? patient.getId() : null);
+        if (updated == 0) {
+            throw new ConflictException("Slot already booked");
+        }
+
+        if (patient != null) {
+            slot.setPatientId(patient.getId());
+        } else {
+            slot.setPatientId(null);
+        }
+        repo.save(slot);
+
+        Appointment appointment = new Appointment();
+        appointment.setSlot(slot);
+        appointment.setDoctor(slot.getDoctor());
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+
+        if (patient != null) {
+            appointment.setPatient(patient);
+            appointment.setPatientName(patient.getName());
+            appointment.setPatientPhone(patient.getPhone());
+        } else {
+            appointment.setPatient(null);
+            appointment.setPatientName(patientName);
+            appointment.setPatientPhone(patientPhone);
+        }
+
+        Appointment saved = appointmentsRepo.save(appointment);
+        return toDto(saved);
     }
 
     private Appointment createAppointment(Slot slot, User patient){

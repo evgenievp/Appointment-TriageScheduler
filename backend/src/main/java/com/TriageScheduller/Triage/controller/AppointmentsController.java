@@ -30,20 +30,18 @@ public class AppointmentsController {
     @PostMapping("/book/{slotId}")
     public ResponseEntity<AppointmentDto> bookAppointment(
             Authentication authentication,
-            @PathVariable Long slotId) {
+            @PathVariable Long slotId,
+            @RequestParam(required = false) String patientName,
+            @RequestParam(required = false) String patientPhone) {
 
-        String email = authentication.getName();
-        User patient = patientsService.findByEmail(email);
+        User patient = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            patient = patientsService.findByEmail(authentication.getName());
+        }
 
-        AppointmentDto appointment = slotsService.bookSlot(slotId, patient);
+        AppointmentDto appointment = slotsService.bookSlot(slotId, patient, patientName, patientPhone);
         return ResponseEntity.status(201).body(appointment);
     }
-
-    @GetMapping("/doctor/me")
-    public ResponseEntity<List<AppointmentDto>> getAppointmentsByDoctorId(Authentication authentication) {
-        return ResponseEntity.status(200).body(this.appointmentsService.findByDoctorAuthentication(authentication));
-    }
-
 
     @GetMapping("/me")
     public ResponseEntity<List<AppointmentDto>> getMyAppointments(Authentication authentication) {
