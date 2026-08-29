@@ -32,9 +32,24 @@ public class Slot {
     private Long patientId;
     @Version
     private Long version;
+    private String patientName;
 
     public Slot() {}
 
+
+
+    public Slot(Long patientId, String patientName,
+                Status status,
+                LocalDateTime endsAt,
+                LocalDateTime startsAt,
+                Doctor doctor) {
+        this.patientId = patientId;
+        this.patientName = patientName;
+        this.status = status;
+        this.endsAt = endsAt;
+        this.startsAt = startsAt;
+        this.doctor = doctor;
+    }
 
     public Slot(Doctor doctor, LocalDateTime startsAt) {
         this.doctor = doctor;
@@ -102,5 +117,22 @@ public class Slot {
 
     public void setPatientId(Long patientId) {
         this.patientId = patientId;
+    }
+
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 }

@@ -108,10 +108,8 @@ public class AppointmentsService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public SlotDto changePatient(Long newPatientId, Long slotId, String phone) {
+    public SlotDto changePatient(Long newPatientId, Long slotId, String phone, String name) {
 
-        User newPatient = patientsRepo.findById(newPatientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
         Slot slot = slotsRepo.findById(slotId)
                 .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
 
@@ -119,19 +117,27 @@ public class AppointmentsService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         slot.setStatus(Status.BOOKED);
-        slot.setPatientId(newPatientId);
+
+        if (newPatientId != null) {
+            User newPatient = patientsRepo.findById(newPatientId)
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            slot.setPatientId(newPatientId);
+            appointment.setPatient(newPatient);
+            appointment.setPatientName(newPatient.getName());
+            appointment.setPatientPhone(newPatient.getPhone());
+        } else {
+            slot.setPatientId(null);
+            appointment.setPatient(null);
+            appointment.setPatientName(name);
+            appointment.setPatientPhone(phone);
+        }
+
         slotsRepo.save(slot);
-
-
-        appointment.setPatient(newPatient);
-        appointment.setPatientPhone(phone);
-        appointment.setPatientName(newPatient.getName());
-
         appointmentsRepo.save(appointment);
 
         return slotsService.toDto(slot);
-
     }
+
 
     public List<AppointmentDto> findByDoctorId(Long id) {
         List<AppointmentDto> dtos = new ArrayList<>();

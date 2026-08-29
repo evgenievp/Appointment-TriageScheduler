@@ -392,4 +392,17 @@ public class SlotsService {
 
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public SlotDto bookSlotWithoutPatient(Long slotId, String name) {
+        Optional<Slot> slot = this.repo.findById(slotId);
+        if (slot.isEmpty()) {
+            throw new EntityNotFoundException("No such slot");
+        }
+        Slot slotEntity = slot.get();
+
+        slotEntity.setPatientName(name);
+        repo.save(slotEntity);
+        return toDto(slotEntity);
+    }
+
 }

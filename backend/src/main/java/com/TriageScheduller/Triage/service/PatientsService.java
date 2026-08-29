@@ -50,7 +50,7 @@ public class PatientsService {
 
     public User findByEmail(String email) {
         return repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
     }
 
     public User save(User patient) {

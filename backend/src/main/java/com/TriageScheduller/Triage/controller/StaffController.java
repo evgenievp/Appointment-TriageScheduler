@@ -8,6 +8,7 @@ import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import com.TriageScheduller.Triage.service.StaffService;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,13 +38,20 @@ public class StaffController {
 
 
     @PutMapping("/slots/{slotId}/assign")
-    public ResponseEntity<SlotDto> changePatientFromStaffWithPatientByPhone(
+    public ResponseEntity<SlotDto> changePatient(
             @PathVariable Long slotId,
-            @RequestParam String phone) {
+            @RequestParam(required = false) Long patientId,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String name) {
 
-        UserDto patient = patientsService.findByPhone(phone);
-        appointmentsService.changePatient(patient.id(), slotId, phone);
-        return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, patient.id()));
+        try {
+            UserDto patient = patientsService.findByPhone(phone);
+            appointmentsService.changePatient(patientId, slotId, phone, name);
+            return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, patient.id()));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.ok(slotsService.bookSlotWithoutPatient(slotId, name));
+        }
+
     }
 
     @GetMapping("/patient/{phoneNumber}")
