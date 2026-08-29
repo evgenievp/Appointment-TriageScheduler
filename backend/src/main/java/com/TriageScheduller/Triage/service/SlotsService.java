@@ -173,6 +173,7 @@ public class SlotsService {
         } else {
             slot.setPatientId(null);
         }
+        slot.setStatus(Status.BOOKED);
         repo.save(slot);
 
         Appointment appointment = new Appointment();

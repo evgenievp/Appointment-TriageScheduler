@@ -61,6 +61,7 @@ public class DoctorsController {
     @GetMapping("/me/doctor")
     public ResponseEntity<List<AppointmentDto>> getMyDoctorAppointments(Authentication authentication) {
         String email = authentication.getName();
+        System.out.println("->".repeat(10) + " " + email);
         DoctorDto doctor = doctorsService.findByEmail(email);
         return ResponseEntity.ok(appointmentsService.findByDoctorId(doctor.id()));
     }

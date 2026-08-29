@@ -33,10 +33,9 @@ public class DoctorsService {
     }
 
     public DoctorDto findByEmail(String email) {
-
         System.out.println(">>> Searching for doctor with email: " + email);
         Doctor user = repo.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("doctor not found"));
 
         return toDto(user);
     }
