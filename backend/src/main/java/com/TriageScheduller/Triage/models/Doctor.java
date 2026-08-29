@@ -21,7 +21,11 @@ public class Doctor {
     protected Doctor() {
     }
 
-    public Doctor(Long id, String name, String speciality, String email, Role role, User user) {
+    public Doctor(Long id, String name,
+                  String speciality,
+                  String email,
+                  Role role,
+                  User user) {
         this.id = id;
         this.name = name;
         this.speciality = speciality;
@@ -30,13 +34,22 @@ public class Doctor {
         this.user = user;
     }
 
-    public Doctor(Long id, String name, String speciality, String email) {
+    public Doctor(Long id, String name,
+                  String speciality,
+                  String email) {
         this.id = id;
         this.name = name;
         this.speciality = speciality;
         this.email = email;
     }
 
+    public Doctor(Long id, String name, String speciality, Role role, String email) {
+        this.id = id;
+        this.name = name;
+        this.speciality = speciality;
+        this.role = role;
+        this.email = email;
+    }
 
     public Doctor(String name, String speciality) {
         this.name = name;

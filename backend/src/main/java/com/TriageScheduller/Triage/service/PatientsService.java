@@ -1,24 +1,27 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.UserDto;
+import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
+import com.TriageScheduller.Triage.utils.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PatientsService {
     private final PatientsRepo repo;
     private final DoctorsRepo doctorsRepo;
+    private final DoctorsService doctorsService;
 
-    public PatientsService(PatientsRepo repo, DoctorsRepo doctorsRepo) {
+    public PatientsService(PatientsRepo repo, DoctorsRepo doctorsRepo, DoctorsService doctorsService) {
         this.repo = repo;
         this.doctorsRepo = doctorsRepo;
+        this.doctorsService = doctorsService;
     }
 
     public String normalizePhone(String phone) {
@@ -84,5 +87,25 @@ public class PatientsService {
         User user = repo.findByPhone(normalized)
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         return toDto(user);
+    }
+
+    public UserDto promoteToStaff(String email) {
+        User user = this.repo.findByPhone(email)
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
+
+        user.setRole(Role.STAFF);
+
+        return toDto(user);
+
+    }
+
+    public DoctorDto promoteToDoctor(String email, String speciality) {
+        User user = this.repo.findByPhone(email)
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
+
+        Doctor doctor = new Doctor(user.getId(), user.getName(), speciality, Role.DOCTOR, email);
+        doctor.setUser(user);
+        return this.doctorsService.toDto(doctor);
+
     }
 }

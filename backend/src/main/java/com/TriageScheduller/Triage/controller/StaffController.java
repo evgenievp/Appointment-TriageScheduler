@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.controller;
 
 import com.TriageScheduller.Triage.dto.AppointmentDto;
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.dto.UserDto;
 import com.TriageScheduller.Triage.service.AppointmentsService;
@@ -52,6 +53,17 @@ public class StaffController {
             return ResponseEntity.ok(slotsService.bookSlotWithoutPatient(slotId, name));
         }
 
+    }
+
+    @PatchMapping("/promoteToStaff")
+    public ResponseEntity<UserDto> promoteToStaff(@RequestParam(required = true) String email) {
+        return ResponseEntity.status(201).body(this.patientsService.promoteToStaff(email));
+    }
+
+    @PutMapping("/promoteToDoctor")
+    public ResponseEntity<DoctorDto> promoteToDoctor(@RequestParam(required = true) String email,
+                                                     @RequestParam(required = true) String speciality) {
+        return ResponseEntity.status(201).body(this.patientsService.promoteToDoctor(email, speciality));
     }
 
     @GetMapping("/patient/{phoneNumber}")

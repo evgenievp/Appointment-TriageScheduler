@@ -2,7 +2,6 @@ package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.models.Doctor;
-import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,10 +32,12 @@ public class DoctorsService {
     }
 
     public DoctorDto findByEmail(String email) {
-        System.out.println(">>> Searching for doctor with email: " + email);
-        Doctor user = repo.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("doctor not found"));
+        Optional<Doctor> doctor = repo.findByEmail(email);
 
+        if (doctor.isEmpty()) {
+            throw new EntityNotFoundException("No doctor");
+        }
+        Doctor user = doctor.get();
         return toDto(user);
     }
 
@@ -48,7 +49,7 @@ public class DoctorsService {
         return dtos;
     }
 
-    private DoctorDto toDto(Doctor doc) {
+    public DoctorDto toDto(Doctor doc) {
         return new DoctorDto(doc.getId(),
                 doc.getName(),
                 doc.getSpeciality(),

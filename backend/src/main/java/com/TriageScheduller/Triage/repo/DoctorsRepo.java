@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DoctorsRepo extends JpaRepository<Doctor, Long> {
-    Optional<Doctor> findByUser(User user);
-
 
     @Query(value = "select * from doctor order by random() limit 5", nativeQuery = true)
     List<Doctor> findRandomDoctors();
+
 
     Optional<Doctor> findByEmail(String email);
 }
