@@ -5,8 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
-import { Button, Tabs } from '../components/ds';
+import { Button, Icon, Tabs } from '../components/ds';
 import { getMyAppointments } from '../api/appointments';
+import { useAuth } from '../lib/authContext';
 import { fromLocalDateTime } from '../lib/dates';
 import { useNow } from '../lib/useNow';
 
@@ -16,6 +17,7 @@ export default function MyAppointments() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const now = useNow();
+  const { user } = useAuth();
   const [tab, setTab] = useState('all');
 
   const { data, isPending, isError, refetch } = useQuery({
@@ -93,7 +95,24 @@ export default function MyAppointments() {
         emptyTitle={empty.title}
         emptyText={empty.text}
         emptyAction={empty.action}
-        actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
+        actions={(appointment) => (
+          <>
+            {/* Задържан час: служителят го е запазил на свое име, докато говори с
+                пациента, и трябва да може да се върне на прехвърлянето. Иначе
+                единственият изход оттук е отказ. */}
+            {user?.role === 'STAFF' && !isPast(appointment) && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => navigate(`/staff/assign/${appointment.appointmentId}`)}
+                iconLeft={<Icon name="phone" size="var(--icon-sm)" />}
+              >
+                {t('staffBooking.assign.resume')}
+              </Button>
+            )}
+            <CancelAppointmentButton appointment={appointment} />
+          </>
+        )}
       />
     </PageShell>
   );

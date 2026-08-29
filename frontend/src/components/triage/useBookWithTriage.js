@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookSlot } from '../../api/appointments';
 import { submitTriage } from '../../api/triage';
+import { useAuth } from '../../lib/authContext';
 import { useToast } from '../../lib/toastContext';
 import { useTriageDraft } from '../../lib/triageDraft';
 
@@ -18,6 +19,11 @@ export default function useBookWithTriage({ onConflict } = {}) {
   const queryClient = useQueryClient();
   const showToast = useToast();
   const { clear: clearAnswers } = useTriageDraft();
+  const { user } = useAuth();
+
+  // Служителят минава по същия път, но краят му е различен: часът е записан на
+  // него и оттук нататък се прехвърля на пациента, с когото говори по телефона.
+  const isStaff = user?.role === 'STAFF';
 
   return useMutation({
     mutationFn: async ({ slot, answers }) => {
@@ -37,24 +43,33 @@ export default function useBookWithTriage({ onConflict } = {}) {
       queryClient.invalidateQueries({ queryKey: ['slots'] });
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
 
+      const time = appointment.appointmentTime.slice(11, 16);
+
       showToast(
-        triaged
+        !triaged
           ? {
-              tone: 'success',
-              title: t('calendar.bookedTitle'),
-              // Часът идва от отговора, а не от подадения слот: календарът знае
-              // времето, но страницата с въпросите има само id.
-              message: t('calendar.bookedMessage', {
-                time: appointment.appointmentTime.slice(11, 16),
-              }),
-            }
-          : {
               tone: 'warning',
               title: t('calendar.bookedNoTriageTitle'),
               message: t('calendar.bookedNoTriageMessage'),
-            },
+            }
+          : isStaff
+            ? {
+                tone: 'success',
+                title: t('staffBooking.heldTitle'),
+                message: t('staffBooking.heldMessage', { time }),
+              }
+            : {
+                tone: 'success',
+                title: t('calendar.bookedTitle'),
+                // Часът идва от отговора, а не от подадения слот: календарът знае
+                // времето, но страницата с въпросите има само id.
+                message: t('calendar.bookedMessage', { time }),
+              },
       );
-      navigate('/me/appointments');
+
+      navigate(
+        isStaff ? `/staff/assign/${appointment.appointmentId}` : '/me/appointments',
+      );
     },
 
     onError: (error) => {

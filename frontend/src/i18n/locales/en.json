@@ -3,7 +3,8 @@
     "clinicName": "Sirma Clinic",
     "documentTitle": "Sirma Clinic — book an appointment",
     "loading": "Loading",
-    "retry": "Try again"
+    "retry": "Try again",
+    "pickDate": "Pick a date"
   },
   "auth": {
     "errors": {
@@ -372,11 +373,18 @@
       "next": "Tomorrow",
       "pickDate": "Pick a date",
       "emptyTitle": "No visits booked for this day",
-      "emptyText": "Try a neighbouring day or pick a date."
+      "emptyText": "Try a neighbouring day or pick a date.",
+      "doctorFilter": "Doctor",
+      "allDoctors": "All doctors",
+      "emptyForDoctorTitle": "No visits with this doctor",
+      "emptyForDoctorText": "Pick another doctor or day.",
+      "newByPhone": "Book by phone"
     },
     "staffNewBooking": {
-      "title": "New booking by phone",
-      "text": "This is where staff book on the clinic's behalf while the patient is on the phone — find or create the patient, pick a slot, and fill in the triage for them."
+      "title": "Booking by phone",
+      "text": "You go through the same steps the patient would: the questions, the doctor, the time. Only the end differs — the slot is held in your name and you then pass it on.",
+      "holdNote": "A held slot is yours until you give it to someone. So while you say \"I can give you Tuesday at 10\", nobody can take it from you.",
+      "start": "Start"
     }
   },
   "booking": {
@@ -386,7 +394,8 @@
       "time": "Time",
       "done": "done",
       "current": "current step",
-      "todo": "to come"
+      "todo": "to come",
+      "patient": "Patient"
     }
   },
   "notFound": {
@@ -405,5 +414,40 @@
     "reload": "Reload the page",
     "home": "Go to the start",
     "imageAlt": "A stethoscope tied in a knot"
+  },
+  "staffBooking": {
+    "hold": "Hold the slot",
+    "holding": "Holding…",
+    "heldTitle": "The slot is held",
+    "heldMessage": "It is booked in your name for {{time}}. Now pass it to the patient.",
+    "assign": {
+      "title": "Who is this slot for",
+      "lead": "Look the patient up by phone. If they have no account, we record the slot against a name and phone.",
+      "urgent": "Urgent",
+      "phone": "Patient's phone",
+      "phoneHint": "We search by the exact number, so pick the country too.",
+      "willSearch": "We will search for <mono>{{phone}}</mono>",
+      "search": "Search",
+      "searching": "Searching…",
+      "give": "Give them the slot",
+      "resume": "Give it to a patient",
+      "giving": "Transferring…",
+      "notFoundTitle": "No account with this number",
+      "notFoundText": "Record the slot against a name and phone — it stays with you on the dashboard.",
+      "name": "Full name",
+      "saveGuest": "Record the slot for them",
+      "doneTitle": "The slot was transferred",
+      "doneMessage": "It is booked for {{name}}.",
+      "releaseHint": "If the call does not end in a booking, release it so someone else can see it.",
+      "release": "Release the slot",
+      "releasing": "Releasing…",
+      "releasedTitle": "The slot was released",
+      "releasedMessage": "It is back among the free ones.",
+      "failedTitle": "That did not work",
+      "failedMessage": "Please try again in a moment.",
+      "missingTitle": "This slot is no longer yours",
+      "missingText": "It has either been transferred, or the address is wrong.",
+      "toDashboard": "To the dashboard"
+    }
   }
 }

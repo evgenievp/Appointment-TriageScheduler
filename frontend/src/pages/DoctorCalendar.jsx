@@ -43,7 +43,10 @@ export default function DoctorCalendar() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  // Регистратурата задържа часа за себе си и после го прехвърля, затова и
+  // надписът е друг: „запазете“ би обещало на служителя час при зъболекар.
+  const isStaff = user?.role === 'STAFF';
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [selected, setSelected] = useState(null);
@@ -188,7 +191,9 @@ export default function DoctorCalendar() {
 
       {/* Лентата се показва само на човек, който е в потока. На случаен посетител
           „Оплакване ✓“ би било лъжа. */}
-      {answers && <BookingSteps current={2} style={{ marginTop: 'var(--space-8)' }} />}
+      {answers && (
+        <BookingSteps current={2} forStaff={isStaff} style={{ marginTop: 'var(--space-8)' }} />
+      )}
 
       <div
         style={{
@@ -280,7 +285,9 @@ export default function DoctorCalendar() {
               onClick={book}
               iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
             >
-              {isBooking ? t('calendar.booking') : t('calendar.book')}
+              {isBooking
+                ? t(isStaff ? 'staffBooking.holding' : 'calendar.booking')
+                : t(isStaff ? 'staffBooking.hold' : 'calendar.book')}
             </Button>
           </Card>
         </>

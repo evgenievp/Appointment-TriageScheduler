@@ -4,6 +4,7 @@ import PageShell from '../components/PageShell';
 import TriageForm from '../components/triage/TriageForm';
 import BookingSteps from '../components/triage/BookingSteps';
 import useBookWithTriage from '../components/triage/useBookWithTriage';
+import { useAuth } from '../lib/authContext';
 import { useTriageDraft } from '../lib/triageDraft';
 import { formatDayLong, fromLocalDateTime } from '../lib/dates';
 
@@ -27,6 +28,7 @@ export default function Triage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { answers, setAnswers } = useTriageDraft();
+  const { user } = useAuth();
 
   const from = params.get('from');
   const back = from?.startsWith('/') && !from.startsWith('//') ? from : '/doctors';
@@ -57,7 +59,7 @@ export default function Triage() {
   return (
     <PageShell active="booking">
       <div style={{ maxWidth: 'var(--measure)' }}>
-        <BookingSteps current={0} />
+        <BookingSteps current={0} forStaff={user?.role === 'STAFF'} />
 
         <h1 style={{ marginTop: 'var(--space-8)' }}>{t('triage.page.title')}</h1>
         <p

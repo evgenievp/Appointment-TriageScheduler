@@ -25,11 +25,13 @@ export default function Select({ label, hint, error, mono, children, style, ...r
           {label}
         </span>
       )}
+      {/* Отстъпът е върху самото поле, а не върху кутията, и chevron-ът е
+          отгоре с `pointer-events: none` — иначе клик точно върху стрелката
+          пада между двата елемента и менюто не се отваря. */}
       <span
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-2)',
+          position: 'relative',
+          display: 'block',
           background: 'var(--white)',
           border:
             'var(--border-width) solid ' +
@@ -39,7 +41,6 @@ export default function Select({ label, hint, error, mono, children, style, ...r
                 ? 'var(--blue-400)'
                 : 'var(--border-default)'),
           borderRadius: 'var(--radius)',
-          padding: 'var(--field-padding)',
           boxShadow: focus ? 'var(--focus-ring)' : 'var(--shadow-none)',
           transition: 'border-color var(--dur) var(--ease)',
         }}
@@ -52,7 +53,10 @@ export default function Select({ label, hint, error, mono, children, style, ...r
             border: 0,
             outline: 0,
             background: 'transparent',
+            display: 'block',
             width: '100%',
+            padding: 'var(--field-padding)',
+            paddingRight: 'calc(var(--icon-sm) + var(--space-6))',
             font: 'inherit',
             fontFamily: mono ? 'var(--font-mono)' : 'inherit',
             color: 'var(--navy-900)',
@@ -63,8 +67,21 @@ export default function Select({ label, hint, error, mono, children, style, ...r
         >
           {children}
         </select>
-        <Icon name="chevron-down" size="var(--icon-sm)" />
+        <span
+          style={{
+            position: 'absolute',
+            right: 'var(--space-3)',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            pointerEvents: 'none',
+            color: 'var(--navy-500)',
+          }}
+        >
+          <Icon name="chevron-down" size="var(--icon-sm)" />
+        </span>
       </span>
+
       {(hint || error) && (
         <span
           style={{
