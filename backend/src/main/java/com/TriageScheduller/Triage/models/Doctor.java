@@ -21,12 +21,22 @@ public class Doctor {
     protected Doctor() {
     }
 
-    public Doctor(Long id, String speciality, String name, String email) {
+    public Doctor(Long id, String name, String speciality, String email, Role role, User user) {
         this.id = id;
-        this.speciality = speciality;
         this.name = name;
+        this.speciality = speciality;
+        this.email = email;
+        this.role = role;
+        this.user = user;
+    }
+
+    public Doctor(Long id, String name, String speciality, String email) {
+        this.id = id;
+        this.name = name;
+        this.speciality = speciality;
         this.email = email;
     }
+
 
     public Doctor(String name, String speciality) {
         this.name = name;

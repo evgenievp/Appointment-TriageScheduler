@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -43,7 +42,7 @@ public class StaffController {
             @RequestParam String phone) {
 
         UserDto patient = patientsService.findByPhone(phone);
-        appointmentsService.changePatient(patient.id(), slotId);
+        appointmentsService.changePatient(patient.id(), slotId, phone);
         return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, patient.id()));
     }
 

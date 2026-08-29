@@ -172,7 +172,7 @@ public class SlotsService {
         appointment.setDoctor(slot.getDoctor());
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointment.setPatientName(patient.getName());
-        appointment.setPatientPhone(appointment.getPatientPhone());
+        appointment.setPatientPhone(patient.getPhone());
         return appointmentsRepo.save(appointment);
     }
 
@@ -212,10 +212,7 @@ public class SlotsService {
 
     @Transactional
     public void makeSlotBlocked(Long slotId) {
-        int updated = repo.blockSlot(slotId);
-        if (updated == 0) {
-            throw new NotFoundException("Slot is not blocked or not found");
-        }
+        repo.blockSlot(slotId);
     }
 
     public List<SlotDto> getSlotsForCalendar(Long doctorId,

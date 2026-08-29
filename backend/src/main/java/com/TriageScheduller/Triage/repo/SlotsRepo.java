@@ -44,6 +44,6 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
 
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE Slot s SET s.status = 'BLOCKED' WHERE s.id = :slotId AND s.status != 'BLOCKED'")
-    int blockSlot(@Param("slotId") Long slotId);
+    @Query("UPDATE Slot s SET s.status = 'BLOCKED' WHERE s.id = :slotId AND s.status = 'FREE'")
+    void blockSlot(@Param("slotId") Long slotId);
 }

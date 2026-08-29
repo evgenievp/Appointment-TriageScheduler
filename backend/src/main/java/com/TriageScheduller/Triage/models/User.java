@@ -23,6 +23,7 @@ public class User {
     private Role role = Role.PATIENT;
 
     private String name;
+    @Column(unique = true, nullable = false)
     private String phone;
 
     protected User() {

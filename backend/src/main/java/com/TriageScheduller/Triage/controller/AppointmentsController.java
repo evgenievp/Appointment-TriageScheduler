@@ -2,7 +2,6 @@ package com.TriageScheduller.Triage.controller;
 import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.AppointmentsService;
-import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +39,7 @@ public class AppointmentsController {
         return ResponseEntity.status(201).body(appointment);
     }
 
-    @GetMapping("/api/appointments/doctor/me")
+    @GetMapping("/doctor/me")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsByDoctorId(Authentication authentication) {
         return ResponseEntity.status(200).body(this.appointmentsService.findByDoctorAuthentication(authentication));
     }

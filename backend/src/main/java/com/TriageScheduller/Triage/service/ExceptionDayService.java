@@ -14,10 +14,12 @@ import java.util.stream.Collectors;
 public class ExceptionDayService {
     private final ExceptionDayRepo repo;
     private final DoctorsService doctorsService;
+    private final SlotsService slotsService;
 
-    public ExceptionDayService(ExceptionDayRepo repo, DoctorsService doctorsService) {
+    public ExceptionDayService(ExceptionDayRepo repo, DoctorsService doctorsService, SlotsService slotsService) {
         this.repo = repo;
         this.doctorsService = doctorsService;
+        this.slotsService = slotsService;
     }
 
     public List<ExceptionDayDto> getExceptionDays(Long doctorId) {
@@ -27,11 +29,13 @@ public class ExceptionDayService {
                 .collect(Collectors.toList());
     }
 
-    public ExceptionDayDto addExceptionDay(Long doctorId, ExceptionDayDto dto) {
+    public ExceptionDayDto addExceptionDay(Long doctorId,
+                                           ExceptionDayDto dto) {
         Doctor doctor = doctorsService.findById(doctorId);
         ExceptionDay day = new ExceptionDay();
         day.setDate(dto.date());
 
+        slotsService.blockSlotsForDay(dto, doctor);
         day.setReason(dto.reason());
         day.setDoctor(doctor);
         ExceptionDay saved = repo.save(day);

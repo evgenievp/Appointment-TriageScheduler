@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 
 @Service
@@ -102,11 +102,10 @@ public class AppointmentsService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public SlotDto changePatient(Long newPatientId, Long slotId) {
+    public SlotDto changePatient(Long newPatientId, Long slotId, String phone) {
 
         User newPatient = patientsRepo.findById(newPatientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-
         Slot slot = slotsRepo.findById(slotId)
                 .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
 
@@ -117,7 +116,10 @@ public class AppointmentsService {
         slot.setPatientId(newPatientId);
         slotsRepo.save(slot);
 
+
         appointment.setPatient(newPatient);
+        appointment.setPatientPhone(phone);
+        appointment.setPatientName(newPatient.getName());
 
         appointmentsRepo.save(appointment);
 
