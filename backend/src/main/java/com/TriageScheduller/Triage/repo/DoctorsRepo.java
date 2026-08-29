@@ -16,5 +16,5 @@ public interface DoctorsRepo extends JpaRepository<Doctor, Long> {
     @Query(value = "select * from doctor order by random() limit 5", nativeQuery = true)
     List<Doctor> findRandomDoctors();
 
-    Optional<Doctor> findByEmail(String name);
+    Optional<Doctor> findByEmail(String email);
 }

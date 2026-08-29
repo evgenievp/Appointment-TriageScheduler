@@ -5,10 +5,12 @@ import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DoctorsService {
@@ -20,18 +22,23 @@ public class DoctorsService {
         this.patientsRepo = patientsRepo;
     }
 
-    public Doctor findById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+    public DoctorDto findById(Long id) {
+       Optional<Doctor> doctor =  repo.findById(id);
+
+       if(doctor.isEmpty()) {
+           throw new EntityNotFoundException("no such doctor");
+       }
+
+       return toDto(doctor.get());
     }
 
-    public Doctor findByEmail(String email) {
+    public DoctorDto findByEmail(String email) {
 
-        User user = patientsRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println(">>> Searching for doctor with email: " + email);
+        Doctor user = repo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        return repo.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        return toDto(user);
     }
 
     public List<DoctorDto> getRandomDoctors() {
@@ -46,7 +53,8 @@ public class DoctorsService {
         return new DoctorDto(doc.getId(),
                 doc.getName(),
                 doc.getSpeciality(),
-                doc.getEmail());
+                doc.getEmail(),
+                doc.getRole());
     }
 
 
@@ -59,4 +67,12 @@ public class DoctorsService {
     }
 
 
+    public Doctor toDoctor(DoctorDto doctor) {
+        return new Doctor(
+                doctor.id(),
+                doctor.name(),
+                doctor.speciality(),
+                doctor.role()
+        );
+    }
 }

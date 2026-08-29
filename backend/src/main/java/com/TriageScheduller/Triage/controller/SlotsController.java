@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.controller;
 
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.GenerateSlotsRequest;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.models.Doctor;
@@ -60,10 +61,10 @@ public class SlotsController {
 
     @PostMapping("/generate")
     public List<SlotDto> generateSlots(@RequestBody GenerateSlotsRequest request) {
-        Doctor doctor = doctorsService.findById(request.doctorId());
+        DoctorDto doctor = doctorsService.findById(request.doctorId());
 
         return slotsService.generateSlots(
-                doctor,
+                doctorsService.toDoctor(doctor),
                 request.startDate(),
                 request.endDate(),
                 request.workStart(),
@@ -74,7 +75,7 @@ public class SlotsController {
     @PostMapping("/preview")
     public List<SlotDto> previewSlots(@RequestBody GenerateSlotsRequest request) {
 
-        Doctor doctor = doctorsService.findById(request.doctorId());
+        Doctor doctor = doctorsService.toDoctor(doctorsService.findById(request.doctorId()));
         return slotsService.previewSlots(doctor,
                 request.startDate(),
                 request.endDate(),

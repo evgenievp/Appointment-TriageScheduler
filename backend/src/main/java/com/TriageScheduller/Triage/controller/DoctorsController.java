@@ -40,9 +40,9 @@ public class DoctorsController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<Doctor> getCurrentDoctor(Authentication authentication) {
+    public ResponseEntity<DoctorDto> getCurrentDoctor(Authentication authentication) {
         String email = authentication.getName();
-        Doctor doctor = doctorsService.findByEmail(email);
+        DoctorDto doctor = doctorsService.findByEmail(email);
         return ResponseEntity.ok(doctor);
     }
 
@@ -51,18 +51,18 @@ public class DoctorsController {
             Authentication authentication) {
 
         String email = authentication.getName();
-        Doctor doctor = doctorsService.findByEmail(email);
+        DoctorDto doctor = doctorsService.findByEmail(email);
+        System.out.println("pass finding doctor by email!!!!!!!!!!!!!");
 
-        return ResponseEntity.ok(
-                exceptionDayService.getExceptionDays(doctor.getId())
-        );
+        return ResponseEntity.ok(exceptionDayService.getExceptionDays(doctor.id()));
+
     }
 
     @GetMapping("/me/doctor")
     public ResponseEntity<List<AppointmentDto>> getMyDoctorAppointments(Authentication authentication) {
         String email = authentication.getName();
-        Doctor doctor = doctorsService.findByEmail(email);
-        return ResponseEntity.ok(appointmentsService.findByDoctorId(doctor.getId()));
+        DoctorDto doctor = doctorsService.findByEmail(email);
+        return ResponseEntity.ok(appointmentsService.findByDoctorId(doctor.id()));
     }
 
     @PostMapping("/me/exceptions")
@@ -72,11 +72,11 @@ public class DoctorsController {
 
         String email = authentication.getName();
 
-        Doctor doctor = doctorsService.findByEmail(email);
+        DoctorDto doctor = doctorsService.findByEmail(email);
 
         slotsService.blockSlotsForDay(dto, doctor);
         ExceptionDayDto saved =
-                exceptionDayService.addExceptionDay(doctor.getId(), dto);
+                exceptionDayService.addExceptionDay(doctor.id(), dto);
 
         return ResponseEntity.status(201).body(saved);
     }

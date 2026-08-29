@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.service;
 
 
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.ExceptionDay;
@@ -15,6 +16,7 @@ public class ExceptionDayService {
     private final ExceptionDayRepo repo;
     private final DoctorsService doctorsService;
     private final SlotsService slotsService;
+
 
     public ExceptionDayService(ExceptionDayRepo repo, DoctorsService doctorsService, SlotsService slotsService) {
         this.repo = repo;
@@ -31,15 +33,25 @@ public class ExceptionDayService {
 
     public ExceptionDayDto addExceptionDay(Long doctorId,
                                            ExceptionDayDto dto) {
-        Doctor doctor = doctorsService.findById(doctorId);
+        DoctorDto doctor = doctorsService.findById(doctorId);
         ExceptionDay day = new ExceptionDay();
         day.setDate(dto.date());
 
         slotsService.blockSlotsForDay(dto, doctor);
         day.setReason(dto.reason());
-        day.setDoctor(doctor);
+        day.setDoctor(dtoToDoctor(doctor));
         ExceptionDay saved = repo.save(day);
         return toDto(saved);
+    }
+
+    public Doctor dtoToDoctor(DoctorDto doctor) {
+        return new Doctor(
+                doctor.id(),
+                doctor.name(),
+                doctor.speciality(),
+                doctor.email()
+
+        );
     }
 
     public void deleteExceptionDay(Long id) {

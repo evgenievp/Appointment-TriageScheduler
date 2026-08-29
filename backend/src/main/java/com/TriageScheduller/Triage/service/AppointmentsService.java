@@ -49,7 +49,7 @@ public class AppointmentsService {
 
     public Appointment createAppointment(Long slotId, User patient, Doctor doctor) {
         Slot slot = slotsRepo.findById(slotId)
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
 
         Appointment appointment = new Appointment();
         appointment.setSlot(slot);
@@ -63,7 +63,7 @@ public class AppointmentsService {
 
     public Appointment findById(Long id) {
         return appointmentsRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
     }
 
     public List<AppointmentDto> findByPatientId(Long patientId) {
@@ -78,7 +78,7 @@ public class AppointmentsService {
     @Transactional
     public void delete(Long appointmentId, String userEmail, boolean isStaff) {
         Appointment appointment = appointmentsRepo.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
         if (!isStaff && !appointment.getPatient().getEmail().equals(userEmail)) {
             throw new ForbiddenException("You are not authorized to cancel this appointment");
@@ -114,13 +114,13 @@ public class AppointmentsService {
                 .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
 
         Appointment appointment = appointmentsRepo.findBySlotId(slotId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
         slot.setStatus(Status.BOOKED);
 
         if (newPatientId != null) {
             User newPatient = patientsRepo.findById(newPatientId)
-                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
             slot.setPatientId(newPatientId);
             appointment.setPatient(newPatient);
             appointment.setPatientName(newPatient.getName());

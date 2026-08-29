@@ -1,6 +1,7 @@
 package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.AppointmentDto;
+import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.exception.ConflictException;
@@ -33,16 +34,18 @@ public class SlotsService {
     private final AppointmentsRepo appointmentsRepo;
     private final ExceptionDayRepo exceptionDayRepo;
     private final PatientsRepo patientsRepo;
+    private final DoctorsService doctorsService;
     private LocalTime restStart;
     private LocalTime restEnd;
 
     public SlotsService(SlotsRepo repo,
                         AppointmentsRepo appointmentsRepo,
-                        ExceptionDayRepo exceptionDayRepo, PatientsRepo patientsRepo) {
+                        ExceptionDayRepo exceptionDayRepo, PatientsRepo patientsRepo, DoctorsService doctorsService) {
         this.repo = repo;
         this.appointmentsRepo = appointmentsRepo;
         this.exceptionDayRepo = exceptionDayRepo;
         this.patientsRepo = patientsRepo;
+        this.doctorsService = doctorsService;
         this.restStart = LocalTime.of(12,0);
         this.restEnd = LocalTime.of(13,0);
 
@@ -334,10 +337,10 @@ public class SlotsService {
         return daySlots;
     }
 
-    public List<SlotDto> blockSlotsForDay(ExceptionDayDto dto, Doctor doctor) {
+    public List<SlotDto> blockSlotsForDay(ExceptionDayDto dayDto, DoctorDto dto) {
         List<SlotDto> daySlots = new ArrayList<>();
-        LocalDateTime current = LocalDateTime.of(dto.date(), LocalTime.of(8,0));
-        LocalDateTime endOfWorkDay = LocalDateTime.of(dto.date(), LocalTime.of(18,30));
+        LocalDateTime current = LocalDateTime.of(dayDto.date(), LocalTime.of(8,0));
+        LocalDateTime endOfWorkDay = LocalDateTime.of(dayDto.date(), LocalTime.of(18,30));
 
         while (current.isBefore(endOfWorkDay)) {
             LocalDateTime slotEnd = current.plusMinutes(30);
@@ -345,6 +348,9 @@ public class SlotsService {
             if (slotEnd.isAfter(endOfWorkDay)) {
                 break;
             }
+
+            Doctor doctor = this.doctorsService.toDoctor(dto);
+
             Slot virtualSlot = new Slot(doctor,
                     current);
             makeSlotBlocked(virtualSlot.getId());
