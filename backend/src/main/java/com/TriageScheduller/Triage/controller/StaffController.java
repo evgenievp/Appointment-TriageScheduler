@@ -4,6 +4,7 @@ import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.dto.UserDto;
+import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -56,14 +58,17 @@ public class StaffController {
     }
 
     @PatchMapping("/promoteToStaff")
-    public ResponseEntity<UserDto> promoteToStaff(@RequestParam(required = true) String email) {
+    public ResponseEntity<UserDto> promoteToStaff(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
         return ResponseEntity.status(201).body(this.patientsService.promoteToStaff(email));
     }
 
     @PutMapping("/promoteToDoctor")
-    public ResponseEntity<DoctorDto> promoteToDoctor(@RequestParam(required = true) String email,
-                                                     @RequestParam(required = true) String speciality) {
-        return ResponseEntity.status(201).body(this.patientsService.promoteToDoctor(email, speciality));
+    public ResponseEntity<DoctorDto> promoteToDoctor(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String speciality = body.get("speciality");
+        return ResponseEntity.status(201)
+                .body(this.patientsService.promoteToDoctor(email, speciality));
     }
 
     @GetMapping("/patient/{phoneNumber}")

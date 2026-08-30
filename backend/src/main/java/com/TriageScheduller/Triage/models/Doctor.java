@@ -18,8 +18,12 @@ public class Doctor {
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
+
+
     protected Doctor() {
     }
+
+
 
     public Doctor(Long id, String name,
                   String speciality,
@@ -32,6 +36,16 @@ public class Doctor {
         this.email = email;
         this.role = role;
         this.user = user;
+    }
+
+    public Doctor(String name,
+                  String speciality,
+                  Role role,
+                  String email) {
+        this.name = name;
+        this.speciality = speciality;
+        this.role = role;
+        this.email = email;
     }
 
     public Doctor(Long id, String name,
