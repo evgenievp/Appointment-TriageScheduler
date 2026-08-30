@@ -7,11 +7,16 @@ public record DoctorDto(
         Long id,
         String name,
         String speciality,
-        String role,
-        String email
+        String email,
+        String role
+
 ) {
-    public DoctorDto(Long id, String name, String speciality,  String email, Role role) {
-        this(id, name, speciality, email, "DOCTOR");
+    public DoctorDto(Long id,
+                     String name,
+                     String speciality,
+                     String email,
+                     Role role) {
+        this(id, name, speciality, email, role.name());
     }
 
 }

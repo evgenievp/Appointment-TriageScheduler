@@ -1,11 +1,9 @@
 package com.TriageScheduller.Triage.repo;
 
 import com.TriageScheduller.Triage.models.Doctor;
-import com.TriageScheduller.Triage.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import javax.print.Doc;
 import java.util.List;
 import java.util.Optional;
 
