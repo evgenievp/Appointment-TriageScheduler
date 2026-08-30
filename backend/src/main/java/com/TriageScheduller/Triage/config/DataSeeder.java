@@ -58,18 +58,18 @@ public class DataSeeder implements CommandLineRunner {
             RegisterRequest register1 = new RegisterRequest(
                     "ivan@abv.bg",
                     "123456789",
-                    "ivan",
+                    "Димитър",
                     "0889 888 888");
 
             RegisterRequest register2 = new RegisterRequest(
                     "georgi@abv.bg",
                     "123456789",
-                    "georgi",
+                    "Д-р Георгиев",
                     "0889 888 887");
             RegisterRequest register3 = new RegisterRequest(
                     "todor@abv.bg",
                     "123456789",
-                    "todor",
+                    "Д-р Тодоров",
                     "0889 888 886");
 
             authService.register(register1);
