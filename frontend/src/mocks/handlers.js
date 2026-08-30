@@ -303,7 +303,7 @@ export const handlers = [
   // Neither of the next two exists on the backend. `findByDoctorId` is already
   // in the repository, so the doctor one is a controller method away; the staff
   // one is findAll() with a date filter.
-  ...handle('get', '/api/appointments/doctor/me', async ({ request }) => {
+  ...handle('get', '/api/doctors/me/doctor', async ({ request }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();
     if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });

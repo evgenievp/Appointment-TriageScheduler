@@ -7,10 +7,9 @@ export const bookSlot = (slotId) =>
 
 export const getMyAppointments = () => request('/appointments/me');
 
-// Съществува, но на удвоен път: `@GetMapping` повтаря префикса на класа, тоест
-// работещият адрес в момента е `/api/appointments/api/appointments/doctor/me`.
-// Не го викаме така — ще се оправи и ще трябва да се пипа втори път.
-export const getDoctorAppointments = () => request('/appointments/doctor/me');
+// Часовете на влезлия лекар. Живее при лекарите, не при резервациите — беше
+// `/appointments/doctor/me`, но онзи път вече не съществува.
+export const getDoctorAppointments = () => request('/doctors/me/doctor');
 
 // Всички резервации, без филтър по ден — филтрирането е при викащия.
 //
