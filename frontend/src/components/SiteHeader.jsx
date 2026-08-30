@@ -46,6 +46,11 @@ export default function SiteHeader({ active }) {
             active: active === 'staff',
             onClick: () => navigate('/staff'),
           },
+          {
+            label: t('nav.roles'),
+            active: active === 'roles',
+            onClick: () => navigate('/staff/roles'),
+          },
         ]
       : []),
   ];

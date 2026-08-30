@@ -207,7 +207,8 @@
     "login": "Log in",
     "logout": "Log out",
     "book": "Book a visit",
-    "menu": "Menu"
+    "menu": "Menu",
+    "roles": "Roles"
   },
   "home": {
     "hero": {
@@ -385,6 +386,27 @@
       "text": "You go through the same steps the patient would: the questions, the doctor, the time. Only the end differs — the slot is held in your name and you then pass it on.",
       "holdNote": "A held slot is yours until you give it to someone. So while you say \"I can give you Tuesday at 10\", nobody can take it from you.",
       "start": "Start"
+    },
+    "staffRoles": {
+      "title": "Roles",
+      "lead": "You grant rights to someone already registered. Look them up by phone so you know who you are changing before you do it.",
+      "phone": "User's phone",
+      "phoneHint": "We search by the exact number, so pick the country too.",
+      "notFoundTitle": "No account with this number",
+      "notFoundText": "They have to register themselves first — accounts are not created from here.",
+      "role": "New role",
+      "roleStaff": "Staff",
+      "roleDoctor": "Doctor",
+      "speciality": "Speciality",
+      "specialityPlaceholder": "Dentistry",
+      "specialityHint": "Patients see this when they pick a doctor.",
+      "submit": "Grant the role",
+      "working": "Saving…",
+      "doneStaff": "Now part of the staff",
+      "doneDoctor": "Now a doctor",
+      "doneMessage": "{{name}} has to sign out and back in for the new rights to apply.",
+      "failed": "That did not work. Please try again in a moment.",
+      "note": "The role takes effect at the next sign-in — until then the person keeps their old rights."
     }
   },
   "booking": {

@@ -353,6 +353,51 @@ export const handlers = [
     });
   }),
 
+  // Повишаване на роля. Ендпойнт за търсене по имейл няма, затова екранът търси
+  // по телефон и взима имейла от резултата — тези двата чакат имейл.
+  ...handle('patch', '/api/staff/promoteToStaff', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const { email } = await request.json();
+    const target = users.find((u) => u.email === email);
+    if (!target) return new HttpResponse('No such user', { status: 404 });
+
+    target.role = 'STAFF';
+    return HttpResponse.json(
+      { id: target.id, name: target.name, phone: target.phone, email: target.email },
+      { status: 201 },
+    );
+  }),
+
+  ...handle('put', '/api/staff/promoteToDoctor', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const { email, speciality } = await request.json();
+    const target = users.find((u) => u.email === email);
+    if (!target) return new HttpResponse('No such user', { status: 404 });
+
+    // Двете заедно: ролята отваря лекарските екрани, редът в `doctor` дава на
+    // какво да се закачат слотовете и почивните дни.
+    target.role = 'DOCTOR';
+    const doctor = {
+      id: Math.max(...doctors.map((d) => d.id)) + 1,
+      name: target.name,
+      speciality,
+      email: target.email,
+      role: 'DOCTOR',
+    };
+    doctors.push(doctor);
+    target.doctorId = doctor.id;
+
+    return HttpResponse.json(doctor, { status: 201 });
+  }),
+
   // Прехвърляне на задържания час. Пациентът идва като `?phone=`, не в тялото —
   // сървърът го търси наново, вместо да приеме ид-то, което търсенето вече е
   // върнало. Затова непознат номер е грешка: пациент без профил още не се

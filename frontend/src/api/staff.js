@@ -32,3 +32,20 @@ export const assignSlot = (slotId, phone) =>
   request(`/staff/slots/${slotId}/assign?phone=${encodeURIComponent(phone)}`, {
     method: 'PUT',
   });
+
+// Повишаване на роля. Няма ендпойнт за търсене на потребител по имейл, тоест
+// самото повишаване е и проверката: 404 значи „няма такъв“.
+//
+// Двата метода са различни, както са в контролера — `PATCH` за персонал и `PUT`
+// за лекар. Едното е смяна на едно поле, другото създава и ред в `doctor`.
+
+// UserDto
+export const promoteToStaff = (email) =>
+  request('/staff/promoteToStaff', { method: 'PATCH', body: JSON.stringify({ email }) });
+
+// DoctorDto
+export const promoteToDoctor = (email, speciality) =>
+  request('/staff/promoteToDoctor', {
+    method: 'PUT',
+    body: JSON.stringify({ email, speciality }),
+  });

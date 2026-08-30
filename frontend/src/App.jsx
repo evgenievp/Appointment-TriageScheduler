@@ -19,6 +19,7 @@ import NotFound from './pages/NotFound';
 import StaffAssign from './pages/StaffAssign';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffNewBooking from './pages/StaffNewBooking';
+import StaffRoles from './pages/StaffRoles';
 
 // ToastProvider sits outermost so SessionWatcher can reach both the session and
 // the toasts.
@@ -84,6 +85,14 @@ export default function App() {
                 element={
                   <RequireAuth role="STAFF">
                     <StaffNewBooking />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/staff/roles"
+                element={
+                  <RequireAuth role="STAFF">
+                    <StaffRoles />
                   </RequireAuth>
                 }
               />
