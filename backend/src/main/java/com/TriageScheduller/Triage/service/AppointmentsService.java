@@ -2,6 +2,7 @@ package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.SlotDto;
+import com.TriageScheduller.Triage.exception.ConflictException;
 import com.TriageScheduller.Triage.exception.ForbiddenException;
 import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.Slot;
@@ -175,5 +176,57 @@ public class AppointmentsService {
         }
         return dtos;
 
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public AppointmentDto reschedule(
+            Long appointmentId,
+            Long newSlotId,
+            String userEmail) {
+
+        Appointment appointment = appointmentsRepo.findById(appointmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+        if (!appointment.getPatient().getEmail().equals(userEmail)) {
+            throw new ForbiddenException(
+                    "You are not authorized to reschedule this appointment"
+            );
+        }
+
+        Slot oldSlot = appointment.getSlot();
+
+        Slot newSlot = slotsRepo.findById(newSlotId)
+                .orElseThrow(() -> new EntityNotFoundException("New slot not found"));
+
+        int booked = slotsRepo.bookSlot(
+                newSlotId,
+                appointment.getPatient().getId()
+        );
+
+        if (booked == 0) {
+            throw new ConflictException("New slot is already booked");
+        }
+
+        int freed = slotsRepo.freeSlot(oldSlot.getId());
+
+        if (freed == 0) {
+            throw new ConflictException("Old slot could not be freed");
+        }
+
+        oldSlot.setStatus(Status.FREE);
+        oldSlot.setPatientId(null);
+
+        newSlot.setStatus(Status.BOOKED);
+        newSlot.setPatientId(appointment.getPatient().getId());
+
+        appointment.setSlot(newSlot);
+        appointment.setDoctor(newSlot.getDoctor());
+
+        slotsRepo.save(oldSlot);
+        slotsRepo.save(newSlot);
+
+        Appointment saved = appointmentsRepo.save(appointment);
+
+        return toDto(saved);
     }
 }
