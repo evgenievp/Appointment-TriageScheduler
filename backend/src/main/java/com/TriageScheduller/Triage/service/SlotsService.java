@@ -346,8 +346,11 @@ public class SlotsService {
 
         for (var slot : this.getSlotsForCalendar(dto.id(), current, endOfWorkDay)) {
             Slot currentSlot = this.findById(slot.id());
-            currentSlot.setStatus(Status.BLOCKED);
+            if (currentSlot.getStatus() == Status.FREE) {
+                currentSlot.setStatus(Status.BLOCKED);
+            }
         }
+
 
         return daySlots;
     }

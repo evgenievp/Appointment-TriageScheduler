@@ -69,7 +69,9 @@ public class ExceptionDayService {
         List<Slot> slots = slotsService.findSlotsByDate(day.getDate(), doctor.id());
 
         for (var slot : slots) {
-            slot.setStatus(Status.FREE);
+            if (slot.getStatus() == Status.BLOCKED) {
+                slot.setStatus(Status.FREE);
+            }
         }
         repo.delete(day);
     }
