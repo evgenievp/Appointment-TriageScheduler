@@ -273,6 +273,7 @@ public class SlotsService {
         );
     }
 
+
     public List<SlotDto> previewSlots(Doctor doctor,
                                       LocalDate startDate,
                                       LocalDate endDate,
@@ -405,5 +406,14 @@ public class SlotsService {
         repo.save(slotEntity);
         return toDto(slotEntity);
     }
+
+    public List<Slot> findSlotsByDate(LocalDate date) {
+        LocalDateTime from = date.atTime(8,0);
+        LocalDateTime to = date.atTime(20,0);
+        List<Slot> slots = this.repo.findSlotsInDateRange(from, to);
+        return slots;
+    }
+
+
 
 }

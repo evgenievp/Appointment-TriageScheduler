@@ -3,9 +3,13 @@ package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
+import com.TriageScheduller.Triage.dto.SlotDto;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.ExceptionDay;
+import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
+import com.TriageScheduller.Triage.utils.Status;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +58,16 @@ public class ExceptionDayService {
 
         );
     }
-
+    @Transactional
     public void deleteExceptionDay(Long id) {
-        repo.deleteById(id);
+        ExceptionDay day = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No such day"));
+        List<Slot> slots = slotsService.findSlotsByDate(day.getDate());
+
+        for (var slot : slots) {
+            slot.setStatus(Status.FREE);
+        }
+        repo.delete(day);
     }
 
     private ExceptionDayDto toDto(ExceptionDay day) {

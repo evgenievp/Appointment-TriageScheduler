@@ -48,4 +48,8 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
     void blockSlot(@Param("slotId") Long slotId);
 
 
+    @Query("SELECT s FROM Slot s WHERE s.startsAt BETWEEN :from AND :to")
+    List<Slot> findSlotsInDateRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+
 }

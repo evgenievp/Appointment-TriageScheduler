@@ -58,7 +58,11 @@ public class Slot {
     }
 
 
-    public Slot(Long id, Doctor doctor, LocalDateTime startsAt, LocalDateTime endsAt, Status status, Long patientId) {
+    public Slot(Long id, Doctor doctor, 
+                LocalDateTime startsAt, 
+                LocalDateTime endsAt, 
+                Status status, 
+                Long patientId) {
         this.id = id;
         this.doctor = doctor;
         this.startsAt = startsAt;
@@ -66,6 +70,8 @@ public class Slot {
         this.status = status;
         this.patientId = patientId;
     }
+
+
 
     public Long getId() {
         return id;
