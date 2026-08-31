@@ -15,6 +15,7 @@ import {
 import SignInRequired from '../components/SignInRequired';
 import BookingSteps from '../components/triage/BookingSteps';
 import useBookWithTriage from '../components/triage/useBookWithTriage';
+import { getMyAppointments } from '../api/appointments';
 import { getCalendarSlots, getFreeSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { useAuth } from '../lib/authContext';
@@ -36,6 +37,23 @@ const dayKey = (date) => toLocalDateTime(date).slice(0, 10);
 // "2026-08-13T09:00:00" → "09:00". Взима се както идва от сървъра — Intl би
 // превърнал часа в 12-часов формат за някои езици, а дизайнът е 24-часов.
 const timeLabel = (startTime) => startTime.slice(11, 16);
+
+// A slot whose time has passed is inert, not "taken" — nobody booked it, it
+// simply cannot be booked any more. BLOCKED is a third case: that is how a
+// doctor's day off is marked, so the hour was never on offer. Telling the three
+// apart is the whole point; lumping them together reads as "fully booked".
+const slotState = (slot, past, mySlotIds) => {
+  if (past) return 'past';
+  if (slot.status === 'BOOKED') return mySlotIds.has(slot.id) ? 'mine' : 'taken';
+  if (slot.status === 'BLOCKED') return 'blocked';
+  return 'free';
+};
+
+// `/slots/free` дава само свободните, тоест на излязъл посетител заето и почивен
+// ден изобщо не стигат до грида — обяснени в легендата, те биха били обещание за
+// разлика, която той няма как да види.
+const LEGEND = ['free', 'selected', 'mine', 'taken', 'blocked', 'past'];
+const LEGEND_PUBLIC = ['free', 'selected', 'none'];
 
 export default function DoctorCalendar() {
   const { id } = useParams();
@@ -88,6 +106,16 @@ export default function DoctorCalendar() {
         : getFreeSlots(doctorId, from, to),
   });
 
+  // Токенът носи само имейл и роля, не и id, затова „моят час“ се разпознава по
+  // резервациите, а не по `slot.patientId`. Ключът е същият като в „Моите часове“,
+  // тоест обикновено идва от кеша.
+  const { data: myAppointments } = useQuery({
+    queryKey: ['appointments', 'me'],
+    queryFn: getMyAppointments,
+    enabled: isAuthenticated,
+  });
+  const mySlotIds = new Set((myAppointments ?? []).map((appointment) => appointment.slotId));
+
   // Тук провалът значи само „избери друг час“ — гридът вече е пред човека.
   const { mutate: confirm, isPending: isBooking } = useBookWithTriage({
     onConflict: () => setSelected(null),
@@ -135,29 +163,20 @@ export default function DoctorCalendar() {
       label: formatDayMonth(date, i18n.resolvedLanguage),
       slots: times.map((time) => {
         const slot = byTime.get(time);
-        if (!slot) return { id: `${key}-${time}`, time, unavailable: true };
+        if (!slot) return { id: `${key}-${time}`, time, state: 'none' };
 
-        // A slot whose time has passed is inert, not "taken" — nobody booked
-        // it, it simply cannot be booked any more, so it gets no strikethrough.
-        //
-        // BLOCKED is the same case: that is how a doctor's day off is marked, so
-        // the hour was never on offer. A strikethrough would claim someone took
-        // it. A signed-out visitor never sees these — `/slots/free` returns only
-        // FREE — so both end up looking at the same grid.
-        const past = isPastTime(slot.startTime);
         return {
           id: slot.id,
           time,
           startTime: slot.startTime,
-          taken: !past && slot.status === 'BOOKED',
-          unavailable: past || slot.status === 'BLOCKED',
+          state: slotState(slot, isPastTime(slot.startTime), mySlotIds),
         };
       }),
     };
   });
 
   const hasFreeSlot = gridDays.some((day) =>
-    day.slots.some((slot) => !slot.taken && !slot.unavailable),
+    day.slots.some((slot) => slot.state === 'free'),
   );
 
   // A slot picked a while ago can slip into the past while the page sits open.
@@ -167,7 +186,7 @@ export default function DoctorCalendar() {
     wanted && !selected
       ? gridDays
           .flatMap((day) => day.slots)
-          .find((slot) => String(slot.id) === wanted && !slot.taken && !slot.unavailable)
+          .find((slot) => String(slot.id) === wanted && slot.state === 'free')
       : null;
   const chosen = selected ?? fromUrl;
   const pick = chosen && !isPastTime(chosen.startTime) ? chosen : null;
@@ -258,7 +277,23 @@ export default function DoctorCalendar() {
 
       {!isPending && !isError && hasFreeSlot && (
         <>
-          <SlotGrid days={gridDays} value={pick?.id} onSelect={setSelected} />
+          <SlotGrid
+            days={gridDays}
+            value={pick?.id}
+            onSelect={setSelected}
+            legend={isAuthenticated ? LEGEND : LEGEND_PUBLIC}
+            labels={{
+              free: t('calendar.legendFree'),
+              selected: t('calendar.legendSelected'),
+              mine: t('calendar.legendMine'),
+              taken: t('calendar.legendTaken'),
+              blocked: t('calendar.legendBlocked'),
+              // Уикендът и миналият час изглеждат еднакво и значат едно и също —
+              // не може да се запази — затова са под общ надпис.
+              past: t('calendar.legendUnavailable'),
+              none: t('calendar.legendUnavailable'),
+            }}
+          />
 
           <Card
             tone="sunken"
