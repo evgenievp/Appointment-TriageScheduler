@@ -62,4 +62,18 @@ public class AppointmentsController {
         appointmentsService.delete(id, email, isStaff);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{appointmentId}/reschedule/{newSlotId}")
+    public ResponseEntity<AppointmentDto> rescheduleAppointment(
+            Authentication authentication,
+            @PathVariable Long appointmentId,
+            @PathVariable Long newSlotId) {
+
+        String email = authentication.getName();
+
+        AppointmentDto updated =
+                appointmentsService.reschedule(appointmentId, newSlotId, email);
+
+        return ResponseEntity.ok(updated);
+    }
 }
