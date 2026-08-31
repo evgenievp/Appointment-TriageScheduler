@@ -98,8 +98,48 @@ export const nextSlotId = () => nextSlotIdValue++;
 // ExceptionDayDto: { id, date, reason, doctor }. reason: HOLIDAY | RESTDAY.
 export const exceptionDays = [];
 
+// A day off blocks that day's free hours, which is what the calendar reads.
+// Booked ones are left alone: behind each stands a patient somebody has to ring
+// first. The backend blocks and frees every slot of the day regardless of
+// status, so it also swallows real bookings — mocked here as agreed, not as it
+// currently behaves.
+export function blockSlotsOn(doctorId, date) {
+  slots.forEach((slot) => {
+    if (slot.doctorId === doctorId && slot.startTime.startsWith(date) && slot.status === 'FREE') {
+      slot.status = 'BLOCKED';
+    }
+  });
+}
+
+export function unblockSlotsOn(doctorId, date) {
+  slots.forEach((slot) => {
+    if (
+      slot.doctorId === doctorId &&
+      slot.startTime.startsWith(date) &&
+      slot.status === 'BLOCKED'
+    ) {
+      slot.status = 'FREE';
+    }
+  });
+}
+
 let nextExceptionIdValue = 1;
 export const nextExceptionId = () => nextExceptionIdValue++;
+
+// One day off up front, so the blocked column is visible without signing in as a
+// doctor first. It looks for a weekday, since weekends carry no hours anyway.
+(function seedExceptionDay() {
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+  day.setDate(day.getDate() + 3);
+  while (day.getDay() === 0 || day.getDay() === 6) day.setDate(day.getDate() + 1);
+
+  const date = toLocalDateTime(day).slice(0, 10);
+  const doctor = doctors[0];
+
+  exceptionDays.push({ id: nextExceptionId(), date, reason: 'RESTDAY', doctor });
+  blockSlotsOn(doctor.id, date);
+})();
 
 // Booked visits spread over two patients, three doctors and three days, so the
 // three lists actually differ: the patient sees their own, the doctor sees their

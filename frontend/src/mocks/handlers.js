@@ -6,6 +6,7 @@ import {
   exceptionDays,
   triageResults,
   users,
+  blockSlotsOn,
   fakeToken,
   nextId,
   nextSlotId,
@@ -13,6 +14,7 @@ import {
   triageScore,
   toAppointmentDto,
   toLocalDateTime,
+  unblockSlotsOn,
 } from './data';
 
 // Mock-овете следват контракта на бекенда (`backend/README_BACKEND.md` + DTO-тата).
@@ -199,6 +201,7 @@ export const handlers = [
       doctor: doctors.find((d) => d.id === user.doctorId),
     };
     exceptionDays.push(day);
+    blockSlotsOn(user.doctorId, date);
     return HttpResponse.json(day, { status: 201 });
   }),
 
@@ -210,7 +213,8 @@ export const handlers = [
 
     const index = exceptionDays.findIndex((e) => e.id === Number(params.id));
     if (index === -1) return new HttpResponse(null, { status: 404 });
-    exceptionDays.splice(index, 1);
+    const [removed] = exceptionDays.splice(index, 1);
+    unblockSlotsOn(user.doctorId, removed.date);
     return new HttpResponse(null, { status: 204 });
   }),
 

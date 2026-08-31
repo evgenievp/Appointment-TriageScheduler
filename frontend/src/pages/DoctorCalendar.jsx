@@ -139,13 +139,18 @@ export default function DoctorCalendar() {
 
         // A slot whose time has passed is inert, not "taken" — nobody booked
         // it, it simply cannot be booked any more, so it gets no strikethrough.
+        //
+        // BLOCKED is the same case: that is how a doctor's day off is marked, so
+        // the hour was never on offer. A strikethrough would claim someone took
+        // it. A signed-out visitor never sees these — `/slots/free` returns only
+        // FREE — so both end up looking at the same grid.
         const past = isPastTime(slot.startTime);
         return {
           id: slot.id,
           time,
           startTime: slot.startTime,
-          taken: !past && slot.status !== 'FREE',
-          unavailable: past,
+          taken: !past && slot.status === 'BOOKED',
+          unavailable: past || slot.status === 'BLOCKED',
         };
       }),
     };
