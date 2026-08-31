@@ -127,8 +127,6 @@ public class AppointmentsService {
             appointment.setPatientName(newPatient.getName());
             appointment.setPatientPhone(newPatient.getPhone());
         } else {
-            slot.setPatientId(null);
-            appointment.setPatient(null);
             appointment.setPatientName(name);
             appointment.setPatientPhone(phone);
         }
