@@ -3,12 +3,12 @@ package com.TriageScheduller.Triage.controller;
 import com.TriageScheduller.Triage.dto.AppointmentDto;
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.ExceptionDayDto;
-import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.DoctorsService;
 import com.TriageScheduller.Triage.service.ExceptionDayService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,7 +86,7 @@ public class DoctorsController {
             Authentication authentication,
             @PathVariable Long id) {
 
-        exceptionDayService.deleteExceptionDay(id);
+        exceptionDayService.deleteExceptionDay(id, authentication);
         return ResponseEntity.noContent().build();
     }
 }

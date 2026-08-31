@@ -10,10 +10,12 @@ import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.repo.ExceptionDayRepo;
 import com.TriageScheduller.Triage.utils.Status;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,10 +61,12 @@ public class ExceptionDayService {
         );
     }
     @Transactional
-    public void deleteExceptionDay(Long id) {
+    public void deleteExceptionDay(Long id,
+                                   Authentication authentication) {
         ExceptionDay day = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No such day"));
-        List<Slot> slots = slotsService.findSlotsByDate(day.getDate());
+        DoctorDto doctor = this.doctorsService.findByEmail(authentication.getName());
+        List<Slot> slots = slotsService.findSlotsByDate(day.getDate(), doctor.id());
 
         for (var slot : slots) {
             slot.setStatus(Status.FREE);

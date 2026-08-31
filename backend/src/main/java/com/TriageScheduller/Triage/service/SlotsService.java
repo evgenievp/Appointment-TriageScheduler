@@ -407,11 +407,10 @@ public class SlotsService {
         return toDto(slotEntity);
     }
 
-    public List<Slot> findSlotsByDate(LocalDate date) {
+    public List<Slot> findSlotsByDate(LocalDate date, Long doctorId) {
         LocalDateTime from = date.atTime(8,0);
         LocalDateTime to = date.atTime(20,0);
-        List<Slot> slots = this.repo.findSlotsInDateRange(from, to);
-        return slots;
+        return this.repo.findSlotsInDateRange(doctorId, from, to);
     }
 
 
