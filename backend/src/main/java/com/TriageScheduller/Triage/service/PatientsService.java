@@ -108,6 +108,8 @@ public class PatientsService {
 
         Doctor doctor = new Doctor(user.getName(), speciality, Role.DOCTOR, email);
         doctor.setUser(user);
+        user.setRole(Role.DOCTOR);
+        patientsRepo.save(user);
         doctorsRepo.save(doctor);
         return this.doctorsService.toDto(doctor);
 
