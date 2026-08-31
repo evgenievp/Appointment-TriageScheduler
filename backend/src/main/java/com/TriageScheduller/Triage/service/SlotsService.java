@@ -337,29 +337,23 @@ public class SlotsService {
 
         return daySlots;
     }
-
+    @Transactional
     public List<SlotDto> blockSlotsForDay(ExceptionDayDto dayDto, DoctorDto dto) {
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(dayDto.date(), LocalTime.of(8,0));
         LocalDateTime endOfWorkDay = LocalDateTime.of(dayDto.date(), LocalTime.of(18,30));
 
-        while (current.isBefore(endOfWorkDay)) {
-            LocalDateTime slotEnd = current.plusMinutes(30);
-
-            if (slotEnd.isAfter(endOfWorkDay)) {
-                break;
-            }
-
-            Doctor doctor = this.doctorsService.toDoctor(dto);
-
-            Slot virtualSlot = new Slot(doctor,
-                    current);
-            makeSlotBlocked(virtualSlot.getId());
-            daySlots.add(toDto(virtualSlot));
-            current = slotEnd;
+        for (var slot : this.getSlotsForCalendar(dto.id(), current, endOfWorkDay)) {
+            Slot currentSlot = this.findById(slot.id());
+            currentSlot.setStatus(Status.BLOCKED);
         }
 
         return daySlots;
+    }
+
+    private Slot findById(Long id) {
+        return this.repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
     }
 
 
