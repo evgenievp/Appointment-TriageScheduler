@@ -16,7 +16,7 @@ import {
 } from '../components/ds';
 import { cancelAppointment, getMyAppointments } from '../api/appointments';
 import { getDoctors } from '../api/doctors';
-import { assignSlot, findPatientByPhone } from '../api/staff';
+import { assignSlot, findPatientsByPhone } from '../api/staff';
 import { countries, DEFAULT_COUNTRY, isValidPhone, toE164 } from '../lib/phone';
 import { formatDayLong, fromLocalDateTime } from '../lib/dates';
 import { useToast } from '../lib/toastContext';
@@ -41,9 +41,10 @@ export default function StaffAssign() {
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
-  // null — още не е търсено; обект — намереният пациент. Ненамерен не се пази
-  // тук, а в `search.isError`: сървърът връща 500, не празен резултат.
-  const [found, setFound] = useState(null);
+  // null — още не е търсено; масив — намереното. Празен масив значи „няма такъв“.
+  // Списък, а не един профил: един телефон може да води до няколко човека и кой е
+  // насреща го решава служителят, не подредбата на резултата.
+  const [matches, setMatches] = useState(null);
 
   const countryList = useMemo(() => countries(i18n.resolvedLanguage), [i18n.resolvedLanguage]);
   const normalized = isValidPhone(phone, country) ? toE164(phone, country) : null;
@@ -72,25 +73,23 @@ export default function StaffAssign() {
     });
 
   const search = useMutation({
-    mutationFn: () => findPatientByPhone(normalized),
-    // `null` при празен резултат се държи като ненамерен, а не като успех.
-    onSuccess: (patient) => setFound(patient ?? null),
+    mutationFn: () => findPatientsByPhone(normalized),
+    onSuccess: (list) => setMatches(list),
   });
 
-  // Сървърът не различава „няма такъв пациент“ от повреда — и двете идват като
-  // 500. Затова всяка грешка води до един и същ изход: ръчно въведени име и
-  // телефон. Скриването му при провал би оставило служителя без ход насред
-  // разговор.
-  const notFound = search.isError || (search.isSuccess && !found);
+  // Празен резултат и провалило се търсене водят до едно и също: ръчно въведени
+  // име и телефон. Скриването на този изход при грешка би оставило служителя без
+  // ход насред разговор.
+  const notFound = search.isError || (search.isSuccess && matches?.length === 0);
 
-  // Субектът се решава на бутона, не тук: намереният профил праща ид-то си,
+  // Субектът се решава на бутона, не тук: избраният профил праща своето ид,
   // ръчното въвеждане — име и телефон. Телефонът не става за идентификация,
   // защото един номер може да води до няколко профила.
   const give = useMutation({
     mutationFn: (subject) => assignSlot(held.slotId, subject),
     onSuccess: (_appointment, subject) =>
       done('staffBooking.assign.doneTitle', 'staffBooking.assign.doneMessage', {
-        name: subject.name ?? found?.name,
+        name: subject.name ?? matches?.find((p) => p.id === subject.patientId)?.name,
       }),
     onError: failed,
   });
@@ -186,7 +185,7 @@ export default function StaffAssign() {
                 value={country}
                 onChange={(event) => {
                   setCountry(event.target.value);
-                  setFound(null);
+                  setMatches(null);
                   search.reset();
                 }}
               >
@@ -207,7 +206,7 @@ export default function StaffAssign() {
                 value={phone}
                 onChange={(event) => {
                   setPhone(event.target.value);
-                  setFound(null);
+                  setMatches(null);
                   search.reset();
                 }}
                 hint={
@@ -234,34 +233,63 @@ export default function StaffAssign() {
           </Button>
         </form>
 
-        {found && (
-          <Card style={{ marginTop: 'var(--space-6)' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 'var(--space-4)',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div>
-                <div style={{ fontWeight: 'var(--fw-semibold)', color: 'var(--navy-900)' }}>
-                  {found.name}
+        {/* Един номер може да води до няколко профила — семейство с общ телефон,
+            родител, вписан на две деца. Показват се всички и служителят избира;
+            вземането на първия по ред би дало часа на грешния човек мълчаливо.
+            Имейлът е тук, защото имената се повтарят: без него два реда с еднакво
+            име и еднакъв телефон са неразличими. */}
+        {matches?.length > 0 && (
+          <div
+            style={{
+              marginTop: 'var(--space-6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-3)',
+            }}
+          >
+            {matches.length > 1 && (
+              <p style={{ color: 'var(--text-strong-muted)' }}>
+                {t('staffBooking.assign.matches', { count: matches.length })}
+              </p>
+            )}
+
+            {matches.map((patient) => (
+              <Card key={patient.id}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 'var(--space-4)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 'var(--fw-semibold)', color: 'var(--navy-900)' }}>
+                      {patient.name}
+                    </div>
+                    <div style={{ marginTop: 'var(--space-2)', color: 'var(--text-strong-muted)' }}>
+                      {patient.email}
+                    </div>
+                    <div style={{ ...mono, marginTop: 'var(--space-1)', color: 'var(--text-muted)' }}>
+                      {patient.phone}
+                    </div>
+                  </div>
+                  <Button
+                    disabled={busy}
+                    onClick={() => give.mutate({ patientId: patient.id })}
+                    iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
+                  >
+                    {t(
+                      give.isPending && give.variables?.patientId === patient.id
+                        ? 'staffBooking.assign.giving'
+                        : 'staffBooking.assign.give',
+                    )}
+                  </Button>
                 </div>
-                <div style={{ ...mono, marginTop: 'var(--space-2)', color: 'var(--text-muted)' }}>
-                  {found.phone}
-                </div>
-              </div>
-              <Button
-                disabled={busy}
-                onClick={() => give.mutate({ patientId: found.id })}
-                iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
-              >
-                {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.give')}
-              </Button>
-            </div>
-          </Card>
+              </Card>
+            ))}
+          </div>
         )}
 
         {/* Ненамерен и „търсенето гръмна“ са едно и също нещо откъм сървъра —
