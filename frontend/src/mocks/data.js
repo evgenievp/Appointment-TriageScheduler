@@ -299,6 +299,17 @@ export const users = [
     phone: '+359885551234',
     role: 'PATIENT',
   },
+  // Deliberately shares a phone with id 4: a household with one number is the
+  // ordinary case, and `users.phone` has no unique index. Without a duplicate in
+  // the data the picker in the staff screens can never be exercised.
+  {
+    id: 5,
+    email: 'elena@example.bg',
+    password: 'sirma2026',
+    name: 'Елена Петрова',
+    phone: '+359885551234',
+    role: 'PATIENT',
+  },
 ];
 
 const base64url = (value) =>

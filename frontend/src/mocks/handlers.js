@@ -345,16 +345,15 @@ export const handlers = [
     if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
     await delay(LATENCY);
 
+    // Списък, не един профил: `users.phone` няма уникален индекс и регистрацията
+    // не проверява за дубликат, тоест няколко човека с един номер са нормален
+    // случай. Празен резултат е празен масив, а не 404 — „няма такъв“ не е грешка.
     const phone = decodeURIComponent(params.phone);
-    const found = users.find((u) => u.role === 'PATIENT' && u.phone === phone);
-    if (!found) return new HttpResponse('No such user', { status: 404 });
+    const found = users
+      .filter((u) => u.role === 'PATIENT' && u.phone === phone)
+      .map((u) => ({ id: u.id, name: u.name, phone: u.phone, email: u.email }));
 
-    return HttpResponse.json({
-      id: found.id,
-      name: found.name,
-      phone: found.phone,
-      email: found.email,
-    });
+    return HttpResponse.json(found);
   }),
 
   // Повишаване на роля. Ендпойнт за търсене по имейл няма, затова екранът търси
@@ -402,10 +401,12 @@ export const handlers = [
     return HttpResponse.json(doctor, { status: 201 });
   }),
 
-  // Прехвърляне на задържания час. Пациентът идва като `?phone=`, не в тялото —
-  // сървърът го търси наново, вместо да приеме ид-то, което търсенето вече е
-  // върнало. Затова непознат номер е грешка: пациент без профил още не се
-  // поддържа, макар полетата за име и телефон да съществуват.
+  // Прехвърляне на задържания час. Субектът идва в тялото, в едно от двете
+  // състояния: `{ patientId }` за регистриран, `{ name, phone }` за човек без
+  // профил. Телефон не идентифицира — един номер може да води до няколко профила.
+  //
+  // Разминаване с бекенда, мокнато е договореното: там още се чете `?phone=`
+  // през `@RequestParam` и тяло не се приема изобщо.
   ...handle('put', '/api/staff/slots/:slotId/assign', async ({ request, params }) => {
     const user = userFromRequest(request);
     if (!user) return unauthorized();
@@ -417,28 +418,31 @@ export const handlers = [
     if (!slot) return new HttpResponse('No such slot', { status: 404 });
 
     const appointment = appointments.find((a) => a.slotId === slotId);
-    if (!appointment) return new HttpResponse('Slot is not booked', { status: 404 });
+    if (!appointment) return new HttpResponse('Slot has no appointment', { status: 404 });
 
-    const phone = new URL(request.url).searchParams.get('phone');
-    const patient = users.find((u) => u.phone === phone);
-    if (!patient) return new HttpResponse('No such user', { status: 404 });
+    const { patientId, name, phone } = await request.json();
 
-    // Резервацията се мести, не се пресъздава: id-то, триажът и приоритетът
+    // Резервацията се коригира, не се пресъздава: id-то, триажът и приоритетът
     // остават. Името и телефонът се обновяват заедно с пациента — иначе часът
     // продължава да носи името на служителя.
-    slot.patientId = patient.id;
-    appointment.patientId = patient.id;
-    appointment.patientName = patient.name;
-    appointment.patientPhone = patient.phone;
+    if (patientId != null) {
+      const patient = users.find((u) => u.id === patientId);
+      if (!patient) return new HttpResponse('No such user', { status: 404 });
 
-    return HttpResponse.json({
-      id: slot.id,
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-      status: slot.status,
-      doctorId: slot.doctorId,
-      patientId: slot.patientId,
-    });
+      appointment.patientId = patient.id;
+      appointment.patientName = patient.name;
+      appointment.patientPhone = patient.phone;
+    } else {
+      if (!name?.trim()) {
+        return new HttpResponse('Provide either patientId or a name', { status: 400 });
+      }
+      // Без профил часът остава на служителя, който го е поел — така той може да
+      // го следи. За кого е реално казват името и телефонът.
+      appointment.patientName = name;
+      appointment.patientPhone = phone ?? null;
+    }
+
+    return HttpResponse.json(appointment);
   }),
 
   ...handle('post', '/api/triage/:appointmentId', async ({ request, params }) => {
