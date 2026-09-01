@@ -83,11 +83,14 @@ export default function StaffAssign() {
   // разговор.
   const notFound = search.isError || (search.isSuccess && !found);
 
+  // Субектът се решава на бутона, не тук: намереният профил праща ид-то си,
+  // ръчното въвеждане — име и телефон. Телефонът не става за идентификация,
+  // защото един номер може да води до няколко профила.
   const give = useMutation({
-    mutationFn: () => assignSlot(held.slotId, normalized),
-    onSuccess: () =>
+    mutationFn: (subject) => assignSlot(held.slotId, subject),
+    onSuccess: (_appointment, subject) =>
       done('staffBooking.assign.doneTitle', 'staffBooking.assign.doneMessage', {
-        name: found?.name ?? name.trim(),
+        name: subject.name ?? found?.name,
       }),
     onError: failed,
   });
@@ -252,7 +255,7 @@ export default function StaffAssign() {
               </div>
               <Button
                 disabled={busy}
-                onClick={() => give.mutate()}
+                onClick={() => give.mutate({ patientId: found.id })}
                 iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
               >
                 {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.give')}
@@ -288,7 +291,7 @@ export default function StaffAssign() {
             />
             <Button
               disabled={!name.trim() || busy}
-              onClick={() => give.mutate()}
+              onClick={() => give.mutate({ name: name.trim(), phone: normalized })}
               style={{ marginTop: 'var(--space-4)' }}
             >
               {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.saveGuest')}
