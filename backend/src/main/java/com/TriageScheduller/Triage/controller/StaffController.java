@@ -1,16 +1,11 @@
 package com.TriageScheduller.Triage.controller;
 
-import com.TriageScheduller.Triage.dto.AppointmentDto;
-import com.TriageScheduller.Triage.dto.DoctorDto;
-import com.TriageScheduller.Triage.dto.SlotDto;
-import com.TriageScheduller.Triage.dto.UserDto;
-import com.TriageScheduller.Triage.models.User;
+import com.TriageScheduller.Triage.dto.*;
 import com.TriageScheduller.Triage.service.AppointmentsService;
 import com.TriageScheduller.Triage.service.PatientsService;
 import com.TriageScheduller.Triage.service.SlotsService;
 import com.TriageScheduller.Triage.service.StaffService;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +22,10 @@ public class StaffController {
     private final SlotsService slotsService;
     private final AppointmentsService appointmentsService;
 
-    public StaffController(StaffService service, PatientsService patientsService, SlotsService slotsService, AppointmentsService appointmentsService) {
+    public StaffController(StaffService service,
+                           PatientsService patientsService,
+                           SlotsService slotsService,
+                           AppointmentsService appointmentsService) {
         this.service = service;
         this.patientsService = patientsService;
         this.slotsService = slotsService;
@@ -43,12 +41,11 @@ public class StaffController {
     @PutMapping("/slots/{slotId}/assign")
     public ResponseEntity<SlotDto> changePatient(
             @PathVariable Long slotId,
-            @RequestParam(required = false) Long patientId,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String name) {
-        return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, phone, name, patientId));
-
-
+            @RequestBody AssignSlotRequest body) {
+        return ResponseEntity.ok(appointmentsService.changePatient(body.patientId(),
+                slotId,
+                body.phone(),
+                body.name()));
     }
 
     @PatchMapping("/promoteToStaff")

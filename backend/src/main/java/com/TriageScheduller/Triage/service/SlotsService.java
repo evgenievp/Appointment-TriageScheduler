@@ -13,6 +13,7 @@ import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.repo.SlotsRepo;
 import com.TriageScheduller.Triage.utils.AppointmentStatus;
 import com.TriageScheduller.Triage.utils.Status;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,6 +38,7 @@ public class SlotsService {
     private final DoctorsService doctorsService;
     private LocalTime restStart;
     private LocalTime restEnd;
+    private int slotTime;
 
     public SlotsService(SlotsRepo repo,
                         AppointmentsRepo appointmentsRepo,
@@ -48,15 +50,40 @@ public class SlotsService {
         this.doctorsService = doctorsService;
         this.restStart = LocalTime.of(12,0);
         this.restEnd = LocalTime.of(13,0);
+        this.slotTime = 30;
 
     }
+
+    public void setSlotTime(int slotTime,
+                            Authentication authentication,
+                            LocalDate startDate,
+                            LocalDate endDate,
+                            LocalTime workStart,
+                            LocalTime workEnd) {
+        if (slotTime <= 0) {
+            return;
+        }
+        String email = authentication.getName();
+        DoctorDto doctor = doctorsService.findByEmail(email);
+        repo.deleteSlotsByDoctorAndDateRange(doctor.id(),
+                startDate.atTime(8,0),
+                endDate.atTime(20,0));
+        generateSlots(doctorsService.toDoctor(doctor),
+                startDate,
+                endDate,
+                workStart,
+                workEnd,
+                slotTime);
+    }
+
 
     @Transactional
     public List<SlotDto> generateSlots(Doctor doctor,
                                        LocalDate startDate,
                                        LocalDate endDate,
                                        LocalTime workStart,
-                                       LocalTime workEnd) {
+                                       LocalTime workEnd,
+                                       int slotTime) {
         Set<LocalDate> exceptionDays = exceptionDayRepo.findByDoctorIdAndDateBetween(
                         doctor.getId(), startDate, endDate)
                 .stream()
@@ -79,7 +106,7 @@ public class SlotsService {
                 continue;
             }
 
-            List<SlotDto> daySlots = generateSlotsForDay(doctor, currentDate, workStart, workEnd);
+            List<SlotDto> daySlots = generateSlotsForDay(doctor, currentDate, workStart, workEnd, slotTime);
             generatedSlots.addAll(daySlots);
 
             currentDate = currentDate.plusDays(1);
@@ -91,14 +118,15 @@ public class SlotsService {
     private List<SlotDto> generateSlotsForDay(Doctor doctor,
                                               LocalDate date,
                                               LocalTime workStart,
-                                              LocalTime workEnd) {
+                                              LocalTime workEnd,
+                                              int slotTime) {
 
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(date, workStart);
         LocalDateTime endOfWorkDay = LocalDateTime.of(date, workEnd);
 
         while (current.isBefore(endOfWorkDay)) {
-            LocalDateTime slotEnd = current.plusMinutes(30);
+            LocalDateTime slotEnd = current.plusMinutes(slotTime);
 
             if (isRestTime(current, this.restStart, this.restEnd)) {
                 current = slotEnd;

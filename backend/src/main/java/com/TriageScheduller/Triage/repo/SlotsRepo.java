@@ -53,4 +53,11 @@ public interface SlotsRepo extends JpaRepository<Slot, Long> {
                                     @Param("from") LocalDateTime from,
                                     @Param("to") LocalDateTime to);
 
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Slot s WHERE s.doctor.id = :doctorId AND s.startsAt BETWEEN :from AND :to")
+    void deleteSlotsByDoctorAndDateRange(@Param("doctorId") Long doctorId,
+                                         @Param("from") LocalDateTime from,
+                                         @Param("to") LocalDateTime to);
 }

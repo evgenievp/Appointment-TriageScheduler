@@ -88,9 +88,9 @@ public class DataSeeder implements CommandLineRunner {
             Doctor drIvan = doctorsService.toDoctor(doc1);
             Doctor drTodor = doctorsService.toDoctor(doc2);
 
-            slotsService.generateSlots(drIvan, start, end, workStart, workEnd);
+            slotsService.generateSlots(drIvan, start, end, workStart, workEnd, 30);
 
-            slotsService.generateSlots(drTodor, start, end, workStart, workEnd);
+            slotsService.generateSlots(drTodor, start, end, workStart, workEnd, 30);
 
         }
 
