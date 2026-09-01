@@ -345,16 +345,15 @@ export const handlers = [
     if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
     await delay(LATENCY);
 
+    // Списък, не един профил: `users.phone` няма уникален индекс и регистрацията
+    // не проверява за дубликат, тоест няколко човека с един номер са нормален
+    // случай. Празен резултат е празен масив, а не 404 — „няма такъв“ не е грешка.
     const phone = decodeURIComponent(params.phone);
-    const found = users.find((u) => u.role === 'PATIENT' && u.phone === phone);
-    if (!found) return new HttpResponse('No such user', { status: 404 });
+    const found = users
+      .filter((u) => u.role === 'PATIENT' && u.phone === phone)
+      .map((u) => ({ id: u.id, name: u.name, phone: u.phone, email: u.email }));
 
-    return HttpResponse.json({
-      id: found.id,
-      name: found.name,
-      phone: found.phone,
-      email: found.email,
-    });
+    return HttpResponse.json(found);
   }),
 
   // Повишаване на роля. Ендпойнт за търсене по имейл няма, затова екранът търси

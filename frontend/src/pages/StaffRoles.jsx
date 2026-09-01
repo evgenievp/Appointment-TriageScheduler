@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import { Button, Card, Icon, Input, Select } from '../components/ds';
-import { findPatientByPhone, promoteToDoctor, promoteToStaff } from '../api/staff';
+import { findPatientsByPhone, promoteToDoctor, promoteToStaff } from '../api/staff';
 import { countries, DEFAULT_COUNTRY, isValidPhone, toE164 } from '../lib/phone';
 import { useToast } from '../lib/toastContext';
 
@@ -26,6 +26,10 @@ export default function StaffRoles() {
 
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
+  // `matches` е каквото върна търсенето, `found` — избраният от него. Разделени
+  // са, защото един телефон може да води до няколко профила, а роля се дава на
+  // конкретен човек.
+  const [matches, setMatches] = useState(null);
   const [found, setFound] = useState(null);
   const [role, setRole] = useState('STAFF');
   const [speciality, setSpeciality] = useState('');
@@ -35,12 +39,16 @@ export default function StaffRoles() {
   const isDoctor = role === 'DOCTOR';
 
   const search = useMutation({
-    mutationFn: () => findPatientByPhone(normalized),
-    onSuccess: (person) => setFound(person ?? null),
+    mutationFn: () => findPatientsByPhone(normalized),
+    // Един резултат се избира сам. При няколко изборът остава на служителя —
+    // „кого повишавам“ не е въпрос, на който подредбата на списъка да отговаря.
+    onSuccess: (list) => {
+      setMatches(list);
+      setFound(list.length === 1 ? list[0] : null);
+    },
   });
 
-  // Сървърът връща 500 и за ненамерен, и за дублиран номер — не ги различаваме.
-  const notFound = search.isError || (search.isSuccess && !found);
+  const notFound = search.isError || (search.isSuccess && matches?.length === 0);
 
   const promote = useMutation({
     mutationFn: () =>
@@ -53,6 +61,7 @@ export default function StaffRoles() {
         title: t(isDoctor ? 'pages.staffRoles.doneDoctor' : 'pages.staffRoles.doneStaff'),
         message: t('pages.staffRoles.doneMessage', { name: found.name }),
       });
+      setMatches(null);
       setFound(null);
       setPhone('');
       setSpeciality('');
@@ -62,6 +71,7 @@ export default function StaffRoles() {
   });
 
   const reset = () => {
+    setMatches(null);
     setFound(null);
     search.reset();
     promote.reset();
@@ -156,6 +166,50 @@ export default function StaffRoles() {
               {t('pages.staffRoles.notFoundText')}
             </p>
           </Card>
+        )}
+
+        {/* Няколко профила с един номер: изборът е на служителя. Роля се дава на
+            конкретен човек, а имената се повтарят — имейлът е това, което ги
+            различава. */}
+        {!found && matches?.length > 1 && (
+          <div
+            style={{
+              marginTop: 'var(--space-6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-3)',
+            }}
+          >
+            <p style={{ color: 'var(--text-strong-muted)' }}>
+              {t('staffBooking.assign.matches', { count: matches.length })}
+            </p>
+
+            {matches.map((person) => (
+              <Card key={person.id}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 'var(--space-4)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 'var(--fw-semibold)', color: 'var(--navy-900)' }}>
+                      {person.name}
+                    </div>
+                    <div style={{ marginTop: 'var(--space-2)', color: 'var(--text-strong-muted)' }}>
+                      {person.email}
+                    </div>
+                  </div>
+                  <Button variant="secondary" onClick={() => setFound(person)}>
+                    {t('pages.staffRoles.choose')}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
 
         {found && (
