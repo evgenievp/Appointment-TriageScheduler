@@ -46,14 +46,8 @@ public class StaffController {
             @RequestParam(required = false) Long patientId,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String name) {
+        return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, phone, name, patientId));
 
-        try {
-            UserDto patient = patientsService.findByPhone(phone);
-            appointmentsService.changePatient(patientId, slotId, phone, name);
-            return ResponseEntity.ok(slotsService.changePatientOfSlot(slotId, patient.id()));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.ok(slotsService.bookSlotWithoutPatient(slotId, name));
-        }
 
     }
 
@@ -72,7 +66,7 @@ public class StaffController {
     }
 
     @GetMapping("/patient/{phoneNumber}")
-    public ResponseEntity<UserDto> findSlotByUserPhone(@PathVariable String phoneNumber) {
+    public ResponseEntity<List<UserDto>> findSlotByUserPhone(@PathVariable String phoneNumber) {
         return ResponseEntity.status(201).body(this.patientsService.findSlotByUserPhone(phoneNumber));
     }
 

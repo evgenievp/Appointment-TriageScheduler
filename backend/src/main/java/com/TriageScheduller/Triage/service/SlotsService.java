@@ -378,37 +378,34 @@ public class SlotsService {
 
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public SlotDto changePatientOfSlot(Long slotId, Long id) {
-        Optional<User> user = this.patientsRepo.findById(id);
+    public SlotDto changePatientOfSlot(Long slotId, String phone, String name, Long patientId) {
+        Optional<User> user = this.patientsRepo.findUserByPhone(phone);
+        Optional<Slot> slotEntity = this.repo.findById(slotId);
+        List<Appointment> appointmentEntity = this.appointmentsRepo.findByPatientPhone(phone);
+        if (appointmentEntity.size() == 0) {
+            Appointment appointment = new Appointment();
+            appointment.setStatus(AppointmentStatus.CONFIRMED);
+            appointment.setPatientName(name);
+            appointment.setPatientPhone(phone);
+        }
+        else {
+            Appointment appointment = appointmentEntity.getLast();
+            appointment.setPatientName(name);
+            appointment.setPatientPhone(phone);
+        }
+        if (slotEntity.isEmpty()) {
+            throw new EntityNotFoundException("No such slot");
+        }
+        Slot slot = slotEntity.get();
         if (user.isEmpty()) {
-            throw new EntityNotFoundException("Something went wrong - no such user");
-        }
-        Optional<Slot> slot = this.repo.findById(slotId);
-        if (slot.isEmpty()) {
-            throw new EntityNotFoundException("No such slot");
+            slot.setPatientName(name);
         }
 
-        Slot slotEntity = slot.get();
-        User userEntity = user.get();
-
-        slotEntity.setPatientId(userEntity.getId());
-        repo.save(slotEntity);
-        return toDto(slotEntity);
+        repo.save(slot);
+        return toDto(slot);
 
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public SlotDto bookSlotWithoutPatient(Long slotId, String name) {
-        Optional<Slot> slot = this.repo.findById(slotId);
-        if (slot.isEmpty()) {
-            throw new EntityNotFoundException("No such slot");
-        }
-        Slot slotEntity = slot.get();
-
-        slotEntity.setPatientName(name);
-        repo.save(slotEntity);
-        return toDto(slotEntity);
-    }
 
     public List<Slot> findSlotsByDate(LocalDate date, Long doctorId) {
         LocalDateTime from = date.atTime(8,0);

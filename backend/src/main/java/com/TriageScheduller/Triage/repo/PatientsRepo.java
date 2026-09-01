@@ -17,5 +17,7 @@ public interface PatientsRepo extends JpaRepository<User, Long> {
         @Query("SELECT u FROM User u WHERE RIGHT(u.phone, 5) = :lastFiveDigits")
         List<User> findByPhoneLastFiveDigits(@Param("lastFiveDigits") String lastFiveDigits);
 
-    Optional<User> findByPhone(String phone);
+    List<User> findByPhone(String phone);
+
+    Optional<User> findUserByPhone(String phone);
 }

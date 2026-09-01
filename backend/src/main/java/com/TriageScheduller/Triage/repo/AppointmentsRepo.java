@@ -20,4 +20,5 @@ public interface AppointmentsRepo extends JpaRepository<Appointment, Long> {
     List<Appointment> findByDate(@Param("date") LocalDate date);
 
 
+    List<Appointment> findByPatientPhone(String phone);
 }

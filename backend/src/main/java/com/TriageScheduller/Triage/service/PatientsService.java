@@ -10,6 +10,8 @@ import com.TriageScheduller.Triage.utils.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,14 +66,15 @@ public class PatientsService {
     }
 
 
-    public UserDto findSlotByUserPhone(String phoneNumber) {
-        Optional<User> user = this.repo.findByPhone(phoneNumber);
+    public List<UserDto> findSlotByUserPhone(String phoneNumber) {
+        List<User> users = this.repo.findByPhone(phoneNumber);
+        List<UserDto> dtos = new ArrayList<>();
 
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("No such user");
+        for (var user: users) {
+            dtos.add(toDto(user));
         }
 
-        return toDto(user.get());
+        return dtos;
     }
 
 
@@ -86,7 +89,7 @@ public class PatientsService {
 
     public UserDto findByPhone(String phone) {
         String normalized = normalizePhone(phone);
-        User user = repo.findByPhone(normalized)
+        User user = repo.findUserByPhone(normalized)
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         return toDto(user);
     }
