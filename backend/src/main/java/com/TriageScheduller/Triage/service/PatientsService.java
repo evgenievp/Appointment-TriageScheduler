@@ -87,12 +87,6 @@ public class PatientsService {
         );
     }
 
-    public UserDto findByPhone(String phone) {
-        String normalized = normalizePhone(phone);
-        User user = repo.findUserByPhone(normalized)
-                .orElseThrow(() -> new EntityNotFoundException("No such user"));
-        return toDto(user);
-    }
 
     public UserDto promoteToStaff(String email) {
         User user = this.repo.findByEmail(email)

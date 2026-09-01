@@ -19,5 +19,5 @@ public interface PatientsRepo extends JpaRepository<User, Long> {
 
     List<User> findByPhone(String phone);
 
-    Optional<User> findUserByPhone(String phone);
+//    Optional<User> findUserByPhone(String phone);
 }

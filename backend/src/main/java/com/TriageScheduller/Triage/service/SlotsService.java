@@ -379,7 +379,7 @@ public class SlotsService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public SlotDto changePatientOfSlot(Long slotId, String phone, String name, Long patientId) {
-        Optional<User> user = this.patientsRepo.findUserByPhone(phone);
+        Optional<User> user = this.patientsRepo.findById(patientId);
         Optional<Slot> slotEntity = this.repo.findById(slotId);
         List<Appointment> appointmentEntity = this.appointmentsRepo.findByPatientPhone(phone);
         if (appointmentEntity.size() == 0) {
