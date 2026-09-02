@@ -322,6 +322,7 @@
       "workStart": "Day starts",
       "workEnd": "Day ends",
       "slotTime": "Appointment length",
+      "weekOf": "week {{index}} of {{total}}",
       "minutes": "{{minutes}} minutes",
       "rules": "Saturdays, Sundays, the 12:00 – 13:00 break and the days off below are all skipped.",
       "errors": {

@@ -31,12 +31,10 @@ import {
 } from '../lib/dates';
 import { useNow } from '../lib/useNow';
 import { useTriageDraft } from '../lib/triageDraft';
+import { buildSlotColumns } from '../lib/slotColumns';
 
 const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
 const dayKey = (date) => toLocalDateTime(date).slice(0, 10);
-// "2026-08-13T09:00:00" → "09:00". Взима се както идва от сървъра — Intl би
-// превърнал часа в 12-часов формат за някои езици, а дизайнът е 24-часов.
-const timeLabel = (startTime) => startTime.slice(11, 16);
 
 // A slot whose time has passed is inert, not "taken" — nobody booked it, it
 // simply cannot be booked any more. BLOCKED is a third case: that is how a
@@ -48,14 +46,6 @@ const slotState = (slot, past, mySlotIds) => {
   if (slot.status === 'BLOCKED') return 'blocked';
   return 'free';
 };
-
-// "2026-08-13T09:20:00" → 560. Минути от полунощ; целият грид смята в тях, за да
-// не се сравняват низове с различна дължина на часа.
-const minutesOf = (localDateTime) =>
-  Number(localDateTime.slice(11, 13)) * 60 + Number(localDateTime.slice(14, 16));
-
-const clockLabel = (minutes) =>
-  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
 
 // `/slots/free` дава само свободните, тоест на излязъл посетител заето и почивен
 // ден изобщо не стигат до грида — обяснени в легендата, те биха били обещание за
@@ -153,66 +143,17 @@ export default function DoctorCalendar() {
     confirm({ slot: pick, answers });
   };
 
-  // Всяка колона изброява само своите часове — обединена времева ос няма, защото
-  // при различна продължителност по дни тя би напълнила грида с празни клетки.
-  //
-  // Часовете въпреки това се подравняват напречно, и то точно. Всички колони са
-  // еднакво високи, а слотовете на един ден покриват едно и също работно време,
-  // затова позицията на даден час е `изминало време / общо време × височина` —
-  // независимо каква е стъпката. Свойство на данните, не гаранция от кода: чупи
-  // се в деня, в който работният прозорец стане различен по дни.
-  const byDay = days.map((date) => {
-    const key = dayKey(date);
-    // `raw` са слотовете както идват от сървъра — трябват за стъпката на деня,
-    // защото само те носят `endTime`.
-    const raw = (slots ?? [])
-      .filter((slot) => slot.startTime.startsWith(key))
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-    return {
-      key,
-      raw,
+  // Колоните се строят в `lib/slotColumns.js`, защото и прегледът преди
+  // създаване на часове рисува същия грид.
+  const gridDays = buildSlotColumns(
+    days.map((date) => ({
+      key: dayKey(date),
       weekday: formatWeekday(date, i18n.resolvedLanguage),
       label: formatDayMonth(date, i18n.resolvedLanguage),
-      slots: raw.map((slot) => ({
-        id: slot.id,
-        time: timeLabel(slot.startTime),
-        startTime: slot.startTime,
-        state: slotState(slot, isPastTime(slot.startTime), mySlotIds),
-      })),
-    };
-  });
-
-  // Всяка колона се разпъва до обхвата на цялата седмица: ако в един ден лекарят
-  // приема до 22:00, всички дни получават клетки дотам, а тези без слот са
-  // „не се предлага“. Така обедната почивка и краят на по-късия ден се виждат
-  // като недостъпни часове, вместо колоната просто да свърши.
-  //
-  // Обхватът се взима от реалните слотове — нищо не се зашива в интерфейса.
-  const all = slots ?? [];
-  const spanStart = all.length ? Math.min(...all.map((s) => minutesOf(s.startTime))) : 0;
-  const spanEnd = all.length ? Math.max(...all.map((s) => minutesOf(s.endTime))) : 0;
-
-  // Стъпката на деня идва от собствените му слотове; ден без слотове взима
-  // назаем най-едрата в седмицата, за да е с най-малко клетки.
-  const cadenceOf = (daySlots) =>
-    daySlots.length ? minutesOf(daySlots[0].endTime) - minutesOf(daySlots[0].startTime) : 0;
-
-  const cadences = byDay.map((day) => cadenceOf(day.raw)).filter(Boolean);
-  const fallback = cadences.length ? Math.max(...cadences) : 0;
-
-  const gridDays = byDay.map((day) => {
-    const step = cadenceOf(day.raw) || fallback;
-    if (!step || spanEnd <= spanStart) return day;
-
-    const byTime = new Map(day.slots.map((slot) => [slot.time, slot]));
-    const cells = [];
-    for (let m = spanStart; m + step <= spanEnd; m += step) {
-      const time = clockLabel(m);
-      cells.push(byTime.get(time) ?? { id: `${day.key}-${time}`, time, state: 'none' });
-    }
-    return { ...day, slots: cells };
-  });
+    })),
+    slots,
+    (slot) => slotState(slot, isPastTime(slot.startTime), mySlotIds),
+  );
 
   const hasFreeSlot = gridDays.some((day) =>
     day.slots.some((slot) => slot.state === 'free'),

@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import ExceptionDays from '../components/doctor/ExceptionDays';
 import {
-  Badge,
   Button,
   Card,
   DatePicker,
@@ -12,10 +11,19 @@ import {
   ErrorState,
   Icon,
   Select,
+  SlotGrid,
 } from '../components/ds';
 import { getCurrentDoctor } from '../api/doctors';
 import { previewSlots, setSlotTime } from '../api/slots';
-import { addDays, formatDayLong, formatWeekday, toDateInput } from '../lib/dates';
+import {
+  addDays,
+  formatDayLong,
+  formatDayMonth,
+  formatWeekday,
+  startOfWeek,
+  toDateInput,
+} from '../lib/dates';
+import { buildSlotColumns } from '../lib/slotColumns';
 import { useToast } from '../lib/toastContext';
 import './DoctorSlots.css';
 
@@ -46,9 +54,6 @@ const DURATIONS = [15, 20, 30, 45, 60];
 const dayCount = (from, to) =>
   Math.round((new Date(`${to}T00:00:00`) - new Date(`${from}T00:00:00`)) / 86_400_000) + 1;
 
-// "2026-08-13T09:00:00" → "09:00". Taken as it comes — Intl would turn it into a
-// 12-hour clock for some locales and the design is 24-hour.
-const timeLabel = (startTime) => startTime.slice(11, 16);
 
 function groupByDay(slots) {
   const days = new Map();
@@ -58,6 +63,50 @@ function groupByDay(slots) {
     days.get(date).push(slot);
   });
   return [...days.entries()];
+}
+
+// Прегледът показва същия седмичен грид като календара на пациента, а не списък
+// с редове: така лекарят вижда какво ще получи, вместо да го чете като таблица.
+//
+// Периодът стига до 92 дни, тоест до 14 седмици. Показва се по една наведнъж —
+// четиринайсет грида един под друг правят страницата няколко хиляди пиксела и
+// прегледът престава да е преглед. Всяка седмица се строи от своите слотове,
+// значи стъпката и обхватът се смятат за нея, както в календара.
+function groupByWeek(slots, locale) {
+  const weeks = new Map();
+
+  slots.forEach((slot) => {
+    const at = new Date(`${slot.startTime.slice(0, 10)}T00:00:00`);
+    const key = toDateInput(startOfWeek(at));
+    if (!weeks.has(key)) weeks.set(key, []);
+    weeks.get(key).push(slot);
+  });
+
+  return [...weeks.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, weekSlots]) => {
+      const monday = new Date(`${key}T00:00:00`);
+      const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+
+      return {
+        key,
+        // Диапазонът се сглобява в JSX-а през `calendar.week`, а не тук — иначе
+        // тирето между двете дати е единственият текст извън преводите.
+        from: formatDayLong(days[0], locale),
+        to: formatDayLong(days[6], locale),
+        columns: buildSlotColumns(
+          days.map((date) => ({
+            key: toDateInput(date),
+            weekday: formatWeekday(date, locale),
+            label: formatDayMonth(date, locale),
+          })),
+          weekSlots,
+          // Часовете още не съществуват — всички изглеждат свободни, но нищо не
+          // се избира. `readOnly` на грида го прави явно.
+          () => 'free',
+        ),
+      };
+    });
 }
 
 export default function DoctorSlots() {
@@ -76,10 +125,14 @@ export default function DoctorSlots() {
     slotTime: 30,
   });
   const [planned, setPlanned] = useState(null);
+  // Коя седмица от прегледа се гледа. Нулира се при всеки нов преглед, за да не
+  // остане на индекс, който по-късият период вече няма.
+  const [weekIndex, setWeekIndex] = useState(0);
 
   const set = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
     setPlanned(null);
+    setWeekIndex(0);
   };
 
   const error =
@@ -95,7 +148,10 @@ export default function DoctorSlots() {
 
   const preview = useMutation({
     mutationFn: () => previewSlots(payload()),
-    onSuccess: setPlanned,
+    onSuccess: (result) => {
+      setPlanned(result);
+      setWeekIndex(0);
+    },
   });
 
   // Прегенерира периода с новата продължителност: трие и създава наново, за да
@@ -135,6 +191,11 @@ export default function DoctorSlots() {
   };
 
   const days = planned ? groupByDay(planned) : [];
+  const weeks = planned ? groupByWeek(planned, i18n.resolvedLanguage) : [];
+  // Предпазен clamp: индексът се нулира навсякъде, където прегледът се сменя, но
+  // ако някой път се пропусне, по-къс период не бива да остави екрана празен.
+  const index = Math.min(weekIndex, Math.max(0, weeks.length - 1));
+  const week = weeks[index];
 
   return (
     <PageShell active="slots">
@@ -156,12 +217,20 @@ export default function DoctorSlots() {
             <DatePicker
               label={t('pages.doctorSlots.startDate')}
               value={form.startDate}
-              onChange={(value) => setForm((current) => ({ ...current, startDate: value }))}
+              onChange={(value) => {
+                setForm((current) => ({ ...current, startDate: value }));
+                setPlanned(null);
+                setWeekIndex(0);
+              }}
             />
             <DatePicker
               label={t('pages.doctorSlots.endDate')}
               value={form.endDate}
-              onChange={(value) => setForm((current) => ({ ...current, endDate: value }))}
+              onChange={(value) => {
+                setForm((current) => ({ ...current, endDate: value }));
+                setPlanned(null);
+                setWeekIndex(0);
+              }}
             />
             <Select
               label={t('pages.doctorSlots.workStart')}
@@ -197,6 +266,7 @@ export default function DoctorSlots() {
                 const slotTime = Number(event.target.value);
                 setForm((current) => ({ ...current, slotTime }));
                 setPlanned(null);
+                setWeekIndex(0);
               }}
             >
               {DURATIONS.map((minutes) => (
@@ -260,30 +330,61 @@ export default function DoctorSlots() {
             />
           </p>
 
-          <div className="slots-preview">
-            {days.map(([date, daySlots]) => {
-              const at = new Date(`${date}T00:00:00`);
-              return (
-                <div key={date} className="slots-day">
-                  <span>
-                    {formatDayLong(at, i18n.resolvedLanguage)},{' '}
-                    <span style={{ color: 'var(--text-muted)' }}>
-                      {formatWeekday(at, i18n.resolvedLanguage)}
+          {/* Същият грид като в календара на пациента: лекарят вижда графика
+              такъв, какъвто ще го види и той, вместо да го чете като списък.
+              По една седмица наведнъж — навигацията е ограничена до седмиците в
+              периода, извън тях няма какво да се покаже. */}
+          {week && (
+            <>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 'var(--space-4)',
+                  flexWrap: 'wrap',
+                  marginBottom: 'var(--space-4)',
+                }}
+              >
+                <div style={{ ...mono, color: 'var(--navy-900)' }}>
+                  {t('calendar.week', { from: week.from, to: week.to })}
+                  {weeks.length > 1 && (
+                    <span style={{ color: 'var(--text-muted)', marginLeft: 'var(--space-3)' }}>
+                      {t('pages.doctorSlots.weekOf', {
+                        index: index + 1,
+                        total: weeks.length,
+                      })}
                     </span>
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                    <span style={{ ...mono, color: 'var(--text-muted)' }}>
-                      {timeLabel(daySlots[0].startTime)} –{' '}
-                      {timeLabel(daySlots[daySlots.length - 1].endTime)}
-                    </span>
-                    <Badge tone="blue" mono>
-                      {t('pages.doctorSlots.slotsShort', { count: daySlots.length })}
-                    </Badge>
-                  </span>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Няма „тази седмица“ както в календара: периодът е в бъдещето и
+                    текущата седмица обикновено не е в него. */}
+                {weeks.length > 1 && (
+                  <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={index === 0}
+                      onClick={() => setWeekIndex(index - 1)}
+                    >
+                      ← {t('calendar.prevWeek')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={index === weeks.length - 1}
+                      onClick={() => setWeekIndex(index + 1)}
+                    >
+                      {t('calendar.nextWeek')} →
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <SlotGrid days={week.columns} readOnly />
+            </>
+          )}
 
           <Button
             onClick={() => generate.mutate()}
@@ -295,7 +396,12 @@ export default function DoctorSlots() {
         </Card>
       )}
 
-      <ExceptionDays onChange={() => setPlanned(null)} />
+      <ExceptionDays
+        onChange={() => {
+          setPlanned(null);
+          setWeekIndex(0);
+        }}
+      />
     </PageShell>
   );
 }

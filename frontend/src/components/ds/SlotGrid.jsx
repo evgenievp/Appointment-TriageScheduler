@@ -105,6 +105,9 @@ export default function SlotGrid({
   onSelect,
   labels = {},
   legend = [],
+  // Прегледът преди създаване рисува същия грид, но там няма какво да се избере
+  // — часовете още не съществуват. Без това клетките изглеждат натискаеми.
+  readOnly = false,
   style,
   ...rest
 }) {
@@ -209,7 +212,7 @@ export default function SlotGrid({
                       <button
                         key={slot.id}
                         type="button"
-                        disabled={state !== 'free'}
+                        disabled={readOnly || state !== 'free'}
                         aria-pressed={active}
                         // Иначе разликата между заето, блокирано и минало е само
                         // видима — екранният четец чува седем еднакви часа.
@@ -219,7 +222,7 @@ export default function SlotGrid({
                           ...cellStyle(active ? SELECTED : STATES[state]),
                           flex: 1,
                           padding: 0,
-                          cursor: state === 'free' ? 'pointer' : 'not-allowed',
+                          cursor: readOnly ? 'default' : state === 'free' ? 'pointer' : 'not-allowed',
                           transition: 'background var(--dur) var(--ease)',
                         }}
                       >
