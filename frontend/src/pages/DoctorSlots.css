@@ -4,11 +4,6 @@
   gap: var(--space-4);
 }
 
-.slots-preview {
-  max-height: var(--slots-preview-height);
-  overflow-y: auto;
-}
-
 .slots-day {
   display: flex;
   align-items: center;
@@ -33,3 +28,4 @@
     gap: var(--space-2);
   }
 }
+
