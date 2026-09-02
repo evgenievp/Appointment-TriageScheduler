@@ -14,7 +14,7 @@ import {
   Select,
 } from '../components/ds';
 import { getCurrentDoctor } from '../api/doctors';
-import { generateSlots, previewSlots } from '../api/slots';
+import { previewSlots, setSlotTime } from '../api/slots';
 import { addDays, formatDayLong, formatWeekday, toDateInput } from '../lib/dates';
 import { useToast } from '../lib/toastContext';
 import './DoctorSlots.css';
@@ -36,6 +36,12 @@ const HOURS = Array.from({ length: ((22 - 6) * 60) / SLOT_MINUTES + 1 }, (_, i) 
     minutes % 60,
   ).padStart(2, '0')}`;
 });
+
+// Продължителност на един преглед. Списък, а не свободно поле: сървърът приема
+// всяко положително число, но стойност, която не дели работния ден, оставя
+// увиснал остатък в края, а произволни минути правят графика нечетим.
+// Началото на деня се избира на половин час, затова 15 е най-дребната смислена.
+const DURATIONS = [15, 20, 30, 45, 60];
 
 const dayCount = (from, to) =>
   Math.round((new Date(`${to}T00:00:00`) - new Date(`${from}T00:00:00`)) / 86_400_000) + 1;
@@ -67,6 +73,7 @@ export default function DoctorSlots() {
     endDate: toDateInput(addDays(today, 30)),
     workStart: '09:00',
     workEnd: '18:00',
+    slotTime: 30,
   });
   const [planned, setPlanned] = useState(null);
 
@@ -91,32 +98,37 @@ export default function DoctorSlots() {
     onSuccess: setPlanned,
   });
 
+  // Прегенерира периода с новата продължителност: трие и създава наново, за да
+  // не се смесват слотове с различна дължина. Затова и не връща списък —
+  // календарът се презарежда от инвалидирането.
   const generate = useMutation({
-    mutationFn: () => generateSlots(payload()),
-    onSuccess: (created) => {
+    mutationFn: () => setSlotTime(form.slotTime, form),
+    onSuccess: () => {
+      // Отговорът е само текст „Success!“ — броят идва от прегледа, който вече е
+      // пред лекаря, а не от записването.
+      const count = planned?.length ?? 0;
       setPlanned(null);
       // The calendar and the free-slot lists are stale the moment this returns.
       queryClient.invalidateQueries({ queryKey: ['slots'] });
 
-      showToast(
-        created.length
-          ? {
-              tone: 'success',
-              title: t('pages.doctorSlots.createdTitle'),
-              message: t('pages.doctorSlots.createdMessage', { count: created.length }),
-            }
-          : {
-              tone: 'info',
-              title: t('pages.doctorSlots.noneTitle'),
-              message: t('pages.doctorSlots.noneMessage'),
-            },
-      );
+      showToast({
+        tone: 'success',
+        title: t('pages.doctorSlots.createdTitle'),
+        message: t('pages.doctorSlots.createdMessage', { count }),
+      });
     },
-    onError: () =>
+    // Запазен час в периода спира триенето на ниво чужд ключ и сървърът връща
+    // 500. Данни не се губят, но лекарят трябва да разбере, че причината е зает
+    // час, а не повреда — иначе ще опитва наново до безкрай.
+    onError: (err) =>
       showToast({
         tone: 'danger',
         title: t('pages.doctorSlots.failedTitle'),
-        message: t('pages.doctorSlots.failedMessage'),
+        message: t(
+          err?.status === 500
+            ? 'pages.doctorSlots.bookedMessage'
+            : 'pages.doctorSlots.failedMessage',
+        ),
       }),
   });
 
@@ -175,6 +187,24 @@ export default function DoctorSlots() {
               {HOURS.map((time) => (
                 <option key={time} value={time}>
                   {time}
+                </option>
+              ))}
+            </Select>
+            {/* Стойността е число за сървъра — `<option value>` винаги е низ,
+                затова се превръща тук, а не при изпращането. */}
+            <Select
+              label={t('pages.doctorSlots.slotTime')}
+              mono
+              value={String(form.slotTime)}
+              onChange={(event) => {
+                const slotTime = Number(event.target.value);
+                setForm((current) => ({ ...current, slotTime }));
+                setPlanned(null);
+              }}
+            >
+              {DURATIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {t('pages.doctorSlots.minutes', { minutes })}
                 </option>
               ))}
             </Select>
