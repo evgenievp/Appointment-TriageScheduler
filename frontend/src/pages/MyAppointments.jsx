@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
+import RescheduleButton from '../components/appointments/RescheduleButton';
 import { Button, Icon, Tabs } from '../components/ds';
 import { getMyAppointments } from '../api/appointments';
 import { useAuth } from '../lib/authContext';
@@ -110,6 +111,7 @@ export default function MyAppointments() {
                 {t('staffBooking.assign.resume')}
               </Button>
             )}
+            <RescheduleButton appointment={appointment} />
             <CancelAppointmentButton appointment={appointment} />
           </>
         )}

@@ -15,6 +15,7 @@ import {
 import SignInRequired from '../components/SignInRequired';
 import BookingSteps from '../components/triage/BookingSteps';
 import useBookWithTriage from '../components/triage/useBookWithTriage';
+import useReschedule from '../components/appointments/useReschedule';
 import { getMyAppointments } from '../api/appointments';
 import { getCalendarSlots, getFreeSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
@@ -114,8 +115,22 @@ export default function DoctorCalendar() {
   });
   const mySlotIds = new Set((myAppointments ?? []).map((appointment) => appointment.slotId));
 
+  // `?reschedule=` е връщане от „Моите часове“ с час за преместване. Режимът е
+  // активен само ако часът наистина е на човека — списъкът е същият, от който
+  // идва бутонът, така че чужд или изтрит id просто води до обикновен календар.
+  const rescheduleId = Number(params.get('reschedule')) || null;
+  const moving = rescheduleId
+    ? ((myAppointments ?? []).find((a) => a.appointmentId === rescheduleId) ?? null)
+    : null;
+  // Без вход няма чий час да се мести — а да покажем свободните би подканило
+  // към ново записване вместо преместване.
+  const needsSignIn = Boolean(rescheduleId) && !isAuthenticated;
+
   // Тук провалът значи само „избери друг час“ — гридът вече е пред човека.
   const { mutate: confirm, isPending: isBooking } = useBookWithTriage({
+    onConflict: () => setSelected(null),
+  });
+  const { mutate: move, isPending: isMoving } = useReschedule({
     onConflict: () => setSelected(null),
   });
 
@@ -129,6 +144,12 @@ export default function DoctorCalendar() {
     `/triage?from=${encodeURIComponent(location.pathname)}&slot=${slot.id}&at=${slot.startTime}`;
 
   const book = () => {
+    // Преместването не минава през въпросите: резервацията остава същата и
+    // триажът ѝ пътува с нея.
+    if (moving) {
+      move({ appointmentId: moving.appointmentId, slot: pick });
+      return;
+    }
     // Изборът не бива да се губи заради вход. Пращаме към него с адрес за
     // връщане, който вече носи часа — така след влизане човекът продължава от
     // въпросите, вместо да търси наново кой час беше избрал.
@@ -180,7 +201,12 @@ export default function DoctorCalendar() {
 
   return (
     <PageShell active="booking">
-      <Button variant="ghost" onClick={() => navigate('/doctors')}>
+      {/* Часът за преместване пътува и към списъка с лекари — може да се мести и
+          при друг лекар. */}
+      <Button
+        variant="ghost"
+        onClick={() => navigate(moving ? { pathname: '/doctors', search: location.search } : '/doctors')}
+      >
         ← {t('calendar.backToDoctors')}
       </Button>
 
@@ -193,9 +219,40 @@ export default function DoctorCalendar() {
         )}
       </div>
 
+      {moving && (
+        <Card
+          tone="sunken"
+          padding="var(--card-padding-sm)"
+          style={{
+            marginTop: 'var(--space-8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--space-4)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontSize: 'var(--text-body-md)', color: 'var(--text-strong-muted)' }}>
+            <Trans
+              i18nKey="calendar.reschedule.banner"
+              values={{
+                when: `${formatDayLong(
+                  fromLocalDateTime(moving.appointmentTime),
+                  i18n.resolvedLanguage,
+                )}, ${moving.appointmentTime.slice(11, 16)}`,
+              }}
+              components={{ mono: <span style={mono} /> }}
+            />
+          </span>
+          <Button size="sm" variant="ghost" onClick={() => navigate('/me/appointments')}>
+            {t('calendar.reschedule.keep')}
+          </Button>
+        </Card>
+      )}
+
       {/* Лентата се показва само на човек, който е в потока. На случаен посетител
           „Оплакване ✓“ би било лъжа. */}
-      {answers && (
+      {answers && !moving && (
         <BookingSteps current={2} forStaff={isStaff} style={{ marginTop: 'var(--space-8)' }} />
       )}
 
@@ -228,7 +285,9 @@ export default function DoctorCalendar() {
         </div>
       </div>
 
-      {isPending && (
+      {needsSignIn && <SignInRequired returnTo={`${location.pathname}${location.search}`} />}
+
+      {!needsSignIn && isPending && (
         <Skeleton variant="slot-grid" days={7} rows={8} label={t('common.loading')} />
       )}
 
@@ -246,7 +305,7 @@ export default function DoctorCalendar() {
         />
       )}
 
-      {!isPending && !isError && !hasFreeSlot && (
+      {!needsSignIn && !isPending && !isError && !hasFreeSlot && (
         <EmptyState
           icon={<Icon name="calendar-x" size="var(--icon-md)" />}
           title={t('calendar.emptyTitle')}
@@ -255,7 +314,7 @@ export default function DoctorCalendar() {
         />
       )}
 
-      {!isPending && !isError && hasFreeSlot && (
+      {!needsSignIn && !isPending && !isError && hasFreeSlot && (
         <>
           <SlotGrid
             days={gridDays}
@@ -315,13 +374,15 @@ export default function DoctorCalendar() {
               )}
             </span>
             <Button
-              disabled={!pick || isBooking}
+              disabled={!pick || isBooking || isMoving}
               onClick={book}
               iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
             >
-              {isBooking
-                ? t(isStaff ? 'staffBooking.holding' : 'calendar.booking')
-                : t(isStaff ? 'staffBooking.hold' : 'calendar.book')}
+              {moving
+                ? t(isMoving ? 'calendar.reschedule.moving' : 'calendar.reschedule.confirm')
+                : isBooking
+                  ? t(isStaff ? 'staffBooking.holding' : 'calendar.booking')
+                  : t(isStaff ? 'staffBooking.hold' : 'calendar.book')}
             </Button>
           </Card>
         </>

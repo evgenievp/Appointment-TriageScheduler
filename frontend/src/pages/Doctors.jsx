@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
@@ -14,6 +14,9 @@ import './Doctors.css';
 export default function Doctors() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // `?reschedule=` rides along: a visit being moved to another doctor must
+  // survive the trip through this list, or the patient books a second one.
+  const { search } = useLocation();
   const { answers } = useTriageDraft();
   const [filterIdx, setFilterIdx] = useState(0);
 
@@ -92,7 +95,7 @@ export default function Doctors() {
                 }
                 name={doctor.name}
                 specialty={doctor.speciality}
-                onClick={() => navigate(`/doctors/${doctor.id}/calendar`)}
+                onClick={() => navigate({ pathname: `/doctors/${doctor.id}/calendar`, search })}
               />
             ))}
           </div>

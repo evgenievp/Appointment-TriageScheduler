@@ -21,3 +21,10 @@ export const getStaffAppointments = () => request('/staff/all');
 
 export const cancelAppointment = (id) =>
   request(`/appointments/${id}`, { method: 'DELETE' });
+
+// AppointmentDto with the new slot, time and doctor. The row keeps its id, so
+// the triage and the priority survive the move; the old slot is freed.
+// 409 if the new slot was taken first, 403 unless the caller owns the visit —
+// reception cannot move a patient's visit yet.
+export const rescheduleAppointment = (appointmentId, newSlotId) =>
+  request(`/appointments/${appointmentId}/reschedule/${newSlotId}`, { method: 'PATCH' });
