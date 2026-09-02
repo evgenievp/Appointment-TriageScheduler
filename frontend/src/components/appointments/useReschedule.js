@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { rescheduleAppointment } from '../../api/appointments';
+import { useAuth } from '../../lib/authContext';
 import { useToast } from '../../lib/toastContext';
 
 // Moving a visit is one PATCH: the appointment keeps its id, so the triage and
@@ -12,6 +13,9 @@ export default function useReschedule({ onConflict } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const showToast = useToast();
+  const { user } = useAuth();
+  // Reception lands back on its board; a moved visit is not in its own list.
+  const home = user?.role === 'STAFF' ? '/staff' : '/me/appointments';
 
   return useMutation({
     mutationFn: ({ appointmentId, slot }) => rescheduleAppointment(appointmentId, slot.id),
@@ -28,7 +32,7 @@ export default function useReschedule({ onConflict } = {}) {
         title: t('calendar.reschedule.doneTitle'),
         message: t('calendar.reschedule.doneMessage', { time: at.slice(11, 16) }),
       });
-      navigate('/me/appointments');
+      navigate(home);
     },
 
     onError: (error) => {

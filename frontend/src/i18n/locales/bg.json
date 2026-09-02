@@ -181,6 +181,7 @@
     "legendFree": "свободен",
     "legendTaken": "зает",
     "legendMine": "ваш",
+    "legendCurrent": "сегашният",
     "legendUnavailable": "неналичен",
     "legendBlocked": "почивен ден",
     "legendSelected": "избран",
@@ -210,7 +211,8 @@
       "forbiddenTitle": "Този час не е ваш",
       "forbiddenMessage": "Може да премествате само собствените си часове.",
       "failedTitle": "Преместването не мина",
-      "failedMessage": "Сървърът не отговори. Опитайте пак след малко."
+      "failedMessage": "Сървърът не отговори. Опитайте пак след малко.",
+      "bannerFor": "Премествате часа на {{patient}} от <mono>{{when}}</mono>. Изберете нов."
     }
   },
   "lang": {

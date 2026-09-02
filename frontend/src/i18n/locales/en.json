@@ -181,6 +181,7 @@
     "legendFree": "free",
     "legendTaken": "taken",
     "legendMine": "yours",
+    "legendCurrent": "current",
     "legendUnavailable": "unavailable",
     "legendBlocked": "day off",
     "legendSelected": "selected",
@@ -210,7 +211,8 @@
       "forbiddenTitle": "This visit is not yours",
       "forbiddenMessage": "You can only move your own visits.",
       "failedTitle": "The move did not go through",
-      "failedMessage": "The server did not respond. Try again in a moment."
+      "failedMessage": "The server did not respond. Try again in a moment.",
+      "bannerFor": "You are moving the visit of {{patient}} from <mono>{{when}}</mono>. Pick a new time."
     }
   },
   "lang": {
