@@ -12,5 +12,6 @@ public record GenerateSlotsRequest(
         LocalDate startDate,
         LocalDate endDate,
         LocalTime workStart,
-        LocalTime workEnd
+        LocalTime workEnd,
+        int slotTime
 ) {}

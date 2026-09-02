@@ -27,7 +27,6 @@ public class Slot {
     private LocalDateTime endsAt;
     @Enumerated(EnumType.STRING)
     private Status status = Status.FREE;
-    private final static int slotTime = 30;
     @Column(name = "patient_id", nullable = true)
     private Long patientId;
     @Version
@@ -51,7 +50,7 @@ public class Slot {
         this.doctor = doctor;
     }
 
-    public Slot(Doctor doctor, LocalDateTime startsAt) {
+    public Slot(Doctor doctor, LocalDateTime startsAt, int slotTime) {
         this.doctor = doctor;
         this.startsAt = startsAt;
         this.endsAt = startsAt.plusMinutes(slotTime);
@@ -111,10 +110,6 @@ public class Slot {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public int getSlotTime() {
-        return slotTime;
     }
 
     public Long getPatientId() {

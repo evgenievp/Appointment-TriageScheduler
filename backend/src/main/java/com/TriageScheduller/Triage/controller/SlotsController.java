@@ -87,7 +87,7 @@ public class SlotsController {
                 request.endDate(),
                 request.workStart(),
                 request.workEnd(),
-                30
+                request.slotTime()
         );
     }
 
@@ -99,7 +99,8 @@ public class SlotsController {
                 request.startDate(),
                 request.endDate(),
                 request.workStart(),
-                request.workEnd());
+                request.workEnd(),
+                request.slotTime());
     }
 
 }

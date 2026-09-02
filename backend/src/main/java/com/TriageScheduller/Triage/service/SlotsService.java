@@ -50,7 +50,7 @@ public class SlotsService {
         this.doctorsService = doctorsService;
         this.restStart = LocalTime.of(12,0);
         this.restEnd = LocalTime.of(13,0);
-        this.slotTime = 30;
+
 
     }
 
@@ -60,7 +60,7 @@ public class SlotsService {
                             LocalDate endDate,
                             LocalTime workStart,
                             LocalTime workEnd) {
-        if (slotTime <= 0) {
+        if (slotTime <= 0 || startDate.isBefore(LocalDate.now()) || endDate.isBefore(LocalDate.now())) {
             return;
         }
         String email = authentication.getName();
@@ -90,7 +90,7 @@ public class SlotsService {
                 .map(ExceptionDay::getDate)
                 .collect(Collectors.toSet());
 
-
+        this.slotTime = slotTime;
         LocalDate currentDate = startDate;
         List<SlotDto> generatedSlots = new ArrayList<>();
 
@@ -120,13 +120,14 @@ public class SlotsService {
                                               LocalTime workStart,
                                               LocalTime workEnd,
                                               int slotTime) {
+        this.slotTime = slotTime;
 
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(date, workStart);
         LocalDateTime endOfWorkDay = LocalDateTime.of(date, workEnd);
 
         while (current.isBefore(endOfWorkDay)) {
-            LocalDateTime slotEnd = current.plusMinutes(slotTime);
+            LocalDateTime slotEnd = current.plusMinutes(this.slotTime);
 
             if (isRestTime(current, this.restStart, this.restEnd)) {
                 current = slotEnd;
@@ -138,7 +139,7 @@ public class SlotsService {
             }
 
             if (!repo.existsByDoctorAndStartsAt(doctor, current)) {
-                Slot slot = new Slot(doctor, current);
+                Slot slot = new Slot(doctor, current, slotTime);
                 daySlots.add(toDto(repo.save(slot)));
             }
             current = slotEnd;
@@ -306,7 +307,8 @@ public class SlotsService {
                                       LocalDate startDate,
                                       LocalDate endDate,
                                       LocalTime workStart,
-                                      LocalTime workEnd) {
+                                      LocalTime workEnd,
+                                      int slotTime) {
         Set<LocalDate> exceptionDays = exceptionDayRepo.findByDoctorIdAndDateBetween(
                         doctor.getId(),
                         startDate,
@@ -329,7 +331,7 @@ public class SlotsService {
                 continue;
             }
 
-            List<SlotDto> daySlots = previewSlotsForDay(doctor, currentDate, workStart, workEnd);
+            List<SlotDto> daySlots = previewSlotsForDay(doctor, currentDate, workStart, workEnd, slotTime);
             previewSlots.addAll(daySlots);
             currentDate = currentDate.plusDays(1);
         }
@@ -340,7 +342,8 @@ public class SlotsService {
     private List<SlotDto> previewSlotsForDay(Doctor doctor,
                                              LocalDate date,
                                              LocalTime workStart,
-                                             LocalTime workEnd) {
+                                             LocalTime workEnd,
+                                             int slotTiem) {
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(date, workStart);
         LocalDateTime endOfWorkDay = LocalDateTime.of(date, workEnd);
@@ -359,7 +362,8 @@ public class SlotsService {
                 break;
             }
             Slot virtualSlot = new Slot(doctor,
-                    current);
+                    current,
+                    slotTime);
             daySlots.add(toDto(virtualSlot));
             current = slotEnd;
         }
