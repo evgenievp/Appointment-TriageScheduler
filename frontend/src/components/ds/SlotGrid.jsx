@@ -210,7 +210,11 @@ export default function SlotGrid({
                     const label = labels[state];
                     return (
                       <button
-                        key={slot.id}
+                        // Ден и час, не `slot.id`: прегледът преди създаване
+                        // показва слотове, които още не съществуват, тоест id-то
+                        // им е `null` за всички. Двойката ден + час е уникална в
+                        // колоната при всякакви данни.
+                        key={`${day.key}-${slot.time}`}
                         type="button"
                         disabled={readOnly || state !== 'free'}
                         aria-pressed={active}
