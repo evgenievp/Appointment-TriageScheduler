@@ -81,7 +81,10 @@ const minutesOf = (time) => {
 
 const toDateOnly = (date) => toLocalDateTime(date).slice(0, 10);
 
-function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd }) {
+// `slotTime` определя и стъпката, и дължината — на сървъра това са едно и също
+// число. По подразбиране 30, за да работят и старите извиквания без полето.
+function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd, slotTime }) {
+  const step = Number(slotTime) > 0 ? Number(slotTime) : SLOT_MINUTES;
   const planned = [];
   const day = new Date(`${startDate}T00:00:00`);
   const last = new Date(`${endDate}T00:00:00`);
@@ -93,7 +96,7 @@ function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd }) {
 
   while (day <= last) {
     if (day.getDay() !== 0 && day.getDay() !== 6 && !off.has(toDateOnly(day))) {
-      for (let m = from; m + SLOT_MINUTES <= to; m += SLOT_MINUTES) {
+      for (let m = from; m + step <= to; m += step) {
         const start = new Date(day);
         start.setHours(0, m, 0, 0);
         const time = toLocalDateTime(start).slice(11, 16);
@@ -102,7 +105,7 @@ function plannedSlots({ doctorId, startDate, endDate, workStart, workEnd }) {
         planned.push({
           id: null,
           startTime: toLocalDateTime(start),
-          endTime: toLocalDateTime(new Date(start.getTime() + SLOT_MINUTES * 60_000)),
+          endTime: toLocalDateTime(new Date(start.getTime() + step * 60_000)),
           status: 'FREE',
           doctorId,
           patientId: null,
@@ -247,6 +250,49 @@ export const handlers = [
 
     slots.push(...created);
     return HttpResponse.json(created);
+  }),
+
+  // Смяна на продължителността: трие периода и го създава наново. За разлика от
+  // `/generate` тук лекарят идва от токена, а всичко останало е query параметри —
+  // този ендпойнт няма тяло.
+  //
+  // Запазен час в периода спира триенето: в бекенда чуждият ключ от `appointment`
+  // хвърля и излиза като 500. Мокнато е същото, за да е тестваем и този изход —
+  // договореното 409 още го няма.
+  ...handle('patch', '/api/slots/setSlotTime/:slotTime', async ({ request, params }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'DOCTOR') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+
+    const url = new URL(request.url);
+    const startDate = url.searchParams.get('startDate');
+    const endDate = url.searchParams.get('endDate');
+    const inPeriod = (slot) =>
+      slot.doctorId === user.doctorId &&
+      slot.startTime.slice(0, 10) >= startDate &&
+      slot.startTime.slice(0, 10) <= endDate;
+
+    if (slots.some((s) => inPeriod(s) && s.status !== 'FREE')) {
+      return new HttpResponse('Something went wrong', { status: 500 });
+    }
+
+    for (let i = slots.length - 1; i >= 0; i -= 1) {
+      if (inPeriod(slots[i])) slots.splice(i, 1);
+    }
+
+    slots.push(
+      ...plannedSlots({
+        doctorId: user.doctorId,
+        startDate,
+        endDate,
+        workStart: url.searchParams.get('workStart'),
+        workEnd: url.searchParams.get('workEnd'),
+        slotTime: Number(params.slotTime),
+      }).map((planned) => ({ ...planned, id: nextSlotId() })),
+    );
+
+    return new HttpResponse('Success!', { status: 201 });
   }),
 
   ...handle('get', '/api/slots/free', async ({ request }) => {

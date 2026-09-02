@@ -316,11 +316,13 @@
     },
     "doctorSlots": {
       "title": "Working hours",
-      "lead": "Pick a date range and your working hours — we create the slots in 30-minute steps. Existing ones are left untouched.",
+      "lead": "Pick a date range, your working hours and how long one appointment takes. The slots for that range are created afresh — the old ones are replaced.",
       "startDate": "From",
       "endDate": "To",
       "workStart": "Day starts",
       "workEnd": "Day ends",
+      "slotTime": "Appointment length",
+      "minutes": "{{minutes}} minutes",
       "rules": "Saturdays, Sundays, the 12:00 – 13:00 break and the days off below are all skipped.",
       "errors": {
         "dateOrder": "The end date is before the start date.",
@@ -343,6 +345,7 @@
       "noneMessage": "Every slot in this range is already in your schedule.",
       "failedTitle": "We could not create the slots",
       "failedMessage": "The server did not respond. Try again in a moment.",
+      "bookedMessage": "There are booked appointments in this range. The length can only be changed over a range with no patients booked — cancel them or pick other dates.",
       "exceptions": {
         "title": "Days off",
         "lead": "The days you do not see patients. No slots are created for them and nobody can book with you.",
