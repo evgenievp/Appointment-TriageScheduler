@@ -48,5 +48,15 @@ export async function request(path, options = {}) {
     throw new ApiError(response.status, (await response.text()) || response.statusText);
   }
 
-  return response.status === 204 ? null : response.json();
+  if (response.status === 204) return null;
+
+  // Not every success is JSON: `PATCH /slots/setSlotTime/{n}` answers 201 with the
+  // bare word "Success!". Parsing that as JSON throws *after* the request has
+  // already done its work, so the caller sees a failure that never happened.
+  // Branch on the content type rather than on the status, and hand plain text
+  // back as text.
+  const type = response.headers.get('Content-Type') ?? '';
+  if (!type.includes('json')) return (await response.text()) || null;
+
+  return response.json();
 }

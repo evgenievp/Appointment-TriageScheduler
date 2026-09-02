@@ -108,6 +108,15 @@ export default function SlotGrid({
   style,
   ...rest
 }) {
+  // Височината на колоната се смята от най-натоварения ден: толкова, колкото му
+  // трябва при нормална клетка. Тогава той запълва колоната без скрол, а по-леките
+  // дни разпределят същата височина между по-малко клетки и техните стават
+  // по-високи. Фиксирано число не става — при 18 слота не стига и всичко пада на
+  // минимума, при 4 остава празно.
+  const busiest = Math.max(1, ...days.map((day) => day.slots.length));
+  const columnHeight =
+    `calc(var(--slot-cell-height) * ${busiest} + var(--space-2) * ${busiest - 1})`;
+
   return (
     <div>
       <div className="sirma-slot-grid-scroll">
@@ -119,7 +128,12 @@ export default function SlotGrid({
           {days.map((day) => (
             <div
               key={day.key}
-              style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-2)',
+                height: columnHeight,
+              }}
             >
               <div
                 style={{
@@ -156,32 +170,65 @@ export default function SlotGrid({
                 </div>
               </div>
 
-              {day.slots.map((slot) => {
-                const active = value === slot.id;
-                const state = slot.state ?? 'none';
-                const label = labels[state];
-                return (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    disabled={state !== 'free'}
-                    aria-pressed={active}
-                    // Иначе разликата между заето, блокирано и минало е само
-                    // видима — екранният четец чува седем еднакви часа.
-                    aria-label={label ? `${slot.time} — ${label}` : undefined}
-                    onClick={() => onSelect?.(slot)}
+              {/* Колоната изброява само своите часове — никакви клетки за часове,
+                  които този ден не предлага. Затова слотовете си поделят
+                  височината: ден с осем едночасови ги показва високи, ден с
+                  двайсет двайсетминутни — ниски. Така всяка колона е плътна,
+                  независимо каква продължителност е задал лекарят.
+
+                  Цената е, че 09:00 в четвъртък вече не пада срещу 09:00 в петък
+                  — колоните нямат обща времева ос. Съзнателно решение. */}
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--space-2)',
+                }}
+              >
+                {day.slots.length === 0 ? (
+                  <div
                     style={{
-                      ...cellStyle(active ? SELECTED : STATES[state]),
-                      height: 'var(--slot-cell-height)',
-                      padding: 0,
-                      cursor: state === 'free' ? 'pointer' : 'not-allowed',
-                      transition: 'background var(--dur) var(--ease)',
+                      ...cellStyle(STATES.blocked),
+                      flex: 1,
+                      display: 'grid',
+                      placeItems: 'center',
+                      padding: 'var(--space-2)',
+                      textAlign: 'center',
                     }}
                   >
-                    {slot.time}
-                  </button>
-                );
-              })}
+                    {labels.empty ?? ''}
+                  </div>
+                ) : (
+                  day.slots.map((slot) => {
+                    const active = value === slot.id;
+                    const state = slot.state ?? 'none';
+                    const label = labels[state];
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        disabled={state !== 'free'}
+                        aria-pressed={active}
+                        // Иначе разликата между заето, блокирано и минало е само
+                        // видима — екранният четец чува седем еднакви часа.
+                        aria-label={label ? `${slot.time} — ${label}` : undefined}
+                        onClick={() => onSelect?.(slot)}
+                        style={{
+                          ...cellStyle(active ? SELECTED : STATES[state]),
+                          flex: 1,
+                          padding: 0,
+                          cursor: state === 'free' ? 'pointer' : 'not-allowed',
+                          transition: 'background var(--dur) var(--ease)',
+                        }}
+                      >
+                        {slot.time}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
           ))}
         </div>

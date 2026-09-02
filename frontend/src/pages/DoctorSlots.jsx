@@ -117,18 +117,15 @@ export default function DoctorSlots() {
         message: t('pages.doctorSlots.createdMessage', { count }),
       });
     },
-    // Запазен час в периода спира триенето на ниво чужд ключ и сървърът връща
-    // 500. Данни не се губят, но лекарят трябва да разбере, че причината е зает
-    // час, а не повреда — иначе ще опитва наново до безкрай.
-    onError: (err) =>
+    // Едно съобщение за всички провали. Запазен час в периода спира триенето на
+    // ниво чужд ключ и излиза като 500 — но същият статус значи и истинска
+    // повреда, а мрежов срив не носи статус изобщо. Разклонение по 500 щеше да
+    // твърди „има запазени часове“ и в случаите, когато няма.
+    onError: () =>
       showToast({
         tone: 'danger',
         title: t('pages.doctorSlots.failedTitle'),
-        message: t(
-          err?.status === 500
-            ? 'pages.doctorSlots.bookedMessage'
-            : 'pages.doctorSlots.failedMessage',
-        ),
+        message: t('pages.doctorSlots.failedMessage'),
       }),
   });
 
