@@ -562,9 +562,9 @@ export const handlers = [
     });
   }),
 
-  // Same row, new slot: the id, the triage and the priority stay put. Owner
-  // only, as on the backend — reception moving a patient's visit is not agreed
-  // yet, so the mock does not pretend it is.
+  // Same row, new slot: the id, the triage and the priority stay put. The owner
+  // or reception may move it — the backend still checks the owner only, this is
+  // the agreed behaviour (same rule as cancelling).
   ...handle(
     'patch',
     '/api/appointments/:id/reschedule/:slotId',
@@ -575,7 +575,7 @@ export const handlers = [
 
       const appointment = appointments.find((a) => a.id === Number(params.id));
       if (!appointment) return new HttpResponse('Appointment not found', { status: 404 });
-      if (appointment.patientId !== user.id) {
+      if (appointment.patientId !== user.id && user.role !== 'STAFF') {
         return new HttpResponse('Forbidden', { status: 403 });
       }
 

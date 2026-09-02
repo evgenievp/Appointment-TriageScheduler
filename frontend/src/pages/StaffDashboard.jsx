@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import AppointmentsList from '../components/appointments/AppointmentsList';
 import CancelAppointmentButton from '../components/appointments/CancelAppointmentButton';
+import RescheduleButton from '../components/appointments/RescheduleButton';
 import PriorityQueue from '../components/staff/PriorityQueue';
 import { Button, DatePicker, Icon, Select } from '../components/ds';
 import { getStaffAppointments } from '../api/appointments';
@@ -85,7 +86,12 @@ export default function StaffDashboard() {
       <PriorityQueue
         selectedId={selectedId}
         onPick={openFromQueue}
-        actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
+        actions={(appointment) => (
+          <>
+            <RescheduleButton appointment={appointment} />
+            <CancelAppointmentButton appointment={appointment} />
+          </>
+        )}
       />
 
       <div className="staff-daybar">
@@ -162,7 +168,12 @@ export default function StaffDashboard() {
         emptyTitle={t(doctorId ? 'pages.staffDashboard.emptyForDoctorTitle' : 'pages.staffDashboard.emptyTitle')}
         emptyText={t(doctorId ? 'pages.staffDashboard.emptyForDoctorText' : 'pages.staffDashboard.emptyText')}
         highlightId={selectedId}
-        actions={(appointment) => <CancelAppointmentButton appointment={appointment} />}
+        actions={(appointment) => (
+          <>
+            <RescheduleButton appointment={appointment} />
+            <CancelAppointmentButton appointment={appointment} />
+          </>
+        )}
       />
     </PageShell>
   );

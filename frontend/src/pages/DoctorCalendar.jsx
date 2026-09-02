@@ -16,7 +16,7 @@ import SignInRequired from '../components/SignInRequired';
 import BookingSteps from '../components/triage/BookingSteps';
 import useBookWithTriage from '../components/triage/useBookWithTriage';
 import useReschedule from '../components/appointments/useReschedule';
-import { getMyAppointments } from '../api/appointments';
+import { getMyAppointments, getStaffAppointments } from '../api/appointments';
 import { getCalendarSlots, getFreeSlots } from '../api/slots';
 import { getDoctors } from '../api/doctors';
 import { useAuth } from '../lib/authContext';
@@ -113,15 +113,27 @@ export default function DoctorCalendar() {
     queryFn: getMyAppointments,
     enabled: isAuthenticated,
   });
-  const mySlotIds = new Set((myAppointments ?? []).map((appointment) => appointment.slotId));
-
-  // `?reschedule=` е връщане от „Моите часове“ с час за преместване. Режимът е
-  // активен само ако часът наистина е на човека — списъкът е същият, от който
-  // идва бутонът, така че чужд или изтрит id просто води до обикновен календар.
+  // `?reschedule=` е връщане от „Моите часове“ или от таблото с час за
+  // преместване. Режимът е активен само ако часът се намери в списъка, от който
+  // идва бутонът — чужд или изтрит id просто води до обикновен календар.
+  // Регистратурата мести чужди часове, затова при нея се търси и в общия
+  // списък; ключът е същият като в таблото, тоест обикновено е в кеша.
   const rescheduleId = Number(params.get('reschedule')) || null;
+  const { data: staffAppointments } = useQuery({
+    queryKey: ['appointments', 'staff'],
+    queryFn: getStaffAppointments,
+    enabled: isAuthenticated && isStaff && Boolean(rescheduleId),
+  });
   const moving = rescheduleId
-    ? ((myAppointments ?? []).find((a) => a.appointmentId === rescheduleId) ?? null)
+    ? ([...(myAppointments ?? []), ...(staffAppointments ?? [])].find(
+        (a) => a.appointmentId === rescheduleId,
+      ) ?? null)
     : null;
+
+  // The visit being moved is highlighted the same way as one's own, so the
+  // patient — or reception — sees where it sits now while picking where it goes.
+  const mySlotIds = new Set((myAppointments ?? []).map((appointment) => appointment.slotId));
+  if (moving) mySlotIds.add(moving.slotId);
   // Без вход няма чий час да се мести — а да покажем свободните би подканило
   // към ново записване вместо преместване.
   const needsSignIn = Boolean(rescheduleId) && !isAuthenticated;
@@ -234,8 +246,13 @@ export default function DoctorCalendar() {
         >
           <span style={{ fontSize: 'var(--text-body-md)', color: 'var(--text-strong-muted)' }}>
             <Trans
-              i18nKey="calendar.reschedule.banner"
+              i18nKey={
+                isStaff && moving.patientName
+                  ? 'calendar.reschedule.bannerFor'
+                  : 'calendar.reschedule.banner'
+              }
               values={{
+                patient: moving.patientName,
                 when: `${formatDayLong(
                   fromLocalDateTime(moving.appointmentTime),
                   i18n.resolvedLanguage,
@@ -324,7 +341,9 @@ export default function DoctorCalendar() {
             labels={{
               free: t('calendar.legendFree'),
               selected: t('calendar.legendSelected'),
-              mine: t('calendar.legendMine'),
+              // While moving, the highlighted cell is the visit's current time —
+              // "yours" would be wrong for reception moving a patient's visit.
+              mine: t(moving ? 'calendar.legendCurrent' : 'calendar.legendMine'),
               taken: t('calendar.legendTaken'),
               blocked: t('calendar.legendBlocked'),
               // Миналият час, часът извън работното време и денят без график
