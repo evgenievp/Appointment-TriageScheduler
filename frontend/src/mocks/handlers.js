@@ -562,6 +562,45 @@ export const handlers = [
     });
   }),
 
+  // Same row, new slot: the id, the triage and the priority stay put. Owner
+  // only, as on the backend — reception moving a patient's visit is not agreed
+  // yet, so the mock does not pretend it is.
+  ...handle(
+    'patch',
+    '/api/appointments/:id/reschedule/:slotId',
+    async ({ request, params }) => {
+      const user = userFromRequest(request);
+      if (!user) return unauthorized();
+      await delay(LATENCY);
+
+      const appointment = appointments.find((a) => a.id === Number(params.id));
+      if (!appointment) return new HttpResponse('Appointment not found', { status: 404 });
+      if (appointment.patientId !== user.id) {
+        return new HttpResponse('Forbidden', { status: 403 });
+      }
+
+      const next = slots.find((s) => s.id === Number(params.slotId));
+      if (!next) return new HttpResponse('New slot not found', { status: 404 });
+      if (next.status !== 'FREE') {
+        return new HttpResponse('New slot is already booked', { status: 409 });
+      }
+
+      const previous = slots.find((s) => s.id === appointment.slotId);
+      if (previous) {
+        previous.status = 'FREE';
+        previous.patientId = null;
+      }
+      next.status = 'BOOKED';
+      next.patientId = appointment.patientId;
+
+      appointment.slotId = next.id;
+      appointment.doctorId = next.doctorId;
+      appointment.appointmentTime = next.startTime;
+
+      return HttpResponse.json(toAppointmentDto(appointment));
+    },
+  ),
+
   ...handle('delete', '/api/appointments/:id', async ({ request, params }) => {
     if (!userFromRequest(request)) return unauthorized();
     await delay(LATENCY);
