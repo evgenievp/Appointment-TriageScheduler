@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 @Service
 public class AppointmentsService {
     private final AppointmentsRepo appointmentsRepo;
@@ -48,10 +47,10 @@ public class AppointmentsService {
         this.doctorsRepo = doctorsRepo;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Appointment createAppointment(Long slotId, User patient, Doctor doctor) {
         Slot slot = slotsRepo.findById(slotId)
                 .orElseThrow(() -> new EntityNotFoundException("Slot not found"));
-
         Appointment appointment = new Appointment();
         appointment.setSlot(slot);
         appointment.setPatient(patient);

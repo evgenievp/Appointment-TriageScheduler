@@ -343,13 +343,13 @@ public class SlotsService {
                                              LocalDate date,
                                              LocalTime workStart,
                                              LocalTime workEnd,
-                                             int slotTiem) {
+                                             int slotTime) {
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(date, workStart);
         LocalDateTime endOfWorkDay = LocalDateTime.of(date, workEnd);
 
         while (current.isBefore(endOfWorkDay)) {
-            LocalDateTime slotEnd = current.plusMinutes(30);
+            LocalDateTime slotEnd = current.plusMinutes(slotTime);
 
             if (isRestTime(current,
                     this.restStart,
@@ -370,6 +370,7 @@ public class SlotsService {
 
         return daySlots;
     }
+
     @Transactional
     public List<SlotDto> blockSlotsForDay(ExceptionDayDto dayDto, DoctorDto dto) {
         List<SlotDto> daySlots = new ArrayList<>();
