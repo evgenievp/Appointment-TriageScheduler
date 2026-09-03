@@ -100,6 +100,10 @@
       "forbiddenMessage": "You can only cancel your own visits.",
       "failedTitle": "The visit was not cancelled",
       "failedMessage": "The server did not respond. Try again in a moment."
+    },
+    "reschedule": {
+      "action": "Reschedule",
+      "lateText": "This close to the visit, moving it goes through reception."
     }
   },
   "triage": {
@@ -177,6 +181,7 @@
     "legendFree": "free",
     "legendTaken": "taken",
     "legendMine": "yours",
+    "legendCurrent": "current",
     "legendUnavailable": "unavailable",
     "legendBlocked": "day off",
     "legendSelected": "selected",
@@ -195,7 +200,20 @@
     "takenTitle": "That time was just taken",
     "takenMessage": "Someone booked it while you were choosing. Pick another.",
     "failedTitle": "Booking failed",
-    "failedMessage": "Try again in a moment."
+    "failedMessage": "Try again in a moment.",
+    "reschedule": {
+      "banner": "You are moving your visit from <mono>{{when}}</mono>. Pick a new time.",
+      "keep": "Keep it as it is",
+      "confirm": "Move the visit",
+      "moving": "Moving…",
+      "doneTitle": "The visit is moved",
+      "doneMessage": "See you at {{time}}.",
+      "forbiddenTitle": "This visit is not yours",
+      "forbiddenMessage": "You can only move your own visits.",
+      "failedTitle": "The move did not go through",
+      "failedMessage": "The server did not respond. Try again in a moment.",
+      "bannerFor": "You are moving the visit of {{patient}} from <mono>{{when}}</mono>. Pick a new time."
+    }
   },
   "lang": {
     "switchTo": "БГ",
