@@ -53,11 +53,17 @@ public class EmailService {
         User user = patientsRepo.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getResetToken() == null ||
-                !user.getResetToken().equals(request.token()) ||
-                user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+        if (user.getResetToken() == null) {
+            throw new RuntimeException("No reset token found");
+        }
 
-            throw new RuntimeException("Invalid or expired token");
+        if (!user.getResetToken().equals(request.token())) {
+            throw new RuntimeException("Invalid token");
+        }
+
+        if (user.getResetTokenExpiry() == null ||
+                user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token expired");
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
