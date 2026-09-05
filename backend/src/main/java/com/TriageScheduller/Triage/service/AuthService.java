@@ -17,11 +17,14 @@ public class AuthService {
     private final PatientsRepo patientsRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailService emailService;
 
-    public AuthService(PatientsRepo patientsRepo, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(PatientsRepo patientsRepo, PasswordEncoder passwordEncoder, JwtService jwtService, EmailService emailService) {
         this.patientsRepo = patientsRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -43,7 +46,7 @@ public class AuthService {
         user.setRole(Role.PATIENT);
 
         User savedUser = patientsRepo.save(user);
-
+        emailService.sendSuccessfulRegisterMail(request);
         return new UserDto(
                 savedUser.getId(),
                 savedUser.getName(),

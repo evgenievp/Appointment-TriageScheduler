@@ -1,5 +1,6 @@
 package com.TriageScheduller.Triage.service;
 
+import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.ResetPasswordRequest;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.Slot;
@@ -91,5 +92,20 @@ public class EmailService {
         message.setText("You book a hour with dr " +
                 doctor.getName() + " at: " + slot.getStartsAt() +
                 "have a nice day.");
+        mailSender.send(message);
+
+    }
+
+    @Transactional
+    public void sendSuccessfulRegisterMail(RegisterRequest request) {
+        User user = patientsRepo.findByEmail(request.email())
+                .orElseThrow(() -> new EntityNotFoundException("Something went wrong"));
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+
+        message.setSubject("New user");
+        message.setText("Welcome to our medical clinic. This is a welcome email");
+        mailSender.send(message);
     }
 }
