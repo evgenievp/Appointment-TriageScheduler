@@ -371,7 +371,7 @@ public class SlotsService {
         return daySlots;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<SlotDto> blockSlotsForDay(ExceptionDayDto dayDto, DoctorDto dto) {
         List<SlotDto> daySlots = new ArrayList<>();
         LocalDateTime current = LocalDateTime.of(dayDto.date(), LocalTime.of(8,0));
