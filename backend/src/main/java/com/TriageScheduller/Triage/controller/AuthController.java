@@ -3,7 +3,6 @@ package com.TriageScheduller.Triage.controller;
 
 import com.TriageScheduller.Triage.dto.*;
 import com.TriageScheduller.Triage.service.AuthService;
-import com.TriageScheduller.Triage.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,12 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    private final EmailService emailService;
 
-    public AuthController(AuthService authService,
-                          EmailService emailService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.emailService = emailService;
     }
 
     @PostMapping("/register")

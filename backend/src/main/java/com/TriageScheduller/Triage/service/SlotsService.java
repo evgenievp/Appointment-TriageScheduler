@@ -39,15 +39,17 @@ public class SlotsService {
     private LocalTime restStart;
     private LocalTime restEnd;
     private int slotTime;
+    private final EmailService emailService;
 
     public SlotsService(SlotsRepo repo,
                         AppointmentsRepo appointmentsRepo,
-                        ExceptionDayRepo exceptionDayRepo, PatientsRepo patientsRepo, DoctorsService doctorsService) {
+                        ExceptionDayRepo exceptionDayRepo, PatientsRepo patientsRepo, DoctorsService doctorsService, EmailService emailService) {
         this.repo = repo;
         this.appointmentsRepo = appointmentsRepo;
         this.exceptionDayRepo = exceptionDayRepo;
         this.patientsRepo = patientsRepo;
         this.doctorsService = doctorsService;
+        this.emailService = emailService;
         this.restStart = LocalTime.of(12,0);
         this.restEnd = LocalTime.of(13,0);
 
@@ -221,6 +223,7 @@ public class SlotsService {
         }
 
         Appointment saved = appointmentsRepo.save(appointment);
+        emailService.sendBookHourMail(slotId, patient);
         return toDto(saved);
     }
 

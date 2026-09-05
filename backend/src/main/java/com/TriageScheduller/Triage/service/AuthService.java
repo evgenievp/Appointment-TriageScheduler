@@ -7,7 +7,6 @@ import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.utils.Role;
 import jakarta.persistence.EntityNotFoundException;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public UserDto register(RegisterRequest request){
 
         if (patientsRepo.existsByEmail(request.email())) {
@@ -51,7 +51,7 @@ public class AuthService {
                 savedUser.getEmail()
         );
     }
-
+    @Transactional
     public LoginResponse login (LoginRequest request){
 
         User user = patientsRepo.findByEmail(request.email())
@@ -70,7 +70,6 @@ public class AuthService {
     public String changePassword(ChangePasswordRequest request, String email) {
         User user = patientsRepo.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
-        String oldPassword = passwordEncoder.encode(request.oldPassword());
         if (!request.password().equals(request.repeatPassword())) {
             throw new ConflictException("Password didn't match");
         }
