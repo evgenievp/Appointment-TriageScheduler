@@ -34,4 +34,10 @@ public class AuthController {
 
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
+                                                 String email) {
+        return ResponseEntity.status(200).body(authService.changePassword(request, email));
+    }
 }

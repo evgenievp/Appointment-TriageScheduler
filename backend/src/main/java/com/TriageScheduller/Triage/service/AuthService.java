@@ -1,16 +1,16 @@
 package com.TriageScheduller.Triage.service;
 
-import com.TriageScheduller.Triage.dto.LoginRequest;
-import com.TriageScheduller.Triage.dto.LoginResponse;
-import com.TriageScheduller.Triage.dto.RegisterRequest;
-import com.TriageScheduller.Triage.dto.UserDto;
+import com.TriageScheduller.Triage.dto.*;
 import com.TriageScheduller.Triage.exception.ConflictException;
 import com.TriageScheduller.Triage.exception.UnauthorizedException;
 import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.utils.Role;
+import jakarta.persistence.EntityNotFoundException;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -65,5 +65,23 @@ public class AuthService {
 
         return new LoginResponse(token);
     }
+
+    @Transactional
+    public String changePassword(ChangePasswordRequest request, String email) {
+        User user = patientsRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
+        String oldPassword = passwordEncoder.encode(request.oldPassword());
+        if (!request.password().equals(request.repeatPassword())) {
+            throw new ConflictException("Password didn't match");
+        }
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new ConflictException("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(request.password()));
+        patientsRepo.save(user);
+        return "Password changed";
+
+    }
+
 
 }
