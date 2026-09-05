@@ -67,8 +67,8 @@ public class AuthService {
     }
 
     @Transactional
-    public String changePassword(ChangePasswordRequest request, String email) {
-        User user = patientsRepo.findByEmail(email)
+    public String changePassword(ChangePasswordRequest request) {
+        User user = patientsRepo.findByEmail(request.email())
                 .orElseThrow(() -> new EntityNotFoundException("No such user"));
         if (!request.password().equals(request.repeatPassword())) {
             throw new ConflictException("Password didn't match");
