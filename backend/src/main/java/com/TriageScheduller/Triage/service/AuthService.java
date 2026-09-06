@@ -95,18 +95,6 @@ public class AuthService {
 
     }
 
-    @Async
-    @Transactional
-    public String generateResetLink(String email) {
-        User user = patientsRepo.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
-        patientsRepo.save(user);
-        emailService.sendResetPasswordEmail(email);
-        return "https://medical-clinic.com/reset-password?token=" + token + "&email=" + email;
-    }
 
 
 }

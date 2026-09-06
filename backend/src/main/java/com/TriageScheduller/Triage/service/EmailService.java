@@ -114,6 +114,8 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
+    @Transactional
     public void passwordChangeEmail(String email) {
         User user = patientsRepo.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Something went wrong"));

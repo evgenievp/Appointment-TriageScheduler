@@ -1,7 +1,6 @@
 package com.TriageScheduller.Triage.service;
 
-import com.TriageScheduller.Triage.repo.PatientsRepo;
-import com.TriageScheduller.Triage.repo.StaffRepo;
+
 import org.springframework.stereotype.Service;
 
 @Service
