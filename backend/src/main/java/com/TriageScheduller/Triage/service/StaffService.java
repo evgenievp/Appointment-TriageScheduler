@@ -7,22 +7,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class StaffService {
 
-    private final StaffRepo repo;
-    private final PatientsRepo patientsRepo;
+
     private final AuthService authService;
+    private final EmailService emailService;
 
 
-    public StaffService(StaffRepo repo,
-                        PatientsRepo patientsRepo,
-                        AuthService authService) {
-        this.repo = repo;
-        this.patientsRepo = patientsRepo;
+    public StaffService(AuthService authService,
+                        EmailService emailService) {
         this.authService = authService;
+        this.emailService = emailService;
     }
 
 
     public void sendNewPasswordLink(String email) {
-        authService.generateResetLink(email);
-
+        emailService.sendResetPasswordEmail(email);
     }
 }
