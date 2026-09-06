@@ -61,6 +61,7 @@ public class AuthService {
                 savedUser.getEmail()
         );
     }
+
     @Transactional
     public LoginResponse login (LoginRequest request){
 
@@ -76,6 +77,7 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
+    @Async
     @Transactional
     public String changePassword(ChangePasswordRequest request) {
         User user = patientsRepo.findByEmail(request.email())
