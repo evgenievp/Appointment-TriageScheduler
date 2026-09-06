@@ -10,6 +10,7 @@ import com.TriageScheduller.Triage.repo.SlotsRepo;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class EmailService {
         this.slotsRepo = slotsRepo;
     }
 
+    @Async
     @Transactional
     public void sendResetPasswordEmail(String toEmail) {
         User patient = patientsRepo.findByEmail(toEmail)
@@ -55,6 +57,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         User user = patientsRepo.findByEmail(request.email())
@@ -79,6 +82,7 @@ public class EmailService {
         patientsRepo.save(user);
     }
 
+    @Async
     @Transactional
     public void sendBookHourMail(Long slotId, User patient) {
         Slot slot = slotsRepo.findById(slotId)
@@ -96,6 +100,7 @@ public class EmailService {
 
     }
 
+    @Async
     @Transactional
     public void sendSuccessfulRegisterMail(RegisterRequest request) {
         User user = patientsRepo.findByEmail(request.email())
