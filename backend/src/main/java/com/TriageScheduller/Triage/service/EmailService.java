@@ -113,4 +113,17 @@ public class EmailService {
         message.setText("Welcome to our medical clinic. This is a welcome email");
         mailSender.send(message);
     }
+
+    public void passwordChangeEmail(String email) {
+        User user = patientsRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Something went wrong"));
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+
+        message.setSubject("Password changed notification");
+        message.setText("Somebody changed password of account connected with this email." +
+                "\n Not you? Please call immediately to medical-clinic support phone.");
+
+    }
 }

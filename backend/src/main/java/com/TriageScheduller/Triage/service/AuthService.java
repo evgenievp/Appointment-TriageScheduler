@@ -7,9 +7,13 @@ import com.TriageScheduller.Triage.models.User;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.utils.Role;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -19,7 +23,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final EmailService emailService;
 
-    public AuthService(PatientsRepo patientsRepo, PasswordEncoder passwordEncoder, JwtService jwtService, EmailService emailService) {
+    public AuthService(PatientsRepo patientsRepo,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       EmailService emailService) {
         this.patientsRepo = patientsRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -80,9 +87,23 @@ public class AuthService {
             throw new ConflictException("Old password is incorrect");
         }
         user.setPassword(passwordEncoder.encode(request.password()));
+        emailService.passwordChangeEmail(request.email());
         patientsRepo.save(user);
         return "Password changed";
 
+    }
+
+    @Async
+    @Transactional
+    public String generateResetLink(String email) {
+        User user = patientsRepo.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        patientsRepo.save(user);
+        emailService.sendResetPasswordEmail(email);
+        return "https://medical-clinic.com/reset-password?token=" + token + "&email=" + email;
     }
 
 

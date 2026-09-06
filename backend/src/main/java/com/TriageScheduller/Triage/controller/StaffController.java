@@ -21,15 +21,18 @@ public class StaffController {
     private final PatientsService patientsService;
     private final SlotsService slotsService;
     private final AppointmentsService appointmentsService;
+    private final StaffService staffService;
 
     public StaffController(StaffService service,
                            PatientsService patientsService,
                            SlotsService slotsService,
-                           AppointmentsService appointmentsService) {
+                           AppointmentsService appointmentsService,
+                           StaffService staffService) {
         this.service = service;
         this.patientsService = patientsService;
         this.slotsService = slotsService;
         this.appointmentsService = appointmentsService;
+        this.staffService = staffService;
     }
 
     @GetMapping("/api/staff/appointments/{date}")
@@ -70,6 +73,12 @@ public class StaffController {
     @GetMapping("/all")
     public ResponseEntity<List<AppointmentDto>> getAllAppointments() {
         return ResponseEntity.ok(appointmentsService.findAll());
+    }
+
+    @PostMapping("/sendNewPassword")
+    public ResponseEntity<String> sendLinkWithNewPassword(@RequestBody String email) {
+        staffService.sendNewPasswordLink(email);
+        return ResponseEntity.status(200).body("Link sent");
     }
 
 
