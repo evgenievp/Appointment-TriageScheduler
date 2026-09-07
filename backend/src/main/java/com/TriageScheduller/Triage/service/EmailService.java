@@ -144,4 +144,14 @@ public class EmailService {
     }
 
 
+    @Async
+    @Transactional
+    public void sentCancelMail(Slot slot, String userEmail) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(userEmail);
+
+        message.setSubject("Cancel visit");
+        message.setText("We received your request and your hour is now cancelled. \nHave a nice day. \n Medical clinic.");
+        mailSender.send(message);
+    }
 }

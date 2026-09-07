@@ -93,6 +93,7 @@ public class AppointmentsService {
         slotsRepo.save(slot);
 
         appointmentsRepo.deleteById(appointmentId);
+        emailService.sentCancelMail(slot, userEmail);
     }
     public AppointmentDto toDto(Appointment appointment) {
         return new AppointmentDto(
