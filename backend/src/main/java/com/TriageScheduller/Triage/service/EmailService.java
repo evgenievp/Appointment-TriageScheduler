@@ -131,7 +131,6 @@ public class EmailService {
     }
 
     @Async
-    @Transactional
     public void sendMailForChangeHour(String userEmail, Slot newSlot, Slot oldSlot) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(userEmail);
@@ -145,7 +144,6 @@ public class EmailService {
 
 
     @Async
-    @Transactional
     public void sentCancelMail(Slot slot, String userEmail) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(userEmail);
