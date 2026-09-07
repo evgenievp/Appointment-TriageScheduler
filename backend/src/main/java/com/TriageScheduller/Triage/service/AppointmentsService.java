@@ -135,7 +135,7 @@ public class AppointmentsService {
 
         slotsRepo.save(slot);
         appointmentsRepo.save(appointment);
-
+        emailService.sendMailAfterStaffBookHour(slot, appointment, newPatientId);
         return slotsService.toDto(slot);
     }
 

@@ -2,6 +2,7 @@ package com.TriageScheduller.Triage.service;
 
 import com.TriageScheduller.Triage.dto.RegisterRequest;
 import com.TriageScheduller.Triage.dto.ResetPasswordRequest;
+import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.models.Slot;
 import com.TriageScheduller.Triage.models.User;
@@ -152,4 +153,22 @@ public class EmailService {
         message.setText("We received your request and your hour is now cancelled. \nHave a nice day. \n Medical clinic.");
         mailSender.send(message);
     }
+
+    @Async
+    @Transactional
+    public void sendMailAfterStaffBookHour(Slot slot,
+                                           Appointment appointment,
+                                           Long newPatientId) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(appointment.getPatient().getEmail());
+
+        message.setSubject("Book visit");
+        message.setText("Visit booked with " + slot.getDoctor().getName() +
+                " at " + slot.getStartsAt() +
+                "\nHave a nice day.\nMedical clinic.");
+        mailSender.send(message);
+    }
+
+
 }
