@@ -137,8 +137,9 @@ public class EmailService {
         message.setTo(userEmail);
 
         message.setSubject("Reschedule doctor visit");
-        message.setText("You successfully changed hour from: " + oldSlot.getStartsAt()
-        + " to new hour" + newSlot.getStartsAt() + " have a nice day.");
+        message.setText("You successfully changed hour with dr: " + newSlot.getDoctor().getName() +
+                " at " + oldSlot.getStartsAt()
+        + " to new hour " + newSlot.getStartsAt() + " have a nice day.");
         mailSender.send(message);
     }
 
