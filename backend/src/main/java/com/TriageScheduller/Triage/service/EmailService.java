@@ -95,7 +95,7 @@ public class EmailService {
         message.setSubject("HourBooked");
         message.setText("You book a hour with dr " +
                 doctor.getName() + " at: " + slot.getStartsAt() +
-                "have a nice day.");
+                " have a nice day.");
         mailSender.send(message);
 
     }
@@ -126,6 +126,21 @@ public class EmailService {
         message.setSubject("Password changed notification");
         message.setText("Somebody changed password of account connected with this email." +
                 "\n Not you? Please call immediately to medical-clinic support phone.");
+        mailSender.send(message);
 
     }
+
+    @Async
+    @Transactional
+    public void sendMailForChangeHour(String userEmail, Slot newSlot, Slot oldSlot) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(userEmail);
+
+        message.setSubject("Reschedule doctor visit");
+        message.setText("You successfully changed hour from: " + oldSlot.getStartsAt()
+        + " to new hour" + newSlot.getStartsAt() + " have a nice day.");
+        mailSender.send(message);
+    }
+
+
 }

@@ -2,19 +2,16 @@ package com.TriageScheduller.Triage.config;
 
 import com.TriageScheduller.Triage.dto.DoctorDto;
 import com.TriageScheduller.Triage.dto.RegisterRequest;
-import com.TriageScheduller.Triage.models.Appointment;
 import com.TriageScheduller.Triage.models.Doctor;
 import com.TriageScheduller.Triage.repo.DoctorsRepo;
 import com.TriageScheduller.Triage.repo.PatientsRepo;
 import com.TriageScheduller.Triage.service.*;
-import com.TriageScheduller.Triage.utils.Role;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import com.TriageScheduller.Triage.models.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
 @Component
 public class DataSeeder implements CommandLineRunner {

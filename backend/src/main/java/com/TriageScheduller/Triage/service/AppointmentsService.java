@@ -34,17 +34,19 @@ public class AppointmentsService {
     private final SlotsService slotsService;
     private final PatientsRepo patientsRepo;
     private final DoctorsRepo doctorsRepo;
+    private final EmailService emailService;
 
     public AppointmentsService(AppointmentsRepo appointmentsRepo,
                                SlotsRepo slotsRepo,
                                SlotsService slotsService,
                                PatientsRepo patientsRepo,
-                               DoctorsRepo doctorsRepo) {
+                               DoctorsRepo doctorsRepo, EmailService emailService) {
         this.appointmentsRepo = appointmentsRepo;
         this.slotsRepo = slotsRepo;
         this.slotsService = slotsService;
         this.patientsRepo = patientsRepo;
         this.doctorsRepo = doctorsRepo;
+        this.emailService = emailService;
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -223,7 +225,7 @@ public class AppointmentsService {
         slotsRepo.save(newSlot);
 
         Appointment saved = appointmentsRepo.save(appointment);
-
+        emailService.sendMailForChangeHour(userEmail, newSlot, oldSlot);
         return toDto(saved);
     }
 }
