@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Card, Checkbox, ErrorState, Icon, IconButton, Input } from '../ds';
@@ -12,6 +13,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginForm({ onDone }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { signIn } = useAuth();
 
   const [values, setValues] = useState({ email: '', password: '' });
@@ -100,6 +102,25 @@ export default function LoginForm({ onDone }) {
               </IconButton>
             }
           />
+
+          {/* Right under the password, where the eye looks for it after a
+              failed attempt. Whatever was typed for email rides along. */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                navigate(
+                  values.email.trim()
+                    ? `/forgot-password?email=${encodeURIComponent(values.email.trim())}`
+                    : '/forgot-password',
+                )
+              }
+            >
+              {t('auth.login.forgot')}
+            </Button>
+          </div>
 
           <Checkbox
             checked={remember}

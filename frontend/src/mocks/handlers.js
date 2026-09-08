@@ -31,6 +31,26 @@ const route = (path) => [`${API}${path}`, path];
 const handle = (method, path, resolver) =>
   route(path).map((url) => http[method](url, resolver));
 
+// Per-address password state that must survive a page reload — see the
+// forgot-password handler. Only ever holds mock data.
+const PASSWORD_STATE = 'mock.password-state';
+const passwordState = (email) => {
+  try {
+    return JSON.parse(sessionStorage.getItem(PASSWORD_STATE) ?? '{}')[email] ?? {};
+  } catch {
+    return {};
+  }
+};
+const savePasswordState = (email, patch) => {
+  try {
+    const all = JSON.parse(sessionStorage.getItem(PASSWORD_STATE) ?? '{}');
+    all[email] = { ...(all[email] ?? {}), ...patch };
+    sessionStorage.setItem(PASSWORD_STATE, JSON.stringify(all));
+  } catch {
+    // Storage blocked — the flow still works within one page load.
+  }
+};
+
 const inRange = (slot, from, to) =>
   (!from || slot.startTime >= from) && (!to || slot.startTime <= to);
 
@@ -152,13 +172,54 @@ export const handlers = [
   ...handle('post', '/api/auth/login', async ({ request }) => {
     await delay(LATENCY);
     const { email, password } = await request.json();
-    const user = users.find((u) => u.email === email && u.password === password);
+    // A password set through the reset link outlives a reload; the seeded one
+    // is the fallback.
+    const current = passwordState(email).password;
+    const user = users.find(
+      (u) => u.email === email && (current ? current === password : u.password === password),
+    );
 
     if (!user) {
       return new HttpResponse('Invalid email or password', { status: 401 });
     }
 
     return HttpResponse.json({ token: fakeToken(user) });
+  }),
+
+  // Забравена парола. Публично и винаги 200 — това е договореното; бекендът
+  // днес иска вход и издава дали имейлът съществува. Линкът не може да стигне
+  // до пощата, затова се печата в конзолата, откъдето се клика.
+  //
+  // Токенът и новата парола живеят в sessionStorage, а не в `users`: кликването
+  // на линка презарежда страницата, а с нея и паметта на mock-а — иначе всеки
+  // линк е мъртъв още преди да е отворен.
+  ...handle('post', '/api/emails/forgot-password', async ({ request }) => {
+    await delay(LATENCY);
+    const email = new URL(request.url).searchParams.get('email');
+    if (users.some((u) => u.email === email)) {
+      const token = crypto.randomUUID();
+      savePasswordState(email, { resetToken: token, resetTokenExpiry: Date.now() + 15 * 60_000 });
+      console.info(
+        `[mock] reset link: ${location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`,
+      );
+    }
+    return new HttpResponse(null, { status: 200 });
+  }),
+
+  // Бекендът днес връща „Password updated!“, без да е сменил нищо — тук е
+  // договореното: проверен токен, сменена парола, 400 при грешен или изтекъл.
+  ...handle('post', '/api/emails/reset-password', async ({ request }) => {
+    await delay(LATENCY);
+    const { email, token, newPassword } = await request.json();
+    const state = passwordState(email);
+    if (!state.resetToken || state.resetToken !== token) {
+      return new HttpResponse('Invalid token', { status: 400 });
+    }
+    if (state.resetTokenExpiry < Date.now()) {
+      return new HttpResponse('Token expired', { status: 400 });
+    }
+    savePasswordState(email, { password: newPassword, resetToken: null, resetTokenExpiry: null });
+    return new HttpResponse('Password updated!', { status: 200 });
   }),
 
   // Публичен по същия начин като в бекенда — без проверка за токен. Пътят е

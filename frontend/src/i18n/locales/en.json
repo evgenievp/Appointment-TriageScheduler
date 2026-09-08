@@ -32,6 +32,7 @@
       "submitting": "Logging in…",
       "noAccount": "No account yet? It takes two minutes.",
       "register": "Create an account",
+      "forgot": "Forgot your password?",
       "failedTitle": "The email or password does not match",
       "failedMessage": "Check the email and type the password again.",
       "errorTitle": "Log in failed",
@@ -68,6 +69,37 @@
       "emailTakenMessage": "Log in to your account or use another address.",
       "failedTitle": "Registration failed",
       "failedMessage": "Try again in a moment."
+    },
+    "forgot": {
+      "title": "Forgotten password",
+      "lead": "Enter the email of your account. We will send you a link to set a new password.",
+      "email": "Email",
+      "emailPlaceholder": "name@example.bg",
+      "submit": "Send the link",
+      "submitting": "Sending…",
+      "sentTitle": "Check your mailbox",
+      "sentText": "If there is an account with this email, we sent a link to set a new password. It is valid for 15 minutes — if you cannot see it, look in “Spam”.",
+      "backToLogin": "Back to log in",
+      "errorTitle": "We could not send the link",
+      "errorText": "The server did not respond. Try again in a moment."
+    },
+    "reset": {
+      "title": "New password",
+      "lead": "Set a new password for <mono>{{email}}</mono>.",
+      "password": "New password",
+      "passwordPlaceholder": "At least 8 characters",
+      "repeat": "Repeat the password",
+      "repeatPlaceholder": "The same password",
+      "mismatch": "The passwords do not match",
+      "submit": "Save the password",
+      "submitting": "Saving…",
+      "doneTitle": "The password is changed",
+      "doneMessage": "Log in with the new password.",
+      "invalidTitle": "The link is invalid or has expired",
+      "invalidText": "Links are valid for 15 minutes after sending. Request a new one.",
+      "requestNew": "Request a new link",
+      "errorTitle": "The change did not go through",
+      "errorText": "The server did not respond. Try again with the same link."
     }
   },
   "appointments": {
