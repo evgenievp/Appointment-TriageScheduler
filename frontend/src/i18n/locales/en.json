@@ -1,7 +1,7 @@
 {
   "common": {
-    "clinicName": "Sirma Clinic",
-    "documentTitle": "Sirma Clinic — book an appointment",
+    "clinicName": "Top Clinic",
+    "documentTitle": "Top Clinic — book an appointment",
     "loading": "Loading",
     "retry": "Try again",
     "pickDate": "Pick a date"
@@ -261,7 +261,8 @@
     "logout": "Log out",
     "book": "Book a visit",
     "menu": "Menu",
-    "roles": "Roles"
+    "roles": "Roles",
+    "profile": "Profile"
   },
   "home": {
     "hero": {
@@ -462,6 +463,33 @@
       "doneMessage": "{{name}} has to sign out and back in for the new rights to apply.",
       "failed": "That did not work. Please try again in a moment.",
       "note": "The role takes effect at the next sign-in — until then the person keeps their old rights."
+    },
+    "settings": {
+      "title": "Profile",
+      "lead": "Your account details and password.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "profileError": "We could not load your account details.",
+      "password": {
+        "title": "Change password",
+        "old": "Current password",
+        "oldPlaceholder": "The password you log in with",
+        "new": "New password",
+        "newPlaceholder": "At least 8 characters",
+        "repeat": "Repeat the new password",
+        "repeatPlaceholder": "The same password",
+        "sameAsOld": "The new password is the same as the current one",
+        "mismatch": "The passwords do not match",
+        "submit": "Change the password",
+        "submitting": "Changing…",
+        "doneTitle": "The password is changed",
+        "doneMessage": "We also sent you a confirmation by email.",
+        "wrongOldTitle": "The current password is not right",
+        "wrongOldMessage": "Type it again.",
+        "failedTitle": "The change did not go through",
+        "failedMessage": "The server did not respond. Try again in a moment."
+      }
     }
   },
   "booking": {

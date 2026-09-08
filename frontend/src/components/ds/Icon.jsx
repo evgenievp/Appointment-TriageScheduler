@@ -21,6 +21,7 @@ import {
   Sun,
   Trash2,
   TriangleAlert,
+  UserRound,
   X,
 } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const icons = {
   phone: Phone,
   'rotate-cw': RotateCw,
   'shield-check': ShieldCheck,
+  'user-round': UserRound,
   stethoscope: Stethoscope,
   sun: Sun,
   'trash-2': Trash2,

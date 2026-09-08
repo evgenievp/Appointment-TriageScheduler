@@ -10,8 +10,8 @@ import { useNow } from '../../lib/useNow';
 // prop names, so the three lines are filled differently per variant rather than
 // the component being changed:
 //
-//   patient  Д-р Иванов        Стоматология · Клиника Сирма
-//   doctor   Мария Илиева      Клиника Сирма
+//   patient  Д-р Иванов        Стоматология · Топ Клиник
+//   doctor   Мария Илиева      Топ Клиник
 //   staff    Мария Илиева      Д-р Иванов · Стоматология
 //
 // `doctorName` and `patientName` are not in the backend DTO yet, so both fall

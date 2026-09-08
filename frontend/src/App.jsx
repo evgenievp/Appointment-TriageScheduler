@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Settings from './pages/Settings';
 import Doctors from './pages/Doctors';
 import DoctorCalendar from './pages/DoctorCalendar';
 import Triage from './pages/Triage';
@@ -49,6 +50,14 @@ export default function App() {
                 element={
                   <RequireAuth>
                     <Triage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/me/settings"
+                element={
+                  <RequireAuth>
+                    <Settings />
                   </RequireAuth>
                 }
               />

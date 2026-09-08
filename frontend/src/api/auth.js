@@ -25,3 +25,10 @@ export const forgotPassword = (email) =>
 //   400 when the token is wrong or expired
 export const resetPassword = (data) =>
   request('/emails/reset-password', { method: 'POST', body: JSON.stringify(data) });
+
+// POST /api/auth/changePassword { oldPassword, password, repeatPassword, email }
+//   → 200 plain text; 409 when the old password is wrong or the two new ones
+//   differ. Signed-in only. `email` is still expected in the body — agreed to
+//   move to the token — so the caller passes the signed-in address.
+export const changePassword = (data) =>
+  request('/auth/changePassword', { method: 'POST', body: JSON.stringify(data) });
