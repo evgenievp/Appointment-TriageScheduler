@@ -186,6 +186,35 @@ export const handlers = [
     return HttpResponse.json({ token: fakeToken(user) });
   }),
 
+  // Смяна на парола от влязъл потребител. Договореното: само с токен и само
+  // за собствения профил — имейлът в тялото се подминава. Бекендът днес е
+  // permitAll (общият ред над конкретния) и вярва на имейла от тялото.
+  ...handle('post', '/api/auth/changePassword', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    await delay(LATENCY);
+    const { oldPassword, password, repeatPassword } = await request.json();
+    if (password !== repeatPassword) {
+      return new HttpResponse("Password didn't match", { status: 409 });
+    }
+    const current = passwordState(user.email).password ?? user.password;
+    if (current !== oldPassword) {
+      return new HttpResponse('Old password is incorrect', { status: 409 });
+    }
+    savePasswordState(user.email, { password });
+    return new HttpResponse('Password changed', { status: 200 });
+  }),
+
+  // Както в бекенда: само за PATIENT, макар и лекарят, и служителят да са редове
+  // в `users`. Профилът им засега показва само имейла от токена.
+  ...handle('get', '/api/patients/me', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'PATIENT') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    return HttpResponse.json({ id: user.id, name: user.name, phone: user.phone, email: user.email });
+  }),
+
   // Забравена парола. Публично и винаги 200 — това е договореното; бекендът
   // днес иска вход и издава дали имейлът съществува. Линкът не може да стигне
   // до пощата, затова се печата в конзолата, откъдето се клика.

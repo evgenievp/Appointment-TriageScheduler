@@ -60,8 +60,9 @@ src/
 └── mocks/             MSW — data.js, handlers.js, browser.js
 ```
 
-Маршрути: `/`, `/login`, `/register`, `/doctors`, `/doctors/:id/calendar`,
-`/me/appointments`, `/doctor/appointments`, `/doctor/slots`, `/staff`, `/staff/new`.
+Маршрути: `/`, `/login`, `/register`, `/forgot-password`, `/reset-password`,
+`/doctors`, `/doctors/:id/calendar`, `/me/appointments`, `/me/settings`,
+`/doctor/appointments`, `/doctor/slots`, `/staff`, `/staff/new`.
 
 Навигацията в `SiteHeader` е по роля: лекарят не вижда пациентските линкове
 (няма пациентски запис, водят го към празна страница), а входът пренасочва към
@@ -238,6 +239,15 @@ src/
 - **Търсенето по телефон не филтрира по роля.** `PatientsRepo.findByPhone` няма
   условие за `role`, тоест може да върне лекар или служител. Мокът филтрира
   `role === 'PATIENT'`, както е договорено.
+- **Паролите — три дупки в бекенда, екраните са готови и чакат.**
+  `/api/emails/**` е `authenticated()`, тоест „забравена парола“ иска вход и
+  връща 403 (проверено с `curl`). `POST /api/emails/reset-password` не вика
+  `EmailService.resetPassword` — отговаря „Password updated!“, без да е сменил
+  нищо. Линкът в писмото е закован на `https://medical-clinik.com/…`. И
+  `/api/auth/**` `permitAll` стои **над** `changePassword` `authenticated()`,
+  тоест смяната на парола минава без вход и с имейл от тялото. Мокът пази
+  токена и новата парола в `sessionStorage`, защото кликването на линка
+  презарежда страницата; линкът се печата в конзолата (`[mock] reset link:`).
 - **Пренасрочването не е за персонала.** `PATCH /api/appointments/{id}/reschedule/{newSlotId}`
   съществува, но проверката е само за собственик — няма `isStaff`. Освен това
   `freeSlot` приема само `BOOKED`, а часовете, които най-често трябва да се местят,
@@ -276,6 +286,11 @@ id-то, триажа и приоритета си. Параметърът пъ�
 може да се мести и при друг лекар. Прозорецът от 12 часа е общ с отказа
 (`lib/appointmentRules.js`). Регистратурата не може да мести чужд час — виж
 разминаванията.
+
+Паролите: „Забравихте паролата?“ на входа → `/forgot-password` → линк по
+имейл → `/reset-password?token&email`; смяна от влязъл потребител в
+`/me/settings` („Профил“ в хедъра, за всички роли). Профилът чете
+`/patients/me` само за PATIENT — за другите роли показва имейла от токена.
 
 Още няма тестове.
 
