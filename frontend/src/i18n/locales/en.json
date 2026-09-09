@@ -550,9 +550,9 @@
       "resume": "Give it to a patient",
       "giving": "Transferring…",
       "notFoundTitle": "No account with this number",
-      "notFoundText": "Record the slot against a name and phone — it stays with you on the dashboard.",
+      "notFoundText": "With an email and consent we create an account and the visit becomes theirs. Without — we book it under a name and phone and it stays with you.",
       "name": "Full name",
-      "saveGuest": "Record the slot for them",
+      "saveGuest": "Book without an account",
       "doneTitle": "The slot was transferred",
       "doneMessage": "It is booked for {{name}}.",
       "releaseHint": "If the call does not end in a booking, release it so someone else can see it.",
@@ -564,7 +564,20 @@
       "failedMessage": "Please try again in a moment.",
       "missingTitle": "This slot is no longer yours",
       "missingText": "It has either been transferred, or the address is wrong.",
-      "toDashboard": "To the dashboard"
+      "toDashboard": "To the dashboard",
+      "email": "Email",
+      "emailHint": "They get a link to set their own password. No email, no account.",
+      "consent": "The patient agreed to have an account created",
+      "consentDescription": "The account also holds the triage answers. It is created only at their request.",
+      "createAndGive": "Create an account and give the visit",
+      "creating": "Creating…",
+      "createdTitle": "Account created, the visit is theirs",
+      "createdMessage": "{{name}} gets a password link at {{email}}.",
+      "createdNoLinkMessage": "The account of {{name}} is ready, but the password link did not go out — send it from “Roles”.",
+      "createdNotGivenTitle": "Account created, the visit stayed with you",
+      "createdNotGivenMessage": "Search for the person by phone and give them the visit.",
+      "emailTakenTitle": "This email already has an account",
+      "emailTakenMessage": "Search for the person by the phone on their account and give them the visit."
     }
   }
 }

@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Card,
+  Checkbox,
   EmptyState,
   Icon,
   Input,
@@ -15,8 +16,9 @@ import {
   Skeleton,
 } from '../components/ds';
 import { cancelAppointment, getMyAppointments } from '../api/appointments';
+import { register } from '../api/auth';
 import { getDoctors } from '../api/doctors';
-import { assignSlot, findPatientsByPhone } from '../api/staff';
+import { assignSlot, findPatientsByPhone, sendNewPasswordLink } from '../api/staff';
 import { countries, DEFAULT_COUNTRY, isValidPhone, toE164 } from '../lib/phone';
 import { formatDayLong, fromLocalDateTime } from '../lib/dates';
 import { useToast } from '../lib/toastContext';
@@ -29,6 +31,12 @@ import { useToast } from '../lib/toastContext';
 // значи е в неговия списък. Ендпойнт за една резервация няма и не трябва.
 
 const mono = { fontFamily: 'var(--font-mono)', fontWeight: 'var(--fw-mono)' };
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// The account made at the desk gets a password nobody knows or sees — the
+// patient sets their own through the link. A UUID is long, random and never
+// reused, which is all a placeholder has to be.
+const placeholderPassword = () => crypto.randomUUID();
 
 export default function StaffAssign() {
   const { id } = useParams();
@@ -41,6 +49,8 @@ export default function StaffAssign() {
   const [country, setCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
   // null — още не е търсено; масив — намереното. Празен масив значи „няма такъв“.
   // Списък, а не един профил: един телефон може да води до няколко човека и кой е
   // насреща го решава служителят, не подредбата на резултата.
@@ -94,6 +104,57 @@ export default function StaffAssign() {
     onError: failed,
   });
 
+  // Three calls, deliberately not one: register, hand over, send the link. If
+  // the hand-over fails the account still exists and the next phone search
+  // finds it — the desk simply gives the visit to that person. A missing link
+  // is even less: it can be resent from the roles screen.
+  const createAndGive = useMutation({
+    mutationFn: async () => {
+      const patient = await register({
+        email: email.trim(),
+        password: placeholderPassword(),
+        name: name.trim(),
+        phone: normalized,
+      });
+      try {
+        await assignSlot(held.slotId, { patientId: patient.id });
+      } catch (error) {
+        throw Object.assign(error, { stage: 'assign' });
+      }
+      try {
+        await sendNewPasswordLink(patient.email);
+        return { linkSent: true };
+      } catch {
+        return { linkSent: false };
+      }
+    },
+    onSuccess: ({ linkSent }) =>
+      done(
+        'staffBooking.assign.createdTitle',
+        linkSent ? 'staffBooking.assign.createdMessage' : 'staffBooking.assign.createdNoLinkMessage',
+        { name: name.trim(), email: email.trim() },
+      ),
+    onError: (error) => {
+      if (error.stage === 'assign') {
+        showToast({
+          tone: 'warning',
+          title: t('staffBooking.assign.createdNotGivenTitle'),
+          message: t('staffBooking.assign.createdNotGivenMessage'),
+        });
+        return;
+      }
+      if (error.status === 409) {
+        showToast({
+          tone: 'danger',
+          title: t('staffBooking.assign.emailTakenTitle'),
+          message: t('staffBooking.assign.emailTakenMessage'),
+        });
+        return;
+      }
+      failed();
+    },
+  });
+
   const release = useMutation({
     mutationFn: () => cancelAppointment(appointmentId),
     onSuccess: () =>
@@ -101,7 +162,9 @@ export default function StaffAssign() {
     onError: failed,
   });
 
-  const busy = give.isPending || release.isPending;
+  const busy = give.isPending || release.isPending || createAndGive.isPending;
+  const emailValid = EMAIL.test(email.trim());
+  const canCreate = Boolean(name.trim()) && emailValid && consent && !busy;
 
   if (isPending) {
     return (
@@ -293,9 +356,9 @@ export default function StaffAssign() {
         )}
 
         {/* Ненамерен и „търсенето гръмна“ са едно и също нещо откъм сървъра —
-            и двете са 500. Разговорът обаче продължава: часът се записва на име
-            и телефон. Срещу днешния бекенд бутонът ще гръмне, защото `assign`
-            приема само телефон на съществуващ пациент. */}
+            и двете са 500. Разговорът обаче продължава по един от два пътя:
+            с имейл и съгласие му правим профил и часът става негов; без —
+            часът се записва на име и телефон и остава при регистратурата. */}
         {notFound && (
           <Card style={{ marginTop: 'var(--space-6)' }}>
             <h2 style={{ fontSize: 'var(--text-h4)' }}>
@@ -310,20 +373,53 @@ export default function StaffAssign() {
             >
               {t('staffBooking.assign.notFoundText')}
             </p>
-            <Input
-              label={t('staffBooking.assign.name')}
-              autoComplete="off"
-              placeholder={t('auth.register.namePlaceholder')}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
-            <Button
-              disabled={!name.trim() || busy}
-              onClick={() => give.mutate({ name: name.trim(), phone: normalized })}
-              style={{ marginTop: 'var(--space-4)' }}
-            >
-              {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.saveGuest')}
-            </Button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <Input
+                label={t('staffBooking.assign.name')}
+                autoComplete="off"
+                placeholder={t('auth.register.namePlaceholder')}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+              <Input
+                label={t('staffBooking.assign.email')}
+                type="email"
+                autoComplete="off"
+                placeholder={t('auth.register.emailPlaceholder')}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                error={email && !emailValid ? t('auth.errors.emailInvalid') : undefined}
+                hint={t('staffBooking.assign.emailHint')}
+              />
+              {/* The account holds health data (the triage), so it is made only
+                  on the patient's say-so — the desk confirms it heard a yes. */}
+              <Checkbox
+                checked={consent}
+                onChange={() => setConsent((value) => !value)}
+                label={t('staffBooking.assign.consent')}
+                description={t('staffBooking.assign.consentDescription')}
+              />
+              <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+                <Button
+                  disabled={!canCreate}
+                  onClick={() => createAndGive.mutate()}
+                  iconLeft={<Icon name="calendar-check" size="var(--icon-sm)" />}
+                >
+                  {t(
+                    createAndGive.isPending
+                      ? 'staffBooking.assign.creating'
+                      : 'staffBooking.assign.createAndGive',
+                  )}
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={!name.trim() || busy}
+                  onClick={() => give.mutate({ name: name.trim(), phone: normalized })}
+                >
+                  {t(give.isPending ? 'staffBooking.assign.giving' : 'staffBooking.assign.saveGuest')}
+                </Button>
+              </div>
+            </div>
           </Card>
         )}
 

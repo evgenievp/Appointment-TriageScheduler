@@ -333,3 +333,24 @@ export function fakeToken(user) {
   );
   return `${header}.${payload}.mock-signature`;
 }
+
+// Accounts created through the mock's register outlive a reload, like the
+// password state in handlers.js does: the desk creates a patient, the patient
+// opens the reset link (a full navigation) and then logs in — three page loads.
+const REGISTERED = 'mock.registered-users';
+try {
+  JSON.parse(sessionStorage.getItem(REGISTERED) ?? '[]').forEach((saved) => {
+    if (!users.some((u) => u.email === saved.email)) users.push(saved);
+  });
+} catch {
+  // Storage blocked — accounts then live only for one page load.
+}
+export function rememberRegisteredUser(user) {
+  try {
+    const all = JSON.parse(sessionStorage.getItem(REGISTERED) ?? '[]');
+    all.push(user);
+    sessionStorage.setItem(REGISTERED, JSON.stringify(all));
+  } catch {
+    // Same as above.
+  }
+}

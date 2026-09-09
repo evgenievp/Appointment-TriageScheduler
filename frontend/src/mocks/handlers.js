@@ -11,6 +11,7 @@ import {
   nextId,
   nextSlotId,
   nextExceptionId,
+  rememberRegisteredUser,
   triageScore,
   toAppointmentDto,
   toLocalDateTime,
@@ -170,6 +171,7 @@ export const handlers = [
       role: 'PATIENT',
     };
     users.push(user);
+    rememberRegisteredUser(user);
 
     // UserDto: { id, name, phone, email } — без паролата и без ролята.
     return HttpResponse.json({
