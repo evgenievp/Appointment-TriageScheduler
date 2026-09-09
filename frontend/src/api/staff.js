@@ -54,6 +54,19 @@ export const assignSlot = (slotId, subject) =>
 // Двата метода са различни, както са в контролера — `PATCH` за персонал и `PUT`
 // за лекар. Едното е смяна на едно поле, другото създава и ред в `doctor`.
 
+// POST /api/staff/sendNewPassword → 200 "Link sent". Reception sends the same
+// reset link the patient could request themselves — for the caller who says
+// "I forgot my password" on the phone.
+//
+// The body is the bare address as text, not JSON: the controller takes
+// `@RequestBody String`, so a JSON string would arrive with its quotes.
+export const sendNewPasswordLink = (email) =>
+  request('/staff/sendNewPassword', {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: email,
+  });
+
 // UserDto
 export const promoteToStaff = (email) =>
   request('/staff/promoteToStaff', { method: 'PATCH', body: JSON.stringify({ email }) });

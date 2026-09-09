@@ -3,7 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import PageShell from '../components/PageShell';
 import { Button, Card, Icon, Input, Select } from '../components/ds';
-import { findPatientsByPhone, promoteToDoctor, promoteToStaff } from '../api/staff';
+import {
+  findPatientsByPhone,
+  promoteToDoctor,
+  promoteToStaff,
+  sendNewPasswordLink,
+} from '../api/staff';
 import { countries, DEFAULT_COUNTRY, isValidPhone, toE164 } from '../lib/phone';
 import { useToast } from '../lib/toastContext';
 
@@ -49,6 +54,22 @@ export default function StaffRoles() {
   });
 
   const notFound = search.isError || (search.isSuccess && matches?.length === 0);
+
+  const sendLink = useMutation({
+    mutationFn: () => sendNewPasswordLink(found.email),
+    onSuccess: () =>
+      showToast({
+        tone: 'success',
+        title: t('pages.staffRoles.newPassword.doneTitle'),
+        message: t('pages.staffRoles.newPassword.doneMessage', { email: found.email }),
+      }),
+    onError: () =>
+      showToast({
+        tone: 'danger',
+        title: t('pages.staffRoles.newPassword.failedTitle'),
+        message: t('pages.staffRoles.newPassword.failedMessage'),
+      }),
+  });
 
   const promote = useMutation({
     mutationFn: () =>
@@ -266,6 +287,40 @@ export default function StaffRoles() {
                 </span>
               )}
             </div>
+          </Card>
+        )}
+
+        {/* Same person, different job: the caller who cannot log in. Reception
+            cannot see or set a password — it only sends the link the patient
+            could request on their own, so the secret never passes through the
+            desk. */}
+        {found && (
+          <Card tone="sunken" style={{ marginTop: 'var(--space-4)' }}>
+            <h2 style={{ fontSize: 'var(--text-h4)' }}>
+              {t('pages.staffRoles.newPassword.title')}
+            </h2>
+            <p
+              style={{
+                color: 'var(--text-muted)',
+                fontSize: 'var(--text-body-sm)',
+                marginTop: 'var(--space-2)',
+                marginBottom: 'var(--space-4)',
+                maxWidth: 'var(--measure-prose)',
+              }}
+            >
+              {t('pages.staffRoles.newPassword.text')}
+            </p>
+            <Button
+              variant="secondary"
+              disabled={sendLink.isPending}
+              onClick={() => sendLink.mutate()}
+            >
+              {t(
+                sendLink.isPending
+                  ? 'pages.staffRoles.newPassword.sending'
+                  : 'pages.staffRoles.newPassword.submit',
+              )}
+            </Button>
           </Card>
         )}
 
