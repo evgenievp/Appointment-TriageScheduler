@@ -51,6 +51,17 @@ const savePasswordState = (email, patch) => {
   }
 };
 
+// Issues a reset link for an existing address; silent for unknown ones. The
+// link cannot reach a mailbox, so it is printed to the console to be clicked.
+function issueResetLink(email) {
+  if (!users.some((u) => u.email === email)) return;
+  const token = crypto.randomUUID();
+  savePasswordState(email, { resetToken: token, resetTokenExpiry: Date.now() + 15 * 60_000 });
+  console.info(
+    `[mock] reset link: ${location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`,
+  );
+}
+
 const inRange = (slot, from, to) =>
   (!from || slot.startTime >= from) && (!to || slot.startTime <= to);
 
@@ -224,14 +235,7 @@ export const handlers = [
   // линк е мъртъв още преди да е отворен.
   ...handle('post', '/api/emails/forgot-password', async ({ request }) => {
     await delay(LATENCY);
-    const email = new URL(request.url).searchParams.get('email');
-    if (users.some((u) => u.email === email)) {
-      const token = crypto.randomUUID();
-      savePasswordState(email, { resetToken: token, resetTokenExpiry: Date.now() + 15 * 60_000 });
-      console.info(
-        `[mock] reset link: ${location.origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`,
-      );
-    }
+    issueResetLink(new URL(request.url).searchParams.get('email'));
     return new HttpResponse(null, { status: 200 });
   }),
 
@@ -490,6 +494,18 @@ export const handlers = [
       .map((u) => ({ id: u.id, name: u.name, phone: u.phone, email: u.email }));
 
     return HttpResponse.json(found);
+  }),
+
+  // Регистратурата праща същия линк за нова парола, който пациентът може да си
+  // поиска сам. Тялото е голият адрес като текст — контролерът е с
+  // `@RequestBody String`.
+  ...handle('post', '/api/staff/sendNewPassword', async ({ request }) => {
+    const user = userFromRequest(request);
+    if (!user) return unauthorized();
+    if (user.role !== 'STAFF') return new HttpResponse('Forbidden', { status: 403 });
+    await delay(LATENCY);
+    issueResetLink((await request.text()).trim());
+    return new HttpResponse('Link sent', { status: 200 });
   }),
 
   // Повишаване на роля. Ендпойнт за търсене по имейл няма, затова екранът търси

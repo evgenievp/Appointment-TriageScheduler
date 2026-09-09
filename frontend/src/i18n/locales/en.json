@@ -462,7 +462,17 @@
       "doneDoctor": "Now a doctor",
       "doneMessage": "{{name}} has to sign out and back in for the new rights to apply.",
       "failed": "That did not work. Please try again in a moment.",
-      "note": "The role takes effect at the next sign-in — until then the person keeps their old rights."
+      "note": "The role takes effect at the next sign-in — until then the person keeps their old rights.",
+      "newPassword": {
+        "title": "New password",
+        "text": "If the person cannot log in, we send a link to set a new password to the email on their account. The password never passes through reception.",
+        "submit": "Send a new-password link",
+        "sending": "Sending…",
+        "doneTitle": "The link is sent",
+        "doneMessage": "To {{email}}. Valid for 15 minutes.",
+        "failedTitle": "The link did not go out",
+        "failedMessage": "The server did not respond. Try again in a moment."
+      }
     },
     "settings": {
       "title": "Profile",

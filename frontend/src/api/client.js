@@ -28,18 +28,20 @@ export const setUnauthorizedHandler = (handler) => {
   onUnauthorized = handler;
 };
 
-export async function request(path, options = {}) {
+export async function request(path, { headers, ...options } = {}) {
   // Read on every call rather than at import time: the token changes when the
   // patient signs in or out, and localStorage is the single source of truth.
   const token = readToken();
 
+  // `headers` is merged, never replaced: a caller overriding Content-Type must
+  // not lose the Authorization header along with it.
   const response = await fetch(`${BASE}${path}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
+      ...headers,
     },
-    ...options,
   });
 
   if (!response.ok) {
