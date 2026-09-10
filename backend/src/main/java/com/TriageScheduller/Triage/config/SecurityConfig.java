@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .hasAnyRole("PATIENT", "STAFF", "DOCTOR")
                         .requestMatchers("/api/slots/setSlotTime/**").hasRole("DOCTOR")
                         .requestMatchers("/api/slots/free/**").permitAll()
+                        .requestMatchers("/api/emails/forgot-password").permitAll()
                         .requestMatchers("/api/patients/**").hasRole("PATIENT")
                         .requestMatchers("/api/doctors/me/**").hasRole("DOCTOR")
                         .requestMatchers("/api/doctors/allDoctors").permitAll()
