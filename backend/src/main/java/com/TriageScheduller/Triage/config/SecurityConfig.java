@@ -35,18 +35,27 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/changePassword").authenticated()
-                        .requestMatchers("/api/emails/**").authenticated()
+
+                        .requestMatchers("/api/emails/reset-password").authenticated()
+                        .requestMatchers("/api/emails/forgot-password").permitAll()
+
                         .requestMatchers("/api/triage/**").permitAll()
+
                         .requestMatchers("/api/appointments/**").authenticated()
                         .requestMatchers("/api/appointments/{id}/reschedule/**")
                         .hasAnyRole("PATIENT", "STAFF", "DOCTOR")
-                        .requestMatchers("/api/slots/setSlotTime/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/slots/free/**").permitAll()
-                        .requestMatchers("/api/emails/forgot-password").permitAll()
-                        .requestMatchers("/api/patients/**").hasRole("PATIENT")
+
+                        .requestMatchers("/api/staff/**").hasRole("STAFF")
+
                         .requestMatchers("/api/doctors/me/**").hasRole("DOCTOR")
                         .requestMatchers("/api/doctors/allDoctors").permitAll()
-                        .requestMatchers("/api/staff/**").hasRole("STAFF")
+
+
+                        .requestMatchers("/api/patients/**").hasRole("PATIENT")
+
+                        .requestMatchers("/api/slots/setSlotTime/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/slots/free/**").permitAll()
+
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
