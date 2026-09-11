@@ -17,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
 public class EmailService {
 
+    private final String clinicName = "Топ клиник";
     private final JavaMailSender mailSender;
     private final PatientsRepo patientsRepo;
     private final PasswordEncoder passwordEncoder;
@@ -51,10 +53,10 @@ public class EmailService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        String resetLink = "https://medical-clinik.com/reset-password?token=" + patient.getResetToken()
+        String resetLink = "https://localhost:5173/reset-password?token=" + patient.getResetToken()
                 + "&email=" + patient.getEmail();
-        message.setSubject("Reset your password");
-        message.setText("Click the link to reset your password:\n" + resetLink);
+        message.setSubject("Забравена парола");
+        message.setText("Кликнете тук, за да смените Вашата парола: \n" + resetLink);
         mailSender.send(message);
     }
 
@@ -90,15 +92,24 @@ public class EmailService {
                 .orElseThrow(() -> new EntityNotFoundException("No such slot"));
 
         Doctor doctor = slot.getDoctor();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String date = slot.getStartsAt().format(dateFormatter);
+        String time = slot.getStartsAt().format(timeFormatter);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(patient.getEmail());
-
-        message.setSubject("HourBooked");
-        message.setText("You book a hour with dr " +
-                doctor.getName() + " at: " + slot.getStartsAt() +
-                " have a nice day.");
+        message.setSubject("Записан час за " + clinicName);
+        message.setText(
+                "Здравейте!\n" +
+                        "Имате запазен час при д-р " + doctor.getName() + "\n" +
+                        "Дата: " + date + "\n" +
+                        "Час: " + time + "\n\n" +
+                        "Екипът на " + clinicName + " Ви пожелава приятен ден!"
+        );
         mailSender.send(message);
-
     }
 
     @Async
@@ -110,8 +121,9 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
 
-        message.setSubject("New user");
-        message.setText("Welcome to our medical clinic. This is a welcome email");
+        message.setSubject("Успешна регистрация");
+        message.setText("Здравейте! \nВие се регистрирахте успешно в " + clinicName +
+                " можете да влезете с вашето потребителско име и парола.");
         mailSender.send(message);
     }
 
@@ -124,9 +136,9 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
 
-        message.setSubject("Password changed notification");
-        message.setText("Somebody changed password of account connected with this email." +
-                "\n Not you? Please call immediately to medical-clinic support phone.");
+        message.setSubject("Смяна на парола");
+        message.setText("Здравейте! \nНякой промени паролата на Вашия имейл, в случай, че това не сте Вие " +
+        "\n моля свържете се незабавно с екипът на " + clinicName +".");
         mailSender.send(message);
 
     }
@@ -134,12 +146,23 @@ public class EmailService {
     @Async
     public void sendMailForChangeHour(String userEmail, Slot newSlot, Slot oldSlot) {
         SimpleMailMessage message = new SimpleMailMessage();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String date = oldSlot.getStartsAt().format(dateFormatter);
+        String time = oldSlot.getStartsAt().format(timeFormatter);
+
+        String newDate = newSlot.getStartsAt().format(dateFormatter);
+        String newTime = newSlot.getStartsAt().format(timeFormatter);
+
         message.setTo(userEmail);
 
-        message.setSubject("Reschedule doctor visit");
-        message.setText("You successfully changed hour with dr: " + newSlot.getDoctor().getName() +
-                " at " + oldSlot.getStartsAt()
-        + " to new hour " + newSlot.getStartsAt() + " have a nice day.");
+        message.setSubject("Промяна на час за посещение");
+        message.setText("Здравейте, Вие успешно променихте час за посещение при д-р " +
+                newSlot.getDoctor().getName() + " с дата " + date + " " + time+
+                ". Новият час е на: " + newDate + " " + newTime+
+                " \nХубав ден!");
         mailSender.send(message);
     }
 
@@ -149,8 +172,10 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(userEmail);
 
-        message.setSubject("Cancel visit");
-        message.setText("We received your request and your hour is now cancelled. \nHave a nice day. \n Medical clinic.");
+        message.setSubject("Отказан час за посещение");
+        message.setText("Здравейте! Получихме Вашия откза от час за посещение при д-р " +
+        slot.getDoctor().getName()+
+                " \nЕкипът на "+ clinicName + " Ви желае хубав ден!");
         mailSender.send(message);
     }
 
@@ -160,13 +185,25 @@ public class EmailService {
                                            Appointment appointment,
                                            Long newPatientId) {
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(appointment.getPatient().getEmail());
+        User newUser = patientsRepo.findById(newPatientId)
+                .orElseThrow(() -> new EntityNotFoundException("No such user"));
 
-        message.setSubject("Book visit");
-        message.setText("Visit booked with " + slot.getDoctor().getName() +
-                " at " + slot.getStartsAt() +
-                "\nHave a nice day.\nMedical clinic.");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String date = slot.getStartsAt().format(dateFormatter);
+        String time = slot.getStartsAt().format(timeFormatter);
+
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(newUser.getEmail());
+
+
+        message.setSubject("Запазен час за посещение");
+        message.setText("Здравейте! \n Вие успешно запазихте час при д-р " +
+                slot.getDoctor().getName() +
+                " на " + date + " " + time +
+                "\nекипът на " + clinicName + " Ви желае хубав ден!");
         mailSender.send(message);
     }
 
